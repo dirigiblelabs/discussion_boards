@@ -1,0 +1,86 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+	
+body{
+	background-color: #f9f9f9;
+}
+ 	
+.container-fluid {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	min-height: 100%;
+	overflow:auto;
+}
+ 	
+.row-fluid   {
+	min-height: 100%;
+	height: 100%;
+}
+
+.board-list-item {
+	display: flex;
+	flex-direction: column;
+}
+.rating-compartment {
+	display: flex;
+	flex-direction: column; 
+	margin-right: 10px; 
+	font-size: 2rem; 
+	line-height: 4rem
+}
+.rating-compartment .fa {
+	font-size: 3.5rem;
+}
+
+.rating-compartment a {
+    text-decoration: none;
+    text-align: center;
+    line-height: 3rem;
+    color: #bbb;
+}
+
+.rating-compartment .rating-number {
+	font-size: 3rem;
+	align-self: center;
+}
+
+.board-list-item .main-compartment {
+	display:flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1 0 auto;
+}
+
+.board-list-item  .title{
+	flex: 1 0 auto; 
+	margin-top: 0;
+	margin-bottom: 3px;
+	font-size: 2rem;
+	color: #337ab7;
+	text-decoration: none;
+}
+
+.main-compartment .stats {
+	flex: 0 0 auto; 
+	display: flex; 
+	flex-direction: row
+}
+
+.main-compartment .stats>*{
+	margin: 0 5px;
+}
+
+.main-compartment .stats> :first-child{
+	margin-left: 0;
+}
+
+.main-compartment .stats> :last-child{
+	margin-right: 0;
+}
