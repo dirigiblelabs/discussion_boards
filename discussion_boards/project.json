@@ -1,1 +1,17 @@
-{"guid":"discussion_boards","repository":{"type":"git","branch":"master","url":"https://github.com/dirigiblelabs/discussion_boards.git"}}
+{
+    "guid":"discussion_boards",
+    "repository":{
+        "type":"git",
+        "branch":"master",
+        "url":"https://github.com/dirigiblelabs/discussion_boards.git"
+        
+    },
+    "dependencies": [
+        {
+            "guid":"arestme",
+            "type": "git",
+            "url": "https://github.com/dirigiblelabs/arestme.git",
+            "branch":"master"
+    	}    	
+	]
+}
