@@ -7,7 +7,13 @@ angular.module('$moment', [])
   return $window.moment;
 }]);
 
-angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar'])
+angular.module('$ckeditor', [])
+.factory('$ckeditor', ['$window', function($window) {
+  return $window.CKEDITOR;
+}]);
+
+
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar'])
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider) {
 
 		$urlRouterProvider.otherwise("/");
@@ -240,4 +246,51 @@ angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.r
 	  		filterText: _filterText
 	  	};
 	}])
+	.directive('ckEditor', ['$ckeditor', function($ckeditor) {
+	  return {
+	    require: '?ngModel',
+	    link: function(scope, elm, attr, ngModel) {
+	    
+	      var ck = $ckeditor.replace(elm[0], {
+		    	toolbar: [
+					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Cut', 'Copy', 'Paste', 'Undo', 'Redo' ] },
+					{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ], items: [ 'Scayt' ] },
+					{ name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+					{ name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar' ] },
+					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: [ 'Source' ] },
+					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Strike', '-', 'RemoveFormat' ] },
+					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },
+					{ name: 'styles', items: [ 'Styles', 'Format' ] }
+				],
+				toolbarGroups: [
+					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
+					{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ] },
+					{ name: 'links' },
+					{ name: 'insert' },
+					{ name: 'forms' },
+					{ name: 'tools' },
+					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
+					{ name: 'others' },
+					'/',
+					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
+					{ name: 'styles' },
+					{ name: 'colors' }
+				]				
+	    	});
+	
+	      if (!ngModel) return;
+	
+	      ck.on('pasteState', function() {
+	        scope.$apply(function() {
+	          ngModel.$setViewValue(ck.getData());
+	        });
+	      });
+	
+	      ngModel.$render = function(value) {
+	        ck.setData(ngModel.$viewValue);
+	      };
+	    }
+	  };
+	}]);
 })(angular);

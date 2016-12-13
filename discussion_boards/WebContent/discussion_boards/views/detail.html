@@ -19,7 +19,7 @@
 				<span style="text-decoration:none; color: darkgray" href ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})">{{detailsVm.board.comments.length||0}} <i class="fa fa-commenting-o" style="font-size: 1.1em"></i></span>
 			</div>
 			
-			<p ng-bind="detailsVm.board.description" style="flex: 1 0 auto; margin: 0 0 10px;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-size: 1.1em"></p>
+			<p ng-bind-html="detailsVm.board.description" style="flex: 1 0 auto; margin: 0 0 10px;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-size: 1.1em"></p>
 			
 			<div style="flex: 1 0 auto;">
 				<span ng-if="detailsVm.board.participantsCount>1" style="color: #c1c1c1">{{detailsVm.board.participantsCount}} people discussing this</span>
