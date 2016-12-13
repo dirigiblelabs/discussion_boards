@@ -29,10 +29,12 @@
 		}
 	};
 	
+	var originalPutHandler = Comment.prototype.cfg["{id}"].put.handler;
+	
 	Comment.prototype.cfg["{id}"].put.handler = function(context, io){
 		//TODO: use isUserInRole to check privileges
 	    try{
-			Comment.prototype.cfg["{id}"].put.handler.apply(this, [context, io]);
+			originalPutHandler.apply(this, [context, io]);
 		} catch(e) {
     	    var errorCode = io.response.INTERNAL_SERVER_ERROR ;
     	    this.logger.error(errorCode, e.message, e.errContext);					

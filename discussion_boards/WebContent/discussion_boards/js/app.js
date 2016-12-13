@@ -33,11 +33,16 @@ angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.r
 		              		throw err;
 		              	});
 		              	
-						this.saveVote = function(vote){
-							MasterDataService.saveVote(self.board, vote)
+						this.saveVote = function(board, vote){
+							MasterDataService.saveVote(board, vote)
 							.then(function(data){
 								$log.info("voted: " + vote);
-								self.board = data;
+								self.list = self.list.map(function(b){
+									if(b.disb_id === data.disb_id)
+										return data;
+									else
+										return b;
+								});
 							});
 						};
 						
@@ -59,14 +64,25 @@ angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.r
 				board: undefined
 			},
 			resolve: {
-				board: ['$stateParams', 'MasterDataService', function($stateParams, MasterDataService){
-					if($stateParams.boardId && $stateParams.board){
-						return $stateParams.board;
+				board: ['$state', '$stateParams', 'MasterDataService', '$log', function($state, $stateParams, MasterDataService, $log){
+					var boardId;
+					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
+						boardId = $stateParams.boardId;
+					}
+					if(boardId){
+						if($stateParams.board)
+							return $stateParams.board;
+						else
+							return MasterDataService.get(boardId)
+							.then(function(data){
+								return data;
+							})
+							.catch(function(err){
+								$log('Could not resolveboard entity with id['+$stateParams.boardId+']');
+								$state.go('list');
+							});
 					} else {
-						return MasterDataService.get($stateParams.boardId)
-						.then(function(data){
-							return data;
-						});
+						return;
 					}
 				}]
 			},
@@ -184,10 +200,10 @@ angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.r
 			views: {
 				"@": {
 					templateUrl: "views/board.upsert.html",
-					controller: ['$state', '$stateParams', '$log', 'MasterDataService', 'Board', function($state, $stateParams, $log, MasterDataService, Board){
-							this.board;
+					controller: ['$state', '$stateParams', '$log', 'MasterDataService', 'Board', 'board',  function($state, $stateParams, $log, MasterDataService, Board, boardInstance){
+							this.board = boardInstance;
 							var self = this;
-							if($stateParams.boardId!==undefined){
+							/*if($stateParams.boardId!==undefined){
 							  	if($stateParams.board)
 									this.board = $stateParams.board;
 								else {
@@ -196,7 +212,7 @@ angular.module('discussion-boards', ['$moment', 'ngAnimate', 'ngResource', 'ui.r
 										self.board = data;
 									});								
 								}
-							}
+							}*/
 					  		this.submit = function(){
 					  			var upsertOperation = self.board.disb_id===undefined?'save':'update';
 					  			Board[upsertOperation](this.board).$promise

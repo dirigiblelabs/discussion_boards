@@ -16,7 +16,7 @@ var persistentProperties = {
 	optional: ["shortText", "description", "publishDate", "status", "user"]
 };
 
-var $log = require("ideas_forge/lib/logger").logger;
+var $log = require("discussion_boards/lib/logger").logger;
 $log.ctx = "Board DAO";
 
 // Parse JSON entity into SQL and insert in db. Returns the new record id.
@@ -121,7 +121,7 @@ exports.find = function(id, expanded) {
 				   	 entity[itemsEntitySetName] = dependentItemEntities;
 			   	   }
 			   	   var currentUser = userLib.getName();
-			   	   var userVote = exports.userVoteForIdea(id, currentUser);
+			   	   var userVote = exports.getVote(id, currentUser);
 			   	   entity.currentUserVote = userVote;
 				}            	
         	}
@@ -150,14 +150,14 @@ exports.getVote = function(disb_id, user){
     var connection = datasource.getConnection();
     var vote = 0;
     try {
-        var sql = "SELECT * FROM DIS_BOARD_VOTE WHERE IDFV_DISB_ID=? AND IDFV_USER=?";
+        var sql = "SELECT * FROM DIS_BOARD_VOTE WHERE DISV_DISB_ID=? AND DISV_USER=?";
         var statement = connection.prepareStatement(sql);
         statement.setInt(1, disb_id);
         statement.setString(2, user);
         
         var resultSet = statement.executeQuery();
         if (resultSet.next()) {
-            vote = resultSet.getInt("IDFV_VOTE");
+            vote = resultSet.getInt("DISV_VOTE");
 			if(vote!==0){
             	$log.info('Vote for DIS_BOARD entity with with id[' + disb_id+ '] found');
         	}
@@ -208,7 +208,7 @@ exports.list = function(limit, offset, sort, order, expanded, entityName) {
 			   	 entity[itemsEntitySetName] = dependentItemEntities;
 		   	   }
 		   	   var currentUser = userLib.getName();
-			   var userVote = exports.userVoteForIdea(entity.disb_id, currentUser);
+			   var userVote = exports.getVote(entity.disb_id, currentUser);
 			   entity.currentUserVote = userVote;
 			}
             entities.push(entity);
@@ -256,23 +256,23 @@ exports.vote = function(disb_id, user, vote){
 	var connection = datasource.getConnection();
     try {
         var sql = "INSERT INTO DIS_BOARD_VOTE (";
-        sql += "IDFV_ID, IDFV_DISB_ID, IDFV_USER, IDFV_VOTE) "; 
+        sql += "DISV_ID, DISV_DISB_ID, DISV_USER, DISV_VOTE) "; 
         sql += "VALUES (?,?,?,?)";
 
         var statement = connection.prepareStatement(sql);
         
         var i = 0;
-        var idfv_id = datasource.getSequence('DIS_BOARD_VOTE_IDFV_ID').next();
-        statement.setInt(++i, idfv_id);
+        var disv_id = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
+        statement.setInt(++i, disv_id);
         statement.setInt(++i, disb_id);        
         statement.setString(++i, user);        
         statement.setShort(++i, vote);
 	    
 	    statement.executeUpdate();
     	
-    	$log.info('DIS_BOARD_VOTE entity inserted with id[' +  idfv_id + '] for DIS_BOARD entity with id['+disb_id+']');
+    	$log.info('DIS_BOARD_VOTE entity inserted with id[' +  disv_id + '] for DIS_BOARD entity with id['+disb_id+']');
 
-        return idfv_id;
+        return disv_id;
 
     } catch(e) {
 		e.errContext = sql;
@@ -329,7 +329,6 @@ exports.update = function(entity) {
         statement.setString(++i, entity.shortText);        
         statement.setString(++i, entity.description);
         statement.setString(++i, entity.user);
-        statement.setString(++i, entity.status);
         statement.setString(++i, entity.publishDate);
         statement.setString(++i, entity.status);        
         var id = entity.disb_id;
