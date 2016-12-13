@@ -28,15 +28,18 @@ body{
 	display: flex;
 	flex-direction: column;
 }
+
+.rating-compartment>*{
+	align-self: center;
+}
 .rating-compartment {
 	display: flex;
 	flex-direction: column; 
 	margin-right: 10px; 
-	font-size: 2rem; 
-	line-height: 4rem
+	font-size: 1rem; 
 }
 .rating-compartment .fa {
-	font-size: 3.5rem;
+	font-size: 2.7rem;
 }
 
 .rating-compartment a {
@@ -48,7 +51,6 @@ body{
 
 .rating-compartment .rating-number {
 	font-size: 3rem;
-	align-self: center;
 }
 
 .board-list-item .main-compartment {
