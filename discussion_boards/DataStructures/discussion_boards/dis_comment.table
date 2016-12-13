@@ -21,7 +21,7 @@
       }
       ,
       {
-        "name":"DISC_REPLY_TO_IDFC_ID",
+        "name":"DISC_REPLY_TO_DISC_ID",
         "type":"INTEGER",
         "length":"0",
         "notNull":"false",
@@ -39,7 +39,7 @@
       }
       ,
       {
-        "name":"DIS_PUBLISH_DATE",
+        "name":"DISC_PUBLISH_DATE",
         "type":"VARCHAR",
         "length":"100",
         "notNull":"false",
@@ -48,7 +48,7 @@
       }
       ,
       {
-        "name":"DIS_USER",
+        "name":"DISC_USER",
         "type":"VARCHAR",
         "length":"100",
         "notNull":"false",
