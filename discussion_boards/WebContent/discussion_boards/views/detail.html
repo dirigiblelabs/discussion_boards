@@ -1,5 +1,5 @@
 <div class="board-list-item list-group-item" style="display: flex;">
-	<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})"></a>
+	<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
 	<div style="flex:1 0 auto; display: flex;">
 		<div class="rating-compartment">
 			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1"><i class="fa fa-thumbs-up" aria-hidden="true"></i></a>
