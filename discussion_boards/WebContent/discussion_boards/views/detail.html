@@ -16,6 +16,10 @@
 		<div class="stats">
 			<span>{{detailsVm.board.visits||0}} <i class="fa fa-eye"></i></span>
 			|
+			<span>{{detailsVm.board.upvotes}} <i class="fa fa-thumbs-up"></i></span>
+			|
+			<span>{{detailsVm.board.downvotes}} <i class="fa fa-thumbs-up fa-rotate-180"></i></span>
+			|
 			<div ng-if="detailsVm.board.comments.length" style="display:inline-block">
 				<span ng-if="detailsVm.board.comments.length">{{detailsVm.board.comments.length}} <i class="fa fa-comments-o"></i></span>
 				|
@@ -45,8 +49,9 @@
 	</div>
 
 	<div class="right-compartment">
+			
 		<div class="rating-box">
-			<span class="subtle">rating</span>				
+			<span class="subtle">rating</span>
 			<span class="rating-number">{{detailsVm.board.rating}}</span>
 			<span class="votes-number">{{detailsVm.board.totalVotes}} Votes</span>
 		</div>
@@ -55,7 +60,8 @@
 			<span ng-if="detailsVm.board.currentUserVote===1"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
 			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===-1"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>
-		</div>		
+		</div>
+		
 	</div>	
 </div>
 

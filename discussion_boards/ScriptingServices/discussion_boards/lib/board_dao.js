@@ -240,6 +240,8 @@ function createEntity(resultSet) {
     entity.repliesCount = resultSet.getInt("REPLIES");  
     entity.participantsCount = resultSet.getInt("PARTICIPANTS");      
     entity.totalVotes = resultSet.getInt("TOTAL_VOTES");    
+    entity.upvotes = resultSet.getInt("UPVOTES");
+    entity.downvotes = resultSet.getInt("DOWNVOTES");        
     entity.rating = resultSet.getInt("RATING");  
 	for(var key in Object.keys(entity)){
 		if(entity[key] === null)

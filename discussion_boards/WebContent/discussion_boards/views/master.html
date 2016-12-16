@@ -20,6 +20,10 @@
 				<div class="stats">
 					<span>{{board.visits||0}} <i class="fa fa-eye"></i></span>
 					|
+					<span>{{board.upvotes}} <i class="fa fa-thumbs-up"></i></span>
+					|
+					<span>{{board.downvotes}} <i class="fa fa-thumbs-up fa-rotate-180"></i></span>
+					|					
 					<div ng-if="board.comments.length" style="display:inline-block">
 						<span ng-if="board.comments.length">{{board.comments.length}} <i class="fa fa-comments-o"></i></span>
 						|
