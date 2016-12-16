@@ -24,11 +24,15 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		      views: {
 		      	"@": {
 		              templateUrl: 'views/master.html',
-		              controller: ['MasterDataService', '$log', 'FilterList', function(MasterDataService, $log, FilterList){
+		              controller: ['MasterDataService', '$log', 'FilterList', 'User', function(MasterDataService, $log, FilterList, User){
 		              
 		              	this.list = [];
 		              	this.filterList = FilterList;
 		              	var self = this;
+		              	
+		              	this.getUserDetails = function(_username){
+		              		return User.query({username:_username}).$promise
+		              	};
 		              	
 						MasterDataService.list()
 						.then(function(data){
@@ -70,7 +74,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				board: undefined
 			},
 			resolve: {
-				board: ['$state', '$stateParams', 'MasterDataService', '$log', function($state, $stateParams, MasterDataService, $log){
+				board: ['$state', '$stateParams', 'MasterDataService','DBoardVisits', '$log', function($state, $stateParams, MasterDataService, DBoardVisits, $log){
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -95,9 +99,17 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$log', 'MasterDataService', 'board', function($state, $log, MasterDataService, board){
+					controller: ['$state', '$log', 'MasterDataService', 'DBoardVisits', 'board', function($state, $log, MasterDataService, DBoardVisits, board){
 						this.board = board;
 						var self = this;
+						
+						try{
+							DBoardVisits.visit(this.board.disb_id)
+							.then(function(){
+								self.board.visits++;
+							});
+						} catch(err){$log.error(err);}
+						
 						$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board});  	
 						
 						this.saveVote = function(vote){
@@ -113,6 +125,22 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							.then(function(vote){
 								self.currentUserVote = vote;
 							});
+						};
+						
+						this.openBoardForEdit = function(){
+							self.descriptionEdit = self.board.description;
+						};
+						
+						this.postEdit = function(){
+							self.board.description = self.descriptionEdit;
+							MasterDataService.get(self.board.disb_id)
+							.then(function(board){
+								self.board = board;
+							});
+						};
+						
+						this.cancelEdit = function(){
+							delete self.descriptionEdit;
 						};
 
 					}],
@@ -202,26 +230,15 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				}
 			}
 		})		
-		.state('list.entity.edit', {    
+		.state('list.new', {    
 			views: {
 				"@": {
 					templateUrl: "views/board.upsert.html",
-					controller: ['$state', '$stateParams', '$log', 'MasterDataService', 'Board', 'board',  function($state, $stateParams, $log, MasterDataService, Board, boardInstance){
-							this.board = boardInstance;
+					controller: ['$state', '$log', 'Board',  function($state, $log, Board){
+							this.board = {};
 							var self = this;
-							/*if($stateParams.boardId!==undefined){
-							  	if($stateParams.board)
-									this.board = $stateParams.board;
-								else {
-									MasterDataService.get($stateParams.boardId)
-									.then(function(data){
-										self.board = data;
-									});								
-								}
-							}*/
 					  		this.submit = function(){
-					  			var upsertOperation = self.board.disb_id===undefined?'save':'update';
-					  			Board[upsertOperation](this.board).$promise
+					  			Board.save(this.board).$promise
 					  			.then(function(data){
 					  				$log.info('board with id['+data.disb_id+'] saved');
 		              				$state.go('list');
@@ -240,6 +257,18 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		cfpLoadingBarProvider.includeSpinner = false;
 		  
 	}])
+	.service('DBoardVisits', ['BoardVisits', function(BoardVisits) {
+		var visited = [];
+		var put = function(disb_id){
+			if(visited.indexOf(disb_id)<0){
+				visited.push(disb_id);
+				return BoardVisits.update({"boardId": disb_id}, {}).$promise;
+			}
+		};
+	  	return {
+	  		visit: put
+	  	};
+	}])	
 	.service('FilterList', [function() {
 		var _filterText;
 	  	return {

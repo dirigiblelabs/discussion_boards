@@ -231,9 +231,11 @@ function createEntity(resultSet) {
 	entity.disb_id = resultSet.getInt("DISB_ID");
     entity.shortText = resultSet.getString("DISB_SHORT_TEXT");	
     entity.description = resultSet.getString("DISB_DESCRIPTION");
-    entity.user = resultSet.getString("DISB_USER");
+    entity.user = resultSet.getString("IDMU_UNAME");
+   	entity.user_pic = resultSet.getString("IDMU_PIC");
     entity.publishDate = resultSet.getString("DISB_PUBLISH_DATE"); 
     entity.status = resultSet.getString("DISB_STATUS");
+    entity.visits = resultSet.getString("DISB_VISITS");
     entity.latestPublishDate = resultSet.getString("LATEST_PUBLISH_DATE");    
     entity.repliesCount = resultSet.getInt("REPLIES");  
     entity.participantsCount = resultSet.getInt("PARTICIPANTS");      
@@ -414,6 +416,28 @@ exports.count = function() {
     $log.info('' + count + ' DIS_BOARD entities counted');
 
     return count;
+};
+
+exports.visit = function(disb_id){
+	console.info('visit recording')
+	var connection = datasource.getConnection();
+    try {
+    
+        var sql = "UPDATE DIS_BOARD";
+        sql += " SET DISB_VISITS=DISB_VISITS+1"; 
+        sql += " WHERE DISB_ID = ?";
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, disb_id);        
+        statement.executeUpdate();
+
+        return this;
+        
+    } catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
 };
 
 exports.getPrimaryKeys = function() {

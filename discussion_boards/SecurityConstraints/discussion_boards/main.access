@@ -1,0 +1,10 @@
+[
+  {
+    "location":"/discussion_boards/",
+    "roles":
+      [
+        {"role":"Everyone"}
+      ]
+  }
+]
+

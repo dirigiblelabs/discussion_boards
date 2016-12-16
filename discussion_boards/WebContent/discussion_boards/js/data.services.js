@@ -33,6 +33,10 @@
 	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/vote', {}, 
 	  			{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}},
 	  			{save: {method:'POST', params:{}, isArray:false, ignoreLoadingBar: true}});
+	}])	
+	.service('BoardVisits', ['$resource', function($resource) {
+	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/visit', {}, 
+	  			{update: {method:'PUT', params:{}, isArray:false, ignoreLoadingBar: true}});
 	}])		
 	.service('Comment', ['$resource', '$log', function($resource, $log) {
 	 	return $resource('../../js/discussion_boards/svc/comment.js/:commentId', { commentId:'@disc_id' }, {
@@ -57,6 +61,29 @@
 			    }
 			});
 	}])
+	.service('User', ['$resource', '$log', function($resource, $log) {
+	  	return $resource('../../js/idm/svc/user.js/:userId', { userId:'@idmu_id' }, {
+			    save: {
+			        method: 'POST',
+			        interceptor: {
+		                response: function(res) {
+		                	var location = res.headers('Location');
+		                	if(location){
+		                		var id = location.substring(location.lastIndexOf('/')+1);
+		                		angular.extend(res.resource, { "idmu_id": id });
+	                		} else {
+	                			$log.error('Cannot infer id after save operation. HTTP Response Header "Location" is missing: ' + location);
+	            			}
+	                        return res.resource;
+		                }
+		            }, 
+		            isArray: false
+			    },
+			    update: {
+			        method: 'PUT'
+			    }
+			});
+	}])	
 	.service('MasterDataService', ['Board', 'BoardVote', '$moment', function(Board, BoardVote, $moment) {
 		
 		function formatEntity(board){
@@ -91,7 +118,7 @@
 			.then(function(board){
 	      		return formatEntity(board);
 			});
-		};
+		};		
 		var saveVote = function(board, v){
 			return BoardVote.save({"boardId": board.disb_id}, {"vote":v}).$promise
 			.then(function(){

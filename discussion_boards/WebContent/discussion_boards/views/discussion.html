@@ -18,7 +18,7 @@
 			<div style="margin-top:20px; margin-left:40px" ng-if="comment.replies.length>0">
 				<div ng-repeat="reply in comment.replies" class="list-group-item" style="border: none; border-top: 1px solid #ddd">
 					<div ng-if="vm.reply!==reply">
-						<span ng-bind="reply.text"></span> <div style="display: inline-block; font-size: 0.9em; color:#848d95">- {{reply.user}} replied <span title="{{reply.publishDate}}" ng-bind="reply.timeSincePublish || 'recently'"></span>
+						<span ng-bind-html="reply.text" style="display: inline-block;"></span> <div style="display: inline-block; font-size: 0.9em; color:#848d95">- {{reply.user}} replied <span title="{{reply.publishDate}}" ng-bind="reply.timeSincePublish || 'recently'"></span>
 						<a href ng-if="reply.editable" ng-click="vm.replyOpen(comment, reply)"><i class="fa fa-pencil" style="font-size: 1.1em"></i></a></div>
 					</div>
 					<div ng-if="vm.reply===reply" class="list-group-item" style="display:flex; flex-direction:column; background: #f4f4f4">

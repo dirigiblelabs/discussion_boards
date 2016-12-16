@@ -21,7 +21,7 @@
       {
         "name":"DISB_DESCRIPTION",
         "type":"VARCHAR",
-        "length":"255",
+        "length":"10000",
         "notNull":"false",
         "primaryKey":"false",
         "defaultValue":""
@@ -49,6 +49,14 @@
         "notNull":"false",
         "primaryKey":"false",
         "defaultValue":""
+      },
+      {
+        "name":"DISB_VISITS",
+        "type":"INTEGER",
+        "length":"0",
+        "notNull":"false",
+        "primaryKey":"false",
+        "defaultValue":"0"
       }
     ]
 }

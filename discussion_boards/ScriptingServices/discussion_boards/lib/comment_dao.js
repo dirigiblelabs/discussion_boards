@@ -82,7 +82,7 @@ exports.find = function(id, expanded) {
     var connection = datasource.getConnection();
     try {
         var item;
-        var sql = "SELECT * FROM DIS_COMMENT WHERE " + exports.pkToSQL();
+        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE " + exports.pkToSQL();
         var statement = connection.prepareStatement(sql);
         statement.setInt(1, id);
         
@@ -114,7 +114,7 @@ exports.findComments = function(boardId, expanded) {
     var connection = datasource.getConnection();
     try {
         var items = [];
-        var sql = "SELECT * FROM DIS_COMMENT WHERE DISC_DISB_ID=?";
+        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE DISC_DISB_ID=?";
         var statement = connection.prepareStatement(sql);
         statement.setInt(1, boardId);
         
@@ -146,7 +146,7 @@ exports.findReplies = function(boardId, commentId) {
     var connection = datasource.getConnection();
     try {
         var items = [];
-        var sql = "SELECT * FROM DIS_COMMENT WHERE DISC_DISB_ID=? AND DISC_REPLY_TO_DISC_ID=?";
+        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE DISC_DISB_ID=? AND DISC_REPLY_TO_DISC_ID=?";
         var statement = connection.prepareStatement(sql);
         statement.setInt(1, boardId);
         statement.setInt(2, commentId);
@@ -182,6 +182,7 @@ exports.list = function(boardId, limit, offset, sort, order, expanded) {
             sql += " " + datasource.getPaging().genTopAndStart(limit, offset);
         }
         sql += " * FROM DIS_COMMENT";
+        sql += " LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME";
         if(boardId !== null && boardId !== undefined){
         	sql += " WHERE DISC_DISB_ID=" + boardId;
         }
@@ -223,7 +224,8 @@ function createEntity(resultSet) {
 	entity.disc_id = resultSet.getInt("DISC_ID");
 	entity.text = resultSet.getString("DISC_COMMENT_TEXT");
 	entity.disc_disb_id = resultSet.getString("DISC_DISB_ID");
-    entity.user = resultSet.getString("DISC_USER");
+    entity.user = resultSet.getString("IDMU_UNAME");
+    entity.pic = resultSet.getString("IDMU_PIC");
     entity.reply_to_disc_id = resultSet.getString("DISC_REPLY_TO_DISC_ID");
     if(entity.reply_to_disc_id < 0){
     	entity.reply_to_disc_id = undefined;
@@ -274,7 +276,7 @@ exports.update = function(item) {
 
     var connection = datasource.getConnection();
     try {
-        var sql = "UPDATE DIS_COMMENT SET DISC_COMMENT_TEXT = ?, DISC_PUBLISH_DATE = ?, DISC_USER = ?";
+        var sql = "UPDATE DIS_COMMENT SET DISC_COMMENT_TEXT = ?, DISC_PUBLISH_DATE = ?";
         sql += " WHERE DISC_ID = ?";
         
         var statement = connection.prepareStatement(sql);
@@ -283,7 +285,6 @@ exports.update = function(item) {
         var i = 0;
         statement.setString(++i, item.text);
         statement.setString(++i, item.publish_date);
-        statement.setString(++i, item.user);
         var id = item.disc_id;
         statement.setInt(++i, id);
         statement.executeUpdate();

@@ -1,35 +1,62 @@
 <div class="board-list-item list-group-item" style="display: flex;">
-	<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
-	<div style="flex:1 0 auto; display: flex;">
-		<div class="rating-compartment">
-			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1"><i class="fa fa-thumbs-up" aria-hidden="true"></i></a>
-			<span ng-if="detailsVm.board.currentUserVote===1"><i class="fa fa-thumbs-up" style="color: #337ab7;" aria-hidden="true"></i></span>
-			<span class="rating-number" ng-bind="detailsVm.board.rating"></span>
-			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1"><i class="fa fa-thumbs-up fa-rotate-180" aria-hidden="true"></i></a>
-			<span ng-if="detailsVm.board.currentUserVote===-1"><i class="fa fa-thumbs-up" style="color: #337ab7;" aria-hidden="true"></i></span>
-			<span style="font-size:1.2rem; color:#c1c1c1">{{detailsVm.board.totalVotes}} Votes</span>
+
+	<div class="left-compartment">
+		<div class="user-box" style="">
+			<img ng-if="detailsVm.board.user_pic!=='-1'" src="data:image/png;base64,{{detailsVm.board.user_pic}}" class="user-pic"/>
+			<i ng-if="detailsVm.board.user_pic==='-1'" class="glyphicon glyphicon-user user-pic"></i>
+			<span ng-bind="detailsVm.board.user" class="user-name"></span>
 		</div>
-		<div class="main-compartment">
-			<div class="stats">
-				<div style="display:flex; flex-direction: column">
-					<i class="fa fa-user-circle-o" style="font-size:2em"></i>
-					<span ng-bind="detailsVm.board.user"></span>
-				</div> | 
-				<span style="color: #aaa" title="{{detailsVm.board.publishDate}}" ng-bind="detailsVm.board.timeSincePublish"></span> | 
-				<span style="text-decoration:none; color: darkgray" href ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})">{{detailsVm.board.comments.length||0}} <i class="fa fa-commenting-o" style="font-size: 1.1em"></i></span>
+		<span class="publish-time" title="{{board.publishDate}}" ng-bind="detailsVm.board.timeSincePublish"></span>
+	</div>				
+	
+	<div class="main-compartment">
+		
+		<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
+
+		<div class="stats">
+			<span>{{detailsVm.board.visits||0}} <i class="fa fa-eye"></i></span>
+			|
+			<div ng-if="detailsVm.board.comments.length" style="display:inline-block">
+				<span ng-if="detailsVm.board.comments.length">{{detailsVm.board.comments.length}} <i class="fa fa-comments-o"></i></span>
+				|
+				<span ng-if="detailsVm.board.participantsCount>1">{{detailsVm.board.participantsCount}} people discussing this</span>
+				<span ng-if="detailsVm.board.participantsCount===1">{{detailsVm.board.participantsCount}} person discussing this</span>
+				|
+				<span ng-if="detailsVm.board.latestPublishDate" title="{{detailsVm.board.latestPublishDate}}">Last update {{detailsVm.board.timeSinceLatestPublish}}</span>
 			</div>
-			
-			<p ng-bind-html="detailsVm.board.description" style="flex: 1 0 auto; margin: 0 0 10px;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-size: 1.1em"></p>
-			
-			<div style="flex: 1 0 auto;">
-				<span ng-if="detailsVm.board.participantsCount>1" style="color: #c1c1c1">{{detailsVm.board.participantsCount}} people discussing this</span>
-				<span ng-if="detailsVm.board.participantsCount===1" style="color: #c1c1c1">{{detailsVm.board.participantsCount}} person discussing this</span>
-				<span ng-if="detailsVm.board.participantsCount===0" style="color: #c1c1c1">No one is discussing this yet. Be the first one to comment!</span>
-				<span ng-if="detailsVm.board.latestPublishDate" title="{{detailsVm.board.latestPublishDate}}" style="color: #c1c1c1"> | Last Update: {{detailsVm.board.timeSinceLatestPublish}}</span>
+			<div ng-if="!detailsVm.board.comments.length" style="display:inline-block">
+				No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" href>comment</a> !
 			</div>
-			<a ui-sref="list.entity.edit({boardId:detailsVm.board.disb_id})" ui-sref-opts="{location:false}" ng-if="detailsVm.board.editable" style="align-self:flex-end">Edit</a>
 		</div>
-	</div>					
+							
+		<div class="description" ng-bind-html="detailsVm.board.description" ng-if="!detailsVm.descriptionEdit"></div>
+		<div ng-if="detailsVm.descriptionEdit"> 
+			<textarea class="form-control" ng-model="detailsVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
+			<div class="button-group" style="margin: 5px 0;">
+				<button class="btn btn-primary" ng-click="detailsVm.postEdit()" ng-disabled="!detailsVm.descriptionEdit">Post</button>
+				<button class="btn btn-primary" ng-click="detailsVm.cancelEdit()">Cancel</button>
+			</div>
+		</div>		
+
+		<div class="tools" ng-if="!detailsVm.descriptionEdit">
+			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.openBoardForEdit()" href>Edit</a>
+		</div>
+
+	</div>
+
+	<div class="right-compartment">
+		<div class="rating-box">
+			<span class="subtle">rating</span>				
+			<span class="rating-number">{{detailsVm.board.rating}}</span>
+			<span class="votes-number">{{detailsVm.board.totalVotes}} Votes</span>
+		</div>
+		<div class="vote-tool">
+			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
+			<span ng-if="detailsVm.board.currentUserVote===1"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
+			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
+			<span ng-if="detailsVm.board.currentUserVote===-1"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>
+		</div>		
+	</div>	
 </div>
 
 <div ui-view></div>

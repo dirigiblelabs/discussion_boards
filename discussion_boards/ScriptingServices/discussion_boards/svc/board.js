@@ -10,6 +10,24 @@
 	var Board = arester.asRestAPI(boardDAO);
 	Board.prototype.logger.ctx = "Board Svc";
 	
+	Board.prototype.cfg["{id}/visit"] = {
+		"put" : {
+			consumes: ["application/json"],	
+			handler: function(context, io){
+				//TODO: this is a PoC only. A much more elaborated solution should be in place (that would not easily allow overflow of integer unlike this one)
+			    try{
+					this.dao.visit(context.pathParams.id);
+					io.response.setStatus(io.response.NO_CONTENT);
+				} catch(e) {
+		    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
+		    	    this.logger.error(errorCode, e.message, e.errContext);
+		        	this.sendError(io, errorCode, errorCode, e.message, e.errContext);
+		        	throw e;
+				}		
+			}
+		}
+	};
+	
 	Board.prototype.cfg["{id}/vote"] = {
 		"get": {
 			consumes: ["application/json"],
