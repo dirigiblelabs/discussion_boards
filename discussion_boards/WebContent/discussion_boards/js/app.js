@@ -13,7 +13,7 @@ angular.module('$ckeditor', [])
 }]);
 
 
-angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar'])
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload'])
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider) {
 
 		$urlRouterProvider.otherwise("/");
@@ -74,7 +74,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				board: undefined
 			},
 			resolve: {
-				board: ['$state', '$stateParams', 'MasterDataService','DBoardVisits', '$log', function($state, $stateParams, MasterDataService, DBoardVisits, $log){
+				board: ['$state', '$stateParams', 'MasterDataService', '$log', function($state, $stateParams, MasterDataService, $log){
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -105,8 +105,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						
 						try{
 							DBoardVisits.visit(this.board.disb_id)
-							.then(function(){
-								self.board.visits++;
+							.then(function(res){
+								if(res!==false)
+									self.board.visits++;
 							});
 						} catch(err){$log.error(err);}
 						
@@ -252,17 +253,29 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					controllerAs: 'detailsVm'								
 				}
 			}
+		})
+		.state('list.settings', {    
+			views: {
+				"@": {
+					templateUrl: "views/settings.html",	
+					controller: [function(){
+						console.info("todo");
+					}]
+				}
+			}
 		});
 		  
 		cfpLoadingBarProvider.includeSpinner = false;
 		  
 	}])
-	.service('DBoardVisits', ['BoardVisits', function(BoardVisits) {
+	.service('DBoardVisits', ['BoardVisits', '$q', function(BoardVisits, $q) {
 		var visited = [];
 		var put = function(disb_id){
 			if(visited.indexOf(disb_id)<0){
 				visited.push(disb_id);
 				return BoardVisits.update({"boardId": disb_id}, {}).$promise;
+			} else {
+				return $q.when(false);
 			}
 		};
 	  	return {
