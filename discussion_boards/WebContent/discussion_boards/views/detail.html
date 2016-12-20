@@ -6,7 +6,7 @@
 			<i ng-if="detailsVm.board.user_pic==='-1'" class="glyphicon glyphicon-user user-pic"></i>
 			<span ng-bind="detailsVm.board.user" class="user-name"></span>
 		</div>
-		<span class="publish-time" title="{{board.publishDate}}" ng-bind="detailsVm.board.timeSincePublish"></span>
+		<span class="publish-time" title="{{detailsVm.board.publishTime}}" ng-bind="detailsVm.board.timeSincePublish"></span>
 	</div>				
 	
 	<div class="main-compartment">
@@ -26,13 +26,13 @@
 				<span ng-if="detailsVm.board.participantsCount>1">{{detailsVm.board.participantsCount}} people discussing this</span>
 				<span ng-if="detailsVm.board.participantsCount===1">{{detailsVm.board.participantsCount}} person discussing this</span>
 				|
-				<span ng-if="detailsVm.board.latestPublishDate" title="{{detailsVm.board.latestPublishDate}}">Last update {{detailsVm.board.timeSinceLatestPublish}}</span>
+				<span ng-if="detailsVm.board.latestDiscussionUpdateTime" title="{{detailsVm.board.latestDiscussionUpdateTime}}">Last discussion update {{detailsVm.board.timeSinceLatestDiscussionUpdateTime}}</span>
 			</div>
 			<div ng-if="!detailsVm.board.comments.length" style="display:inline-block">
 				No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" href>comment</a> !
 			</div>
 		</div>
-							
+
 		<div class="description" ng-bind-html="detailsVm.board.description" ng-if="!detailsVm.descriptionEdit"></div>
 		<div ng-if="detailsVm.descriptionEdit"> 
 			<textarea class="form-control" ng-model="detailsVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
@@ -43,7 +43,7 @@
 		</div>		
 
 		<div class="tools" ng-if="!detailsVm.descriptionEdit">
-			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.openBoardForEdit()" href>Edit</a>
+			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.openBoardForEdit()" href>Edit</a> <span ng-if="detailsVm.board.timeSinceLastModified" title="{{detailsVm.board.lastModifiedTime}}" style="color:#767676;font-size:0.875em">Last edit {{detailsVm.board.timeSinceLastModified}}</span>
 		</div>
 
 	</div>

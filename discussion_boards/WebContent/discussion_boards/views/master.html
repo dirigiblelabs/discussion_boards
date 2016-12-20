@@ -1,7 +1,7 @@
 <div class="items-list">
 	<div ng-hide="masterVm.list.length" class="nodata-text">Look, it's empty! Be the first to add here!</div>
 	<div class="list-group" ng-if="masterVm.list.length>0">
-	  <div class="list-group-item" ng-repeat="board in masterVm.list|filter:masterVm.filterList.filterText|orderBy:['-rating', '-latestPublishDate', '-participants']">
+	  <div class="list-group-item" ng-repeat="board in masterVm.list|filter:masterVm.filterList.filterText|orderBy:['-rating', '-lastModifiedTime', '-participants']">
 		<div class="board-list-item">
 			
 			<div class="left-compartment">
@@ -10,7 +10,7 @@
 					<i ng-if="board.user_pic==='-1'" class="glyphicon glyphicon-user user-pic"></i>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
-				<span class="publish-time" title="{{board.publishDate}}" ng-bind="board.timeSincePublish"></span>
+				<span class="publish-time" title="{{board.publishTime}}" ng-bind="board.timeSincePublish"></span>
 			</div>				
 			
 			<div class="main-compartment">
@@ -30,7 +30,7 @@
 						<span ng-if="board.participantsCount>1">{{board.participantsCount}} people discussing this</span>
 						<span ng-if="board.participantsCount===1">{{board.participantsCount}} person discussing this</span>
 						|
-						<span ng-if="board.latestPublishDate" title="{{board.latestPublishDate}}">Last update {{board.timeSinceLatestPublish}}</span>
+						<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTime}}">Last update {{board.timeSinceLatestDiscussionUpdateTime}}</span>
 					</div>
 					<div ng-if="!board.comments.length" style="display:inline-block">
 						No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:board.disb_id, board: board})" href>comment</a> !

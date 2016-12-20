@@ -35,8 +35,16 @@
         "defaultValue":""
       },
       {
-        "name":"DISB_PUBLISH_DATE",
-        "type":"VARCHAR",
+        "name":"DISB_PUBLISH_TIME",
+        "type":"BIGINT",
+        "length":"0",
+        "notNull":"true",
+        "primaryKey":"false",
+        "defaultValue":""
+      },
+      {
+        "name":"DISB_LASTMODIFIED_TIME",
+        "type":"BIGINT",
         "length":"100",
         "notNull":"false",
         "primaryKey":"false",

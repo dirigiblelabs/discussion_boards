@@ -13,7 +13,7 @@ var itemsEntitySetName = "comments";
 
 var persistentProperties = {
 	mandatory: ["disb_id"],
-	optional: ["shortText", "description", "publishDate", "status", "user"]
+	optional: ["shortText", "description", "publishTime", "lastModifiedTime", "status", "user"]
 };
 
 var $log = require("discussion_boards/lib/logger").logger;
@@ -47,8 +47,8 @@ exports.insert = function(entity, cascaded) {
     var connection = datasource.getConnection();
     try {
         var sql = "INSERT INTO DIS_BOARD (";
-        sql += "DISB_ID, DISB_SHORT_TEXT, DISB_DESCRIPTION, DISB_USER, DISB_PUBLISH_DATE, DISB_STATUS) "; 
-        sql += "VALUES (?,?,?,?,?,?)";
+        sql += "DISB_ID, DISB_SHORT_TEXT, DISB_DESCRIPTION, DISB_USER, DISB_PUBLISH_TIME, DISB_LASTMODIFIED_TIME, DISB_STATUS) "; 
+        sql += "VALUES (?,?,?,?,?,?,?)";
 
         var statement = connection.prepareStatement(sql);
         
@@ -63,9 +63,10 @@ exports.insert = function(entity, cascaded) {
         
         statement.setString(++i, entity.user);
         
-        /* TODO: */
-		entity.publish_date = new Date().toString();
-        statement.setString(++i, entity.publish_date);
+		entity.publishTime = Date.now();
+        statement.setLong(++i, entity.publishTime);
+       	entity.lastModifiedTime = entity.publishTime;
+       	statement.setLong(++i, entity.lastModifiedTime);
 
         statement.setString(++i, entity.status);//FIXME: use codes instead        
         
@@ -233,16 +234,27 @@ function createEntity(resultSet) {
     entity.description = resultSet.getString("DISB_DESCRIPTION");
     entity.user = resultSet.getString("IDMU_UNAME");
    	entity.user_pic = resultSet.getString("IDMU_PIC");
-    entity.publishDate = resultSet.getString("DISB_PUBLISH_DATE"); 
-    entity.status = resultSet.getString("DISB_STATUS");
+   	entity.status = resultSet.getString("DISB_STATUS");
     entity.visits = resultSet.getString("DISB_VISITS");
-    entity.latestPublishDate = resultSet.getString("LATEST_PUBLISH_DATE");    
+    
+    entity.publishTime = resultSet.getLong("DISB_PUBLISH_TIME");
+    entity.publishTime = new Date(entity.publishTime).toISOString();
+    
+    entity.lastModifiedTime = resultSet.getLong("DISB_LASTMODIFIED_TIME");    
+    if(entity.lastModifiedTime!==null)
+    	entity.lastModifiedTime = new Date(entity.lastModifiedTime).toISOString();
+    
+	entity.latestDiscussionUpdateTime = resultSet.getLong("LATEST_UPDATE_TIME");
+    if(entity.latestDiscussionUpdateTime!==null && entity.latestDiscussionUpdateTime>0)
+    	entity.latestDiscussionUpdateTime = new Date(entity.latestDiscussionUpdateTime).toISOString();    
+    
     entity.repliesCount = resultSet.getInt("REPLIES");  
     entity.participantsCount = resultSet.getInt("PARTICIPANTS");      
     entity.totalVotes = resultSet.getInt("TOTAL_VOTES");    
     entity.upvotes = resultSet.getInt("UPVOTES");
     entity.downvotes = resultSet.getInt("DOWNVOTES");        
-    entity.rating = resultSet.getInt("RATING");  
+    entity.rating = resultSet.getInt("RATING"); 
+    
 	for(var key in Object.keys(entity)){
 		if(entity[key] === null)
 			entity[key] = undefined;
@@ -299,6 +311,14 @@ function createSQLEntity(entity) {
 			persistentItem[persistentProperties.optional[i]] = null;
 		}
 	}	
+	
+	if(entity.publishTime){
+		persistentItem.publishTime = new Date(entity.publishTime).getTime();
+	} 
+	if(entity.latestpublishTime){
+		persistentItem.latestpublishTime = new Date(entity.latestpublishTime).getTime();
+	}
+	
 	$log.info("Transformation to DB JSON object finished");
 	return persistentItem;
 }
@@ -326,14 +346,14 @@ exports.update = function(entity) {
     try {
     
         var sql = "UPDATE DIS_BOARD";
-        sql += " SET DISB_SHORT_TEXT=?, DISB_DESCRIPTION=?, DISB_USER=?, DISB_PUBLISH_DATE=?, DISB_STATUS=?"; 
+        sql += " SET DISB_SHORT_TEXT=?, DISB_DESCRIPTION=?, DISB_USER=?, DISB_LASTMODIFIED_TIME=?, DISB_STATUS=?"; 
         sql += " WHERE DISB_ID = ?";
         var statement = connection.prepareStatement(sql);
         var i = 0;
         statement.setString(++i, entity.shortText);        
         statement.setString(++i, entity.description);
         statement.setString(++i, entity.user);
-        statement.setString(++i, entity.publishDate);
+        statement.setLong(++i, Date.now());
         statement.setString(++i, entity.status);        
         var id = entity.disb_id;
         statement.setInt(++i, id);

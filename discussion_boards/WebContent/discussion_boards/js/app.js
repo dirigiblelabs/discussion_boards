@@ -134,9 +134,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						
 						this.postEdit = function(){
 							self.board.description = self.descriptionEdit;
-							MasterDataService.get(self.board.disb_id)
+							MasterDataService.update(self.board)
 							.then(function(board){
 								self.board = board;
+								delete self.descriptionEdit; 
 							});
 						};
 						

@@ -86,16 +86,28 @@
 	}])	
 	.service('MasterDataService', ['Board', 'BoardVote', '$moment', function(Board, BoardVote, $moment) {
 		
+		function asElapsedTimeString(time){
+			if(time)
+				return $moment(new Date(time).toISOString()).fromNow();
+		}
+		
 		function formatEntity(board){
-			board.timeSincePublish = $moment(board.publishDate).fromNow();
-  			if(board.latestPublishDate)
-  				board.timeSinceLatestPublish = $moment(board.latestPublishDate).fromNow();
+			board.timeSincePublish = asElapsedTimeString(board.publishTime);
+  			if(board.lastModifiedTime && $moment(board.lastModifiedTime).isAfter($moment(board.publishTime)))
+  				board.timeSinceLastModified = asElapsedTimeString(board.lastModifiedTime);
+			if(board.latestDiscussionUpdateTime)
+  				board.timeSinceLatestDiscussionUpdateTime = asElapsedTimeString(board.latestDiscussionUpdateTime);  				
+  				
   			if(board.comments){
           		board.comments = board.comments.map(function(comment){
-	      			comment.timeSincePublish = $moment(comment.publish_date).fromNow();
+	      			comment.timeSincePublish = asElapsedTimeString(comment.publishTime);
+	      			if(comment.lastModifiedTime && $moment(comment.lastModifiedTime).isAfter($moment(comment.publishTime)))
+	      				comment.timeSinceLastModified = asElapsedTimeString(comment.lastModifiedTime);
 	      			if(comment.replies){
 	      				comment.replies = comment.replies.map(function(reply){
-	          				reply.timeSincePublish = $moment(reply.publish_date).fromNow();
+	          				reply.timeSincePublish = asElapsedTimeString(reply.publishTime);
+	          				if(reply.lastModifiedTime && $moment(reply.lastModifiedTime).isAfter($moment(reply.publishTime)))
+	      						reply.lastModifiedTime = asElapsedTimeString(reply.lastModifiedTime);
 	          				return reply;
 	          			});
 	            	}
@@ -118,7 +130,13 @@
 			.then(function(board){
 	      		return formatEntity(board);
 			});
-		};		
+		};
+		var update = function(board){
+			return Board.update(board).$promise
+			.then(function(board){
+	      		return formatEntity(board);
+			});
+		};	
 		var saveVote = function(board, v){
 			return BoardVote.save({"boardId": board.disb_id}, {"vote":v}).$promise
 			.then(function(){
@@ -133,7 +151,8 @@
 		};
 	 	return {
 	 		list: list,
-	 		get:get,
+	 		get :get,
+	 		update: update,
 	 		getVote: getVote,
 	 		saveVote: saveVote
 	 	};

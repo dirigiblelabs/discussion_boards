@@ -3,7 +3,7 @@
 	<div class="list-group">
 		<div ng-repeat="comment in vm.board.comments" class="list-group-item" style="display:flex; flex-direction:column">
 			<div style="font-size: 0.9em;color:#848d95">
-				<span ng-bind="comment.user"></span> said <span ng-if="comment.publishDate">on</span> <span title="{{comment.publishDate}}" ng-bind="comment.timeSincePublish || 'recently'">:</span>
+				<span ng-bind="comment.user"></span> said <span title="{{comment.lastModifiedTime || comment.publishTime}}" ng-bind="comment.timeSinceLastModified || comment.timeSincePublish">:</span>
 			</div>
 			<span ng-if="vm.comment !== comment || vm.replyEdit" ng-bind-html="comment.text" style="font-size: 1.1em"></span>
 			<div ng-if="vm.comment === comment && !vm.replyEdit"> 
@@ -18,7 +18,7 @@
 			<div style="margin-top:20px; margin-left:40px" ng-if="comment.replies.length>0">
 				<div ng-repeat="reply in comment.replies" class="list-group-item" style="border: none; border-top: 1px solid #ddd">
 					<div ng-if="vm.reply!==reply">
-						<span ng-bind-html="reply.text" style="display: inline-block;"></span> <div style="display: inline-block; font-size: 0.9em; color:#848d95">- {{reply.user}} replied <span title="{{reply.publishDate}}" ng-bind="reply.timeSincePublish || 'recently'"></span>
+						<span ng-bind-html="reply.text" style="display: inline-block;"></span> <div style="display: inline-block; font-size: 0.9em; color:#848d95">- {{reply.user}} replied <span title="{{reply.lastModifiedTime || reply.publishTIme}}" ng-bind="reply.timeSinceLastModified || reply.timeSincePublish"></span>
 						<a href ng-if="reply.editable" ng-click="vm.replyOpen(comment, reply)"><i class="fa fa-pencil" style="font-size: 1.1em"></i></a></div>
 					</div>
 					<div ng-if="vm.reply===reply" class="list-group-item" style="display:flex; flex-direction:column; background: #f4f4f4">

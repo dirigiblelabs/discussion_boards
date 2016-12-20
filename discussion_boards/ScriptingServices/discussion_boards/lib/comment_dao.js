@@ -9,7 +9,7 @@ var datasource = database.getDatasource();
 
 var persistentProperties = {
 	mandatory: ["disc_id", "disc_disb_id"],
-	optional: ["text", "user", "publish_date", "reply_to_disc_id"]
+	optional: ["text", "user", "publishTime", "lastModifiedTime", "reply_to_disc_id"]
 };
 
 var $log = require("discussion_boards/lib/logger").logger;
@@ -36,8 +36,8 @@ exports.insert = function(item) {
 	
     var connection = datasource.getConnection();
     try {
-        var sql = "INSERT INTO DIS_COMMENT (DISC_ID, DISC_DISB_ID, DISC_REPLY_TO_DISC_ID, DISC_COMMENT_TEXT, DISC_USER, DISC_PUBLISH_DATE)";
-        sql += " VALUES (?,?,?,?,?,?)";
+        var sql = "INSERT INTO DIS_COMMENT (DISC_ID, DISC_DISB_ID, DISC_REPLY_TO_DISC_ID, DISC_COMMENT_TEXT, DISC_USER, DISC_PUBLISH_TIME, DISC_LASTMODIFIED_TIME)";
+        sql += " VALUES (?,?,?,?,?,?,?)";
 
         var statement = connection.prepareStatement(sql);
         item = createSQLEntity(item);
@@ -57,8 +57,10 @@ exports.insert = function(item) {
         statement.setString(++j, item.user);
         
         /* TODO: */
-        item.publish_date = new Date().toString();
-        statement.setString(++j, item.publish_date);
+        item.publishTime = Date.now();
+        statement.setLong(++j, item.publishTime);
+        item.lastModifiedTime = item.publishTime;
+        statement.setLong(++j, item.lastModifiedTime);
 
         statement.executeUpdate();
         
@@ -230,7 +232,14 @@ function createEntity(resultSet) {
     if(entity.reply_to_disc_id < 0){
     	entity.reply_to_disc_id = undefined;
     }
-    entity.publish_date = resultSet.getString("DISC_PUBLISH_DATE");
+    
+  	entity.publishTime = resultSet.getLong("DISC_PUBLISH_TIME");
+    entity.publishTime = new Date(entity.publishTime).toISOString();
+    
+    entity.lastModifiedTime = resultSet.getLong("DISC_LASTMODIFIED_TIME");    
+    if(entity.lastModifiedTime!==null)
+    	entity.lastModifiedTime = new Date(entity.lastModifiedTime).toISOString();    
+    
     var user = require("net/http/user");
     entity.editable = entity.user === user.getName();    
     $log.info("Transformation from DB JSON object finished");
@@ -276,7 +285,7 @@ exports.update = function(item) {
 
     var connection = datasource.getConnection();
     try {
-        var sql = "UPDATE DIS_COMMENT SET DISC_COMMENT_TEXT = ?, DISC_PUBLISH_DATE = ?";
+        var sql = "UPDATE DIS_COMMENT SET DISC_COMMENT_TEXT = ?, DISC_LASTMODIFIED_TIME = ?";
         sql += " WHERE DISC_ID = ?";
         
         var statement = connection.prepareStatement(sql);
@@ -284,7 +293,7 @@ exports.update = function(item) {
 
         var i = 0;
         statement.setString(++i, item.text);
-        statement.setString(++i, item.publish_date);
+        statement.setLong(++i, Date.now());
         var id = item.disc_id;
         statement.setInt(++i, id);
         statement.executeUpdate();

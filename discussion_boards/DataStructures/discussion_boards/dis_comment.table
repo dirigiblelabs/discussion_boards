@@ -39,9 +39,18 @@
       }
       ,
       {
-        "name":"DISC_PUBLISH_DATE",
-        "type":"VARCHAR",
-        "length":"100",
+        "name":"DISC_PUBLISH_TIME",
+        "type":"BIGINT",
+        "length":"",
+        "notNull":"true",
+        "primaryKey":"false",
+        "defaultValue":""
+      }
+      ,
+      {
+        "name":"DISC_LASTMODIFIED_TIME",
+        "type":"BIGINT",
+        "length":"",
         "notNull":"false",
         "primaryKey":"false",
         "defaultValue":""
