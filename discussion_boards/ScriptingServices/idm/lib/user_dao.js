@@ -131,9 +131,6 @@ exports.list = function(limit, offset, sort, order, expanded, username) {
         var resultSet = statement.executeQuery();
         while (resultSet.next()) {
         	var entity = createEntity(resultSet);
-        	if(expanded !== null && expanded!==undefined){
-			   //TODO: add contacts
-			}
             entities.push(entity);
         }
         
@@ -174,7 +171,7 @@ function createSQLEntity(entity) {
 		} else {
 			persistentItem[persistentProperties.optional[i]] = null;
 		}
-	}	
+	}
 	$log.info("Transformation to DB JSON object finished");
 	return persistentItem;
 }
@@ -188,27 +185,26 @@ exports.update = function(entity) {
 		throw new Error('Illegal argument: entity is ' + entity);
 	}	
 	
-/*	for(var i = 0; i< persistentProperties.mandatory.length; i++){
+	for(var i = 0; i< persistentProperties.mandatory.length; i++){
 		var propName = persistentProperties.mandatory[i];
 		var propValue = entity[propName];
 		if(propValue === undefined || propValue === null){
 			throw new Error('Illegal ' + propName + ' attribute value in IDM_USER entity for update: ' + propValue);
 		}
-	}*/
+	}
 	
 	entity = createSQLEntity(entity);
 
     var connection = datasource.getConnection();
     try {
-        var sql = "UPDATE IDM_USER SET IDMU_UNAME=?, IDMU_PIC=? WHERE IDMU_ID=?";		
+        var sql = "UPDATE IDM_USER SET IDMU_UNAME=?, IDMU_PIC=? WHERE IDMU_ID=?";
         var statement = connection.prepareStatement(sql);
         
         var i=0;
-		statement.setString(++i, "dirigible");
-		statement.setString(++i, "-1");
-       	var id = 10;//entity.idmu_id;
+		statement.setString(++i, entity.uname);
+		statement.setString(++i, entity.pic);
+       	var id = entity.idmu_id;
 	    statement.setInt(++i, id);
-	    console.info(entity.idmu_id);
 	    
         statement.executeUpdate();
             
