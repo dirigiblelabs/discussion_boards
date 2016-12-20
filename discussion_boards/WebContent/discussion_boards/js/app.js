@@ -154,7 +154,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.html",				
-					controller: ['$stateParams','$log', 'MasterDataService', 'Comment', 'board', function($stateParams, $log, MasterDataService, Comment, board){
+					controller: ['$state', '$stateParams','$log', 'MasterDataService', 'Comment', 'board', function($state, $stateParams, $log, MasterDataService, Comment, board){
 						
 						this.comment = {};
 						this.board = board;
@@ -179,10 +179,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
 								$log.info('Comment with id['+commentData.disc_id+'] saved');
-								return MasterDataService.get($stateParams.boardId)
-										.then(function(data){
-											self.board = data;
-										});
+								MasterDataService.get(board.disb_id)
+								.then(function(board){
+									$state.go('list.entity', {board: board}, {reload:true});
+								});
 							})
 							.catch(function(err){
 								$log.error(err);
@@ -212,12 +212,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.replyPost = function(){
 							var upsertOperation = self.reply.disc_id===undefined?'save':'update';
 							Comment[upsertOperation ](self.reply).$promise
-							.then(function(commentData){
+							.then(function(){
 								$log.info('reply saved');
-								return MasterDataService.get($stateParams.boardId)
-										.then(function(data){
-											self.board = data;
-										});
+								MasterDataService.get(board.disb_id)
+								.then(function(board){
+									$state.go('list.entity', {board: board}, {reload:true});
+								});
 							})
 							.catch(function(err){
 								throw err;

@@ -2,8 +2,8 @@
 
 	<div class="left-compartment">
 		<div class="user-box" style="">
-			<img ng-if="detailsVm.board.user_pic!=='-1'" src="data:image/png;base64,{{detailsVm.board.user_pic}}" class="user-pic"/>
-			<i ng-if="detailsVm.board.user_pic==='-1'" class="glyphicon glyphicon-user user-pic"></i>
+			<img ng-if="board.picSrc" ng-src="detailsVm.board.picSrc" class="user-pic"/>
+			<i ng-if="!board.picSrc" class="glyphicon glyphicon-user user-pic"></i>
 			<span ng-bind="detailsVm.board.user" class="user-name"></span>
 		</div>
 		<span class="publish-time" title="{{detailsVm.board.publishTime}}" ng-bind="detailsVm.board.timeSincePublish"></span>

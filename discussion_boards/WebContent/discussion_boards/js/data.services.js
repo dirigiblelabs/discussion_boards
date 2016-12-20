@@ -114,6 +114,7 @@
 	            	return comment;
 				});
   			}
+  			board.picSrc = board.user_pic&&board.user_pic!=="-1"?"data:image/png;base64,"+board.user_pic:undefined;
   			return board;
 		}
 		
