@@ -24,27 +24,15 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		      views: {
 		      	"@": {
 		              templateUrl: 'views/master.html',
-		              controller: ['MasterDataService', '$log', 'FilterList', 'UserImg', function(MasterDataService, $log, FilterList, UserImg){
+		              controller: ['$Boards', '$log', 'FilterList', function($Boards, $log, FilterList){
 		              
 		              	this.list = [];
 		              	this.filterList = FilterList;
 		              	var self = this;
 		              	
-						MasterDataService.list()
+						$Boards.list()
 						.then(function(data){
 							self.list = data;
-							self.list.map(function(board){
-								board.userDetails = {
-									avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
-								};
-								UserImg.get(board.user)
-								.then(function(image){
-									if(!image){
-										board.userDetails.avatar = undefined;
-									}
-								});
-								return board;
-							});
 						})
 		              	.catch(function(err){
 		              		$log.error(err);
@@ -52,7 +40,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		              	});
 		              	
 						this.saveVote = function(board, vote){
-							MasterDataService.saveVote(board, vote)
+							$Boards.saveVote(board, vote)
 							.then(function(data){
 								$log.info("voted: " + vote);
 								self.list = self.list.map(function(b){
@@ -82,7 +70,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				board: undefined
 			},
 			resolve: {
-				board: ['$state', '$stateParams', 'MasterDataService','UserImg', '$log', function($state, $stateParams, MasterDataService, UserImg, $log){
+				board: ['$state', '$stateParams', '$Boards', '$log', function($state, $stateParams, $Boards, $log){
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -91,18 +79,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						if($stateParams.board)
 							return $stateParams.board;
 						else
-							return MasterDataService.get(boardId)
-							.then(function(boardData){
-								boardData.userDetails = {
-									avatar: "/services/js/idm/svc/user.js/$pics/"+boardData.user 
-								};
-								UserImg.get(boardData.user)
-								.then(function(image){
-									if(!image)
-										boardData.userDetails.avatar= undefined;
-								});
-								return boardData;
-							})
+							return $Boards.get(boardId)
 							.catch(function(err){
 								$log('Could not resolveboard entity with id['+$stateParams.boardId+']');
 								$state.go('list');
@@ -115,12 +92,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$log', 'MasterDataService', 'DBoardVisits', 'board', function($state, $log, MasterDataService, DBoardVisits, board){
+					controller: ['$state', '$log', '$Boards', '$DBoardVisits', 'board', function($state, $log, $Boards, $DBoardVisits, board){
 						this.board = board;
 						var self = this;
 						
 						try{
-							DBoardVisits.visit(this.board.disb_id)
+							$DBoardVisits.visit(this.board.disb_id)
 							.then(function(res){
 								if(res!==false)
 									self.board.visits++;
@@ -130,7 +107,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board});  	
 						
 						this.saveVote = function(vote){
-							MasterDataService.saveVote(self.board, vote)
+							$Boards.saveVote(self.board, vote)
 							.then(function(data){
 								$log.info("voted: " + vote);
 								self.board = data; 
@@ -138,7 +115,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 						
 						this.getVote = function(){
-							MasterDataService.getVote(self.board)
+							$Boards.getVote(self.board)
 							.then(function(vote){
 								self.currentUserVote = vote;
 							});
@@ -150,7 +127,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						
 						this.postEdit = function(){
 							self.board.description = self.descriptionEdit;
-							MasterDataService.update(self.board)
+							$Boards.update(self.board)
 							.then(function(board){
 								self.board = board;
 								delete self.descriptionEdit; 
@@ -170,7 +147,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.html",				
-					controller: ['$state', '$stateParams','$log', 'MasterDataService', 'Comment', 'board', function($state, $stateParams, $log, MasterDataService, Comment, board){
+					controller: ['$state', '$log', '$Boards', '$Comment', 'board', function($state, $log, $Boards, $Comment, board){
 						
 						this.comment = {};
 						this.board = board;
@@ -191,11 +168,11 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.postComment = function(){
 							self.comment.disc_disb_id = this.board.disb_id;
 							var operation = self.comment.disc_id!==undefined?'update':'save';
-							Comment[operation](self.comment).$promise
+							$Comment[operation](self.comment).$promise
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
 								$log.info('Comment with id['+commentData.disc_id+'] saved');
-								MasterDataService.get(board.disb_id)
+								$Boards.get(board.disb_id)
 								.then(function(board){
 									$state.go('list.entity', {board: board}, {reload:true});
 								});
@@ -227,10 +204,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 
 						this.replyPost = function(){
 							var upsertOperation = self.reply.disc_id===undefined?'save':'update';
-							Comment[upsertOperation ](self.reply).$promise
+							$Comment[upsertOperation ](self.reply).$promise
 							.then(function(){
 								$log.info('reply saved');
-								MasterDataService.get(board.disb_id)
+								$Boards.get(board.disb_id)
 								.then(function(board){
 									$state.go('list.entity', {board: board}, {reload:true});
 								});
@@ -272,34 +249,31 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		})
 		.state('list.settings', {  
 			resolve: {
-				User: ['$resource', function($resource){
-					return $resource('../../js/idm/svc/user.js/$current', {}, 
-	  						{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+				user: ['$LoggedUser', function($LoggedUser){
+					return $LoggedUser.get()
+						.then(function(user){
+							return user;
+						});	
 				}]
 			},
 			views: {
 				"@": {
 					templateUrl: "views/settings.html",	
-					controller: ['FileUploader', 'User', function(FileUploader, User){
+					controller: ['$state', 'FileUploader', 'user', function($state, FileUploader, user){
+						
+						this.user = user;
 						var self  = this;
 						
-						var uploader = this.uploader = new FileUploader();
-						User.get().$promise
-						.then(function(user){
-							self.user = user;
-							self.uploader.url = '../../js/idm/svc/user.js/$pics/' + self.user.uname;
-						});					
-					    
-					    this.uploader.onBeforeUploadItem = function(item) {
+						var uploader = this.uploader = new FileUploader({
+							url: this.user.avatarUrl
+						});
+					    this.uploader.onBeforeUploadItem = function(/*item*/) {
 							//item.url = zipUploadPath + "?path=" + this.folder.path;
 					    };
-					    this.uploader.onCompleteItem = function(fileItem, response, status, headers) {
-							User.get().$promise
-							.then(function(user){
-								self.user = user;
-							});
+					    this.uploader.onCompleteItem = function(/*fileItem, response, status, headers*/) {
+							$state.reload();
 					    };
-					    this.uploader.onAfterAddingFile = function(fileItem) {
+					    this.uploader.onAfterAddingFile = function(/*fileItem*/) {
 					    	self.uploader.uploadAll();
 					    };
 					}],
@@ -310,72 +284,5 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  
 		cfpLoadingBarProvider.includeSpinner = false;
 		  
-	}])
-	.service('DBoardVisits', ['BoardVisits', '$q', function(BoardVisits, $q) {
-		var visited = [];
-		var put = function(disb_id){
-			if(visited.indexOf(disb_id)<0){
-				visited.push(disb_id);
-				return BoardVisits.update({"boardId": disb_id}, {}).$promise;
-			} else {
-				return $q.when(false);
-			}
-		};
-	  	return {
-	  		visit: put
-	  	};
-	}])	
-	.service('FilterList', [function() {
-		var _filterText;
-	  	return {
-	  		filterText: _filterText
-	  	};
-	}])
-	.directive('ckEditor', ['$ckeditor', function($ckeditor) {
-	  return {
-	    require: '?ngModel',
-	    link: function(scope, elm, attr, ngModel) {
-	    
-	      var ck = $ckeditor.replace(elm[0], {
-		    	toolbar: [
-					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Format', 'Bold', 'Italic', 'Strike', '-', 'RemoveFormat' ] },
-					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },					
-					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Undo', 'Redo' ] },
-					{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ], items: [ 'Scayt' ] },
-					{ name: 'links', items: [ 'Link', 'Unlink' ] },
-					{ name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar' ] },
-					{ name: 'styles', items: [ 'Styles' ] },					
-					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: [ 'Source' ] },					
-				],
-				toolbarGroups: [
-					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
-					{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ] },
-					{ name: 'links' },
-					{ name: 'insert' },
-					{ name: 'forms' },
-					{ name: 'tools' },
-					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
-					{ name: 'others' },
-					'/',
-					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
-					{ name: 'styles' },
-					{ name: 'colors' }
-				]				
-	    	});
-	
-	      if (!ngModel) return;
-	
-	      ck.on('pasteState', function() {
-	        scope.$apply(function() {
-	          ngModel.$setViewValue(ck.getData());
-	        });
-	      });
-	
-	      ngModel.$render = function(value) {
-	        ck.setData(ngModel.$viewValue);
-	      };
-	    }
-	  };
 	}]);
 })(angular);
