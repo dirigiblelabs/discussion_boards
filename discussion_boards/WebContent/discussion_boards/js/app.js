@@ -24,7 +24,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		      views: {
 		      	"@": {
 		              templateUrl: 'views/master.html',
-		              controller: ['MasterDataService', '$log', 'FilterList', 'User', function(MasterDataService, $log, FilterList, User){
+		              controller: ['MasterDataService', '$log', 'FilterList', 'UserImg', function(MasterDataService, $log, FilterList, UserImg){
 		              
 		              	this.list = [];
 		              	this.filterList = FilterList;
@@ -34,12 +34,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						.then(function(data){
 							self.list = data;
 							self.list.map(function(board){
-								User.get(board.user)
-								.then(function(userData){
-									if(userData){
-										board.userDetails = {
-											avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
-										};
+								board.userDetails = {
+									avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
+								};
+								UserImg.get(board.user)
+								.then(function(image){
+									if(!image){
+										board.userDetails.avatar = undefined;
 									}
 								});
 								return board;
@@ -81,7 +82,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				board: undefined
 			},
 			resolve: {
-				board: ['$state', '$stateParams', 'MasterDataService','User', '$log', function($state, $stateParams, MasterDataService, User, $log){
+				board: ['$state', '$stateParams', 'MasterDataService','UserImg', '$log', function($state, $stateParams, MasterDataService, UserImg, $log){
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -91,16 +92,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							return $stateParams.board;
 						else
 							return MasterDataService.get(boardId)
-							.then(function(data){
-								User.get(data.user)
-								.then(function(userData){
-									if(userData){
-										data.userDetails = {
-											avatar: "/services/js/idm/svc/user.js/$pics/"+data.user 
-										};
-									}
+							.then(function(boardData){
+								boardData.userDetails = {
+									avatar: "/services/js/idm/svc/user.js/$pics/"+boardData.user 
+								};
+								UserImg.get(boardData.user)
+								.then(function(image){
+									if(!image)
+										boardData.userDetails.avatar= undefined;
 								});
-								return data;
+								return boardData;
 							})
 							.catch(function(err){
 								$log('Could not resolveboard entity with id['+$stateParams.boardId+']');

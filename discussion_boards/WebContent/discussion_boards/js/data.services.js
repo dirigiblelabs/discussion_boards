@@ -74,9 +74,9 @@
 	  		get: get
 	  	};
 	}])
-	.service('User', ['$resource', '$log', function($resource) {
+	.service('UserImg', ['$resource', '$log', function($resource) {
 		var UserSvc = $resource('../../js/idm/svc/user.js/$pics/:userName', {}, 
-	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+	  					{get: {method:'GET', params:{}, isArray:false, cache: true, ignoreLoadingBar: true}});
 		var get = function(userName){
 		  	return UserSvc.get({"userName":userName}).$promise
 		  	.then(function(userData){
@@ -87,29 +87,6 @@
 	  		get: get
 	  	};	  					
 	}])	
-/*	.service('User', ['$resource', '$log', function($resource, $log) {
-	  	return $resource('../../js/idm/svc/user.js/:userId', { userId:'@idmu_id' }, {
-			    save: {
-			        method: 'POST',
-			        interceptor: {
-		                response: function(res) {
-		                	var location = res.headers('Location');
-		                	if(location){
-		                		var id = location.substring(location.lastIndexOf('/')+1);
-		                		angular.extend(res.resource, { "idmu_id": id });
-	                		} else {
-	                			$log.error('Cannot infer id after save operation. HTTP Response Header "Location" is missing: ' + location);
-	            			}
-	                        return res.resource;
-		                }
-		            }, 
-		            isArray: false
-			    },
-			    update: {
-			        method: 'PUT'
-			    }
-			});
-	}])	*/
 	.service('MasterDataService', ['Board', 'BoardVote', '$moment', function(Board, BoardVote, $moment) {
 		
 		function asElapsedTimeString(time){
