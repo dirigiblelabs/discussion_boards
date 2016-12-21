@@ -61,7 +61,33 @@
 			    }
 			});
 	}])
-	.service('User', ['$resource', '$log', function($resource, $log) {
+	.service('LoggedUser', ['$resource', '$log', function($resource) {
+		var UserSvc =  $resource('../../js/idm/svc/user.js/$current', {}, 
+	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+	  	var get = function(){
+		  	return UserSvc.get().$promise
+		  	.then(function(userData){
+		  		return userData;
+		  	});
+	  	};
+	  	return {
+	  		get: get
+	  	};
+	}])
+	.service('User', ['$resource', '$log', function($resource) {
+		var UserSvc = $resource('../../js/idm/svc/user.js/$pics/:userName', {}, 
+	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+		var get = function(userName){
+		  	return UserSvc.get({"userName":userName}).$promise
+		  	.then(function(userData){
+		  		return userData;
+		  	});
+	  	};	  					
+	  	return {
+	  		get: get
+	  	};	  					
+	}])	
+/*	.service('User', ['$resource', '$log', function($resource, $log) {
 	  	return $resource('../../js/idm/svc/user.js/:userId', { userId:'@idmu_id' }, {
 			    save: {
 			        method: 'POST',
@@ -83,7 +109,7 @@
 			        method: 'PUT'
 			    }
 			});
-	}])	
+	}])	*/
 	.service('MasterDataService', ['Board', 'BoardVote', '$moment', function(Board, BoardVote, $moment) {
 		
 		function asElapsedTimeString(time){
@@ -149,8 +175,7 @@
 			board.totalVotesShort = formatNumberShort(board.totalVotes);
 			board.upvotesShort = formatNumberShort(board.upvotes);
 			board.downvotesShort = formatNumberShort(board.downvotes);			
-			board.ratingShort = formatNumberShort(board.rating);			
-  			board.picSrc = board.user_pic?"data:image/png;base64,"+board.user_pic:undefined;
+			board.ratingShort = formatNumberShort(board.rating);
   			return board;
 		}
 		

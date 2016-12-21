@@ -6,8 +6,8 @@
 			
 			<div class="left-compartment">
 				<div class="user-box" style="">
-					<img ng-if="board.picSrc" ng-src="board.picSrc" class="user-pic"/>
-					<i ng-if="!board.picSrc" class="glyphicon glyphicon-user user-pic"></i>
+					<img ng-if="board.userDetails.avatar" src="{{board.userDetails.avatar}}" class="user-pic"/>
+					<i ng-if="!board.userDetails.avatar" class="glyphicon glyphicon-user user-pic"></i>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
 				<span class="publish-time" title="{{board.publishTimeLocal}}" ng-bind="board.timeSincePublish"></span>

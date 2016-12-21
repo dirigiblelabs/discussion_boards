@@ -12,6 +12,11 @@
             "type": "git",
             "url": "https://github.com/dirigiblelabs/arestme.git",
             "branch":"master"
-    	}    	
+    	}, {
+    	    "guid":"docs_explorer",
+	        "type":"git",
+	        "url":"https://github.com/dirigiblelabs/docs_explorer.git",
+	        "branch":"master"
+    	}
 	]
 }

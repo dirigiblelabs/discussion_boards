@@ -30,13 +30,20 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		              	this.filterList = FilterList;
 		              	var self = this;
 		              	
-		              	this.getUserDetails = function(_username){
-		              		return User.query({username:_username}).$promise
-		              	};
-		              	
 						MasterDataService.list()
 						.then(function(data){
 							self.list = data;
+							self.list.map(function(board){
+								User.get(board.user)
+								.then(function(userData){
+									if(userData){
+										board.userDetails = {
+											avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
+										};
+									}
+								});
+								return board;
+							});
 						})
 		              	.catch(function(err){
 		              		$log.error(err);
@@ -74,7 +81,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				board: undefined
 			},
 			resolve: {
-				board: ['$state', '$stateParams', 'MasterDataService', '$log', function($state, $stateParams, MasterDataService, $log){
+				board: ['$state', '$stateParams', 'MasterDataService','User', '$log', function($state, $stateParams, MasterDataService, User, $log){
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -85,6 +92,14 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						else
 							return MasterDataService.get(boardId)
 							.then(function(data){
+								User.get(data.user)
+								.then(function(userData){
+									if(userData){
+										data.userDetails = {
+											avatar: "/services/js/idm/svc/user.js/$pics/"+data.user 
+										};
+									}
+								});
 								return data;
 							})
 							.catch(function(err){
@@ -254,13 +269,40 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				}
 			}
 		})
-		.state('list.settings', {    
+		.state('list.settings', {  
+			resolve: {
+				User: ['$resource', function($resource){
+					return $resource('../../js/idm/svc/user.js/$current', {}, 
+	  						{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+				}]
+			},
 			views: {
 				"@": {
 					templateUrl: "views/settings.html",	
-					controller: [function(){
-						console.info("todo");
-					}]
+					controller: ['FileUploader', 'User', function(FileUploader, User){
+						var self  = this;
+						
+						var uploader = this.uploader = new FileUploader();
+						User.get().$promise
+						.then(function(user){
+							self.user = user;
+							self.uploader.url = '../../js/idm/svc/user.js/$pics/' + self.user.uname;
+						});					
+					    
+					    this.uploader.onBeforeUploadItem = function(item) {
+							//item.url = zipUploadPath + "?path=" + this.folder.path;
+					    };
+					    this.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+							User.get().$promise
+							.then(function(user){
+								self.user = user;
+							});
+					    };
+					    this.uploader.onAfterAddingFile = function(fileItem) {
+					    	self.uploader.uploadAll();
+					    };
+					}],
+					controllerAs: 'settingsVm'
 				}
 			}
 		});
