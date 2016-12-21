@@ -14,10 +14,10 @@
 		<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
 
 		<div class="stats">
-			<span>{{detailsVm.board.visits||0}} <i class="fa fa-eye"></i></span>
+			<span>{{detailsVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 			|
 			<div ng-if="detailsVm.board.comments.length" style="display:inline-block">
-				<span ng-if="detailsVm.board.comments.length">{{detailsVm.board.comments.length}} <i class="fa fa-comments-o"></i> by {{detailsVm.board.participantsCount}}
+				<span ng-if="detailsVm.board.comments.length">{{detailsVm.board.comments.length}} <i class="fa fa-comments-o"></i> by {{detailsVm.board.participantsCountShort}}
 					<span ng-if="detailsVm.board.participantsCount>1">people</span>
 					<span ng-if="detailsVm.board.participantsCount===1">person</span>
 				</span>
@@ -47,18 +47,18 @@
 			
 		<div class="rating-box">
 			<span class="subtle">rating</span>
-			<span class="rating-number">{{detailsVm.board.rating}}</span>
-			<span class="votes-number">{{detailsVm.board.totalVotes}} Votes</span>
+			<span class="rating-number">{{detailsVm.board.ratingShort}}</span>
+			<span class="votes-number">{{detailsVm.board.totalVotesShort}} Votes</span>
 		</div>
 		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;">
 			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
-			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.upvotes}}</span>
+			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.upvotesShort}}</span>
 		</div>
 		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;">
 			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
-			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.downvotes}}</span>									
+			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.downvotesShort}}</span>									
 		</div>
 		
 	</div>	

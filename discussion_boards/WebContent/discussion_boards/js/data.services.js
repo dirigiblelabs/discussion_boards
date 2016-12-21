@@ -91,6 +91,24 @@
 				return $moment(new Date(time).toISOString()).fromNow();
 		}
 		
+		function formatNumberShort(value){
+			if(value === undefined || Number.isNaN(value))
+				return value;
+			var val = parseInt(value);
+			if(val > 1000000){
+				val = Math.round((val/1000000)*100)/100;
+				return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+"M+";
+			}
+			if(val>1000){
+				val = Math.round((val/1000)*100)/100;
+				return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+"K+";
+			}
+			if(val > 200){
+				return Math.floor(100/100)*100 + '+';
+			}
+			return val;
+		}
+		
 		function formatEntity(board){
 			board.timeSincePublish = asElapsedTimeString(board.publishTime);
 			board.publishTimeLocal = $moment(board.publishTime).format('LLL');
@@ -102,7 +120,7 @@
 				board.latestDiscussionUpdateTimeLocal = $moment(board.latestDiscussionUpdateTime).format('LLL');  	
   				board.timeSinceLatestDiscussionUpdateTime = asElapsedTimeString(board.latestDiscussionUpdateTime); 
   			}
-  				
+  			
   			if(board.comments){
           		board.comments = board.comments.map(function(comment){
 	      			comment.timeSincePublish = asElapsedTimeString(comment.publishTime);
@@ -125,6 +143,13 @@
 	            	return comment;
 				});
   			}
+  			
+  			board.visitsShort = formatNumberShort(board.visits);
+  			board.participantsCountShort = formatNumberShort(board.participantsCount);
+			board.totalVotesShort = formatNumberShort(board.totalVotes);
+			board.upvotesShort = formatNumberShort(board.upvotes);
+			board.downvotesShort = formatNumberShort(board.downvotes);			
+			board.ratingShort = formatNumberShort(board.rating);			
   			board.picSrc = board.user_pic?"data:image/png;base64,"+board.user_pic:undefined;
   			return board;
 		}
