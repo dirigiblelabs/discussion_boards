@@ -93,21 +93,32 @@
 		
 		function formatEntity(board){
 			board.timeSincePublish = asElapsedTimeString(board.publishTime);
-  			if(board.lastModifiedTime && $moment(board.lastModifiedTime).isAfter($moment(board.publishTime)))
-  				board.timeSinceLastModified = asElapsedTimeString(board.lastModifiedTime);
-			if(board.latestDiscussionUpdateTime)
-  				board.timeSinceLatestDiscussionUpdateTime = asElapsedTimeString(board.latestDiscussionUpdateTime);  				
+			board.publishTimeLocal = $moment(board.publishTime).format('LLL');
+			board.lastModifiedTimeLocal = $moment(board.lastModifiedTime).format('LLL');
+  			if($moment(board.lastModifiedTime).isAfter($moment(board.publishTime))){
+  				board.timeSinceLastModified = asElapsedTimeString(board.lastModifiedTime);			
+  			}
+			if(board.latestDiscussionUpdateTime){
+				board.latestDiscussionUpdateTimeLocal = $moment(board.latestDiscussionUpdateTime).format('LLL');  	
+  				board.timeSinceLatestDiscussionUpdateTime = asElapsedTimeString(board.latestDiscussionUpdateTime); 
+  			}
   				
   			if(board.comments){
           		board.comments = board.comments.map(function(comment){
 	      			comment.timeSincePublish = asElapsedTimeString(comment.publishTime);
-	      			if(comment.lastModifiedTime && $moment(comment.lastModifiedTime).isAfter($moment(comment.publishTime)))
+					comment.publishTimeLocal = $moment(comment.publishTime).format('LLL'); 	      			
+	      			if($moment(comment.lastModifiedTime).isAfter($moment(comment.publishTime))){
+	      				comment.lastModifiedTimeLocal = $moment(comment.lastModifiedTime).format('LLL');
 	      				comment.timeSinceLastModified = asElapsedTimeString(comment.lastModifiedTime);
+      				}
 	      			if(comment.replies){
 	      				comment.replies = comment.replies.map(function(reply){
 	          				reply.timeSincePublish = asElapsedTimeString(reply.publishTime);
-	          				if(reply.lastModifiedTime && $moment(reply.lastModifiedTime).isAfter($moment(reply.publishTime)))
+	          				reply.publishTimeLocal = $moment(reply.publishTime).format('LLL');
+	          				if($moment(reply.lastModifiedTime).isAfter($moment(reply.publishTime))){
 	      						reply.lastModifiedTime = asElapsedTimeString(reply.lastModifiedTime);
+	          					reply.lastModifiedTimeLocal = $moment(reply.lastModifiedTime).format('LLL');	      						
+      						}
 	          				return reply;
 	          			});
 	            	}

@@ -235,10 +235,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		.state('list.new', {    
 			views: {
 				"@": {
-					templateUrl: "views/board.upsert.html",
+					templateUrl: "views/board.form.html",
 					controller: ['$state', '$log', 'Board',  function($state, $log, Board){
 							this.board = {};
-							var self = this;
 					  		this.submit = function(){
 					  			Board.save(this.board).$promise
 					  			.then(function(data){
@@ -296,14 +295,14 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 	    
 	      var ck = $ckeditor.replace(elm[0], {
 		    	toolbar: [
-					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Cut', 'Copy', 'Paste', 'Undo', 'Redo' ] },
+					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Format', 'Bold', 'Italic', 'Strike', '-', 'RemoveFormat' ] },
+					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },					
+					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Undo', 'Redo' ] },
 					{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ], items: [ 'Scayt' ] },
-					{ name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+					{ name: 'links', items: [ 'Link', 'Unlink' ] },
 					{ name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar' ] },
-					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: [ 'Source' ] },
-					{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Strike', '-', 'RemoveFormat' ] },
-					{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },
-					{ name: 'styles', items: [ 'Styles', 'Format' ] }
+					{ name: 'styles', items: [ 'Styles' ] },					
+					{ name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: [ 'Source' ] },					
 				],
 				toolbarGroups: [
 					{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },

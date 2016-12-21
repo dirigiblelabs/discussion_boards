@@ -6,7 +6,7 @@
 			<i ng-if="!board.picSrc" class="glyphicon glyphicon-user user-pic"></i>
 			<span ng-bind="detailsVm.board.user" class="user-name"></span>
 		</div>
-		<span class="publish-time" title="{{detailsVm.board.publishTime}}" ng-bind="detailsVm.board.timeSincePublish"></span>
+		<span class="publish-time" title="{{detailsVm.board.publishTimeLocal}}" ng-bind="detailsVm.board.timeSincePublish"></span>
 	</div>				
 	
 	<div class="main-compartment">
@@ -28,7 +28,7 @@
 		</div>
 
 		<div class="description" ng-bind-html="detailsVm.board.description" ng-if="!detailsVm.descriptionEdit"></div>
-		<span ng-if="detailsVm.board.timeSinceLastModified" title="{{detailsVm.board.lastModifiedTime}}" style="color:#767676;font-size:0.875em">- last edit {{detailsVm.board.timeSinceLastModified}}</span>
+		<span ng-if="detailsVm.board.timeSinceLastModified" title="{{detailsVm.board.lastModifiedTimeLocal}}" style="color:#767676;font-size:0.875em">- last edit {{detailsVm.board.timeSinceLastModified}}</span>
 		<div ng-if="detailsVm.descriptionEdit"> 
 			<textarea class="form-control" ng-model="detailsVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
 			<div class="button-group" style="margin: 5px 0;">
@@ -64,6 +64,6 @@
 	</div>	
 </div>
 
-<div ng-if="detailsVm.board.latestDiscussionUpdateTime" title="{{detailsVm.board.latestDiscussionUpdateTime}}" style="font-size: 0.875em;color: #767676;margin-top: 10px;margin-bottom: -20px;">Last discussion update {{detailsVm.board.timeSinceLatestDiscussionUpdateTime}}</div>
+<div ng-if="detailsVm.board.latestDiscussionUpdateTime" title="{{detailsVm.board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;margin-top: 10px;margin-bottom: -20px;">Last discussion update {{detailsVm.board.timeSinceLatestDiscussionUpdateTime}}</div>
 
 <div ui-view></div>

@@ -10,7 +10,7 @@
 					<i ng-if="!board.picSrc" class="glyphicon glyphicon-user user-pic"></i>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
-				<span class="publish-time" title="{{board.publishTime}}" ng-bind="board.timeSincePublish"></span>
+				<span class="publish-time" title="{{board.publishTimeLocal}}" ng-bind="board.timeSincePublish"></span>
 			</div>				
 			
 			<div class="main-compartment">
@@ -32,7 +32,7 @@
 				</div>
 									
 				<!--<div class="description" ng-bind-html="board.description"></div>-->
-				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTime}}" style="font-size: 0.875em;color: #767676;">Last discussion update {{board.timeSinceLatestDiscussionUpdateTime}}</span>
+				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">Last discussion update {{board.timeSinceLatestDiscussionUpdateTime}}</span>
 			</div>
 
 			<div class="right-compartment">
