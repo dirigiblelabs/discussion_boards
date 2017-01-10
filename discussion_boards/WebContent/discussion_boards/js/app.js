@@ -13,7 +13,7 @@ angular.module('$ckeditor', [])
 }]);
 
 
-angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload'])
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate'])
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider) {
 
 		$urlRouterProvider.otherwise("/");
@@ -67,7 +67,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		.state('list.entity', {
 			url: "{boardId}",
 			params: {
-				board: undefined
+				board: undefined,
+				timeline: false
 			},
 			resolve: {
 				board: ['$state', '$stateParams', '$Boards', '$log', function($state, $stateParams, $Boards, $log){
@@ -92,7 +93,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$log', '$Boards', '$DBoardVisits', 'board', function($state, $log, $Boards, $DBoardVisits, board){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', function($state, $stateParams, $log, $Boards, $DBoardVisits, board){
 						this.board = board;
 						var self = this;
 						
@@ -104,7 +105,11 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							});
 						} catch(err){$log.error(err);}
 						
-						$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board});  	
+						if($stateParams.timeline){
+							$state.go('list.entity.discussion-timeline', {boardId: self.board.disb_id, board:self.board}); 
+						} else {
+							$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board});  	
+						}
 						
 						this.saveVote = function(vote){
 							$Boards.saveVote(self.board, vote)
@@ -143,6 +148,86 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				}
 			}
 		})
+		.state('list.entity.discussion-timeline', {
+			resolve: {
+				comments: ['BoardCommentsTimeline', 'board', function(BoardCommentsTimeline, board){
+					return BoardCommentsTimeline
+							.get({boardId: board.disb_id}).$promise.
+							then(function(comments){
+								return comments;
+							});
+				}]
+			},
+			views: {
+				"@list.entity": {
+					templateUrl: "views/discussion-timeline.html",				
+					controller: ['$state', '$log', '$Boards', '$Comment','$UserImg', 'board', 'comments', function($state, $log, $Boards, $Comment, $UserImg, board, comments){
+						
+						this.comment = {};
+						this.board = board;
+						this.comments = comments;
+						var self = this;
+					  	
+					  	this.openCommentForEdit = function(comment){
+					  		self.comment = comment;
+					  		self.commentEdit = true;
+					  	};
+					  	
+					  	this.cancelCommentEdit = function(){
+					  		self.comment = {};
+					  		self.commentEdit = false;
+					  	};
+					  	
+						this.postComment = function(){
+							self.comment.disc_disb_id = this.board.disb_id;
+							var operation = self.comment.disc_id!==undefined?'update':'save';
+							$Comment[operation](self.comment).$promise
+							.then(function(commentData){
+								//TODO: mixin into the resource the id from Location header upon response
+								$log.info('Comment with id['+commentData.disc_id+'] saved');
+								$Boards.get(board.disb_id)
+								.then(function(board){
+									$state.go('list.entity', {board: board, timeline: true});
+									//$state.go('list.entity.discussion-timeline', {board: board});
+								});
+							})
+							.catch(function(err){
+								$log.error(err);
+								throw err;
+							})
+							.finally(function(){
+								self.cancelCommentEdit();
+							});
+						};
+						
+						this.pix = {};
+						
+						for(var i=0; i<this.comments.length; i++){
+							if(this.pix[this.comments[i].user] === undefined)
+								this.pix[this.comments[i].user]= '';
+						}
+						
+						for(var user in this.pix){
+							getUserPicture(user)
+							.then(function(pic){
+								if(pic){
+									self.pix[user] = "/services/js/idm/svc/user.js/$pics/"+user;
+								}
+							});
+						}
+						
+						function getUserPicture(username){
+							return $UserImg.get(username)
+							.then(function(data){
+								return data;
+							});
+						};
+
+					}],
+					controllerAs: 'vm'				
+				}
+			}
+		})		
 		.state('list.entity.discussion', {
 			views: {
 				"@list.entity": {

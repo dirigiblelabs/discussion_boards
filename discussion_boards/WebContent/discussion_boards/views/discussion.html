@@ -1,7 +1,7 @@
 <div ng-if="vm.board.comments.length<1" style="margin-top:20px">Be the first one to comment!</div>
 <div class="list-group" ng-if="vm.board.comments.length>0" style="margin-top:20px">
 	<div class="list-group">
-		<div ng-repeat="comment in vm.board.comments" class="list-group-item" style="display:flex; flex-direction:column">
+		<div ng-repeat="comment in vm.board.comments" class="list-group-item" style="display:flex; flex-direction:column; margin-bottom: 5px;">
 			<div style="font-size: 0.9em;color:#848d95">
 				<span ng-bind="comment.user"></span> said <span title="{{comment.lastModifiedTimeLocal || comment.publishTimeLocal}}" ng-bind="comment.timeSinceLastModified || comment.timeSincePublish">:</span>
 			</div>

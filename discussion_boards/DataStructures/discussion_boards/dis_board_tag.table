@@ -1,0 +1,32 @@
+{
+  "tableName":"DIS_BOARD_TAG",
+  "columns":
+    [
+      {
+        "name":"DISBT_ID",
+        "type":"BIGINT",
+        "length":"0",
+        "notNull":"true",
+        "primaryKey":"true",
+        "defaultValue":""
+      }
+      ,
+      {
+        "name":"DISBT_DISB_ID",
+        "type":"INTEGER",
+        "length":"0",
+        "notNull":"true",
+        "primaryKey":"false",
+        "defaultValue":""
+      }
+      ,
+      {
+        "name":"DISBT_ANN_ID",
+        "type":"BIGINT",
+        "length":"0",
+        "notNull":"true",
+        "primaryKey":"false",
+        "defaultValue":""
+      }
+    ]
+}

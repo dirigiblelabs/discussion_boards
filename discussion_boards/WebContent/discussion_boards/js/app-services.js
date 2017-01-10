@@ -15,7 +15,7 @@
 	  		visit: put
 	  	};
 	}])	
-	.service('$Boards', ['Board', 'BoardVote', '$UserImg', '$moment', function(Board, BoardVote, $UserImg, $moment) {
+	.service('$Boards', ['Board', 'BoardVote', 'BoardTags', '$UserImg', '$moment', function(Board, BoardVote, BoardTags, $UserImg, $moment) {
 		
 		function asElapsedTimeString(time){
 			if(time)
@@ -135,12 +135,27 @@
 	      		return vote;
 			});
 		};
+		var getTags = function(board){
+			return BoardTags.get({"boardId":board.disb_id}).$promise
+			.then(function(vote){
+	      		return vote;
+			});
+		};
+		var setTags = function(board, tags){
+			return BoardTags.save({"boardId": board.disb_id}, tags).$promise;
+		};
+		var untag = function(board, tags){
+			return BoardTags.remove({"boardId": board.disb_id}, tags).$promise;
+		};		
 	 	return {
 	 		list: list,
 	 		get :get,
 	 		update: update,
 	 		getVote: getVote,
-	 		saveVote: saveVote
+	 		saveVote: saveVote,
+	 		getTags: getTags,
+	 		setTags: setTags,
+	 		untag: untag
 	 	};
 	}])	
 	.service('FilterList', [function() {

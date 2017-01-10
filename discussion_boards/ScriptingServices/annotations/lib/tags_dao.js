@@ -4,22 +4,21 @@
 "use strict";
 
 var database = require("db/database");
-//var userLib = require("net/http/user");
 
 var datasource = database.getDatasource();
 
 var persistentProperties = {
-	mandatory: ["idmu_id", "uname"],
-	optional: ["pic"]
+	mandatory: ["ann_id"],
+	optional: ["defaultLabel", "uri"]
 };
 
 var $log = require("logging/lib/logger").logger;
-$log.ctx = "User DAO";
+$log.ctx = "Tags DAO";
 
 // Parse JSON entity into SQL and insert in db. Returns the new record id.
-exports.insert = function(entity, cascaded) {
+exports.insert = function(entity) {
 
-	$log.info('Inserting IDM_USER entity cascaded['+cascaded+']');
+	$log.info('Inserting ANN_TAG entity');
 
 	if(entity === undefined || entity === null){
 		throw new Error('Illegal argument: entity is ' + entity);
@@ -27,39 +26,35 @@ exports.insert = function(entity, cascaded) {
 	
 	for(var i = 0; i< persistentProperties.mandatory.length; i++){
 		var propName = persistentProperties.mandatory[i];
-		if(propName==='idmu_id')
+		if(propName==='ann_id')
 			continue;//Skip validaiton check for id. It's epxected to be null on insert.
 		var propValue = entity[propName];
 		if(propValue === undefined || propValue === null){
-			throw new Error('Illegal ' + propName + ' attribute value in IDM_USER entity for insert: ' + propValue);
+			throw new Error('Illegal ' + propName + ' attribute value in DIS_BOARD entity for insert: ' + propValue);
 		}
-	}
-
-	if(cascaded === undefined || cascaded === null){
-		cascaded = false;
 	}
 
     entity = createSQLEntity(entity);
 
     var connection = datasource.getConnection();
     try {
-        var sql = "INSERT INTO IDM_USER (";
-        sql += "IDMU_ID, IDMU_UNAME, IDMU_PIC) "; 
+        var sql = "INSERT INTO ANN_TAG (";
+        sql += "ANN_ID, ANN)DEFAULT_LABEL, ANN_URI) "; 
         sql += "VALUES (?,?,?)";
 
         var statement = connection.prepareStatement(sql);
         
-        i = 0;
-        entity.idmu_id = datasource.getSequence('IDM_USER_IDMU_ID').next();
-        statement.setInt(++i,  entity.idmu_id);
-        statement.setString(++i, entity.uname);        
-        statement.setString(++i, entity.pic);        
-        
+        var i = 0;
+        entity.disb_id = datasource.getSequence('ANN_TAGS_ANN_ID').next();
+        statement.setLong(++i,  entity.ann_id);
+        statement.setString(++i, entity.defaultLabel);        
+        statement.setString(++i, entity.uri);
+
         statement.executeUpdate();
 
-        $log.info('IDM_USER entity inserted with id[' +  entity.idmu_id + ']');
+        $log.info('ANN_TAG entity inserted with id[' +  entity.disb_id + ']');
 
-        return entity.idmu_id;
+        return entity.ann_id;
 
     } catch(e) {
 		e.errContext = sql;
@@ -72,7 +67,7 @@ exports.insert = function(entity, cascaded) {
 // Reads a single entity by id, parsed into JSON object 
 exports.find = function(id) {
 
-	$log.info('Finding IDM_USER entity with id[' + id + ']');
+	$log.info('Finding ANN_TAG entity with id[' + id + ']');
 
 	if(id === undefined || id === null){
 		throw new Error('Illegal argument for id parameter:' + id);
@@ -81,15 +76,14 @@ exports.find = function(id) {
     var connection = datasource.getConnection();
     try {
         var entity;
-        var sql = "SELECT * FROM IDM_USER WHERE " + exports.pkToSQL();
+        var sql = "SELECT * FROM ANN_TAG WHERE " + exports.pkToSQL();
+     
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, id);
+        statement.setLong(1, id);
 
         var resultSet = statement.executeQuery();
         if (resultSet.next()) {
         	entity = createEntity(resultSet);
-			if(entity)
-            	$log.info('IDM_USER entity with id[' + id + '] found');
         } 
         return entity;
     } catch(e) {
@@ -100,10 +94,41 @@ exports.find = function(id) {
     }
 };
 
-// Read all entities, parse and return them as an array of JSON objets
-exports.list = function(limit, offset, sort, order, expanded, username) {
+// Reads a single entity by id, parsed into JSON object 
+exports.findByTagValue = function(tag) {
 
-	$log.info('Listing IDM_USER entity collection expanded['+expanded+'] with list operators: limit['+limit+'], offset['+offset+'], sort['+sort+'], order['+order+'], entityName['+username+']');
+	$log.info('Finding ANN_TAG entity with tag[' + tag + ']');
+
+	if(tag=== undefined || tag === null){
+		throw new Error('Illegal argument for tag parameter:' + tag);
+	}
+
+    var connection = datasource.getConnection();
+    try {
+        var entity;
+        var sql = "SELECT * FROM ANN_TAG WHERE TAG = ?";
+     
+        var statement = connection.prepareStatement(sql);
+        statement.setLong(1, tag);
+
+        var resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+        	entity = createEntity(resultSet);
+        } 
+        return entity;
+    } catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
+};
+
+
+// Read all entities, parse and return them as an array of JSON objets
+exports.list = function(limit, offset, sort, order, expanded, tag) {
+
+	$log.info('Listing ANN_TAG entity collection expanded['+expanded+'] with list operators: limit['+limit+'], offset['+offset+'], sort['+sort+'], order['+order+'], tag['+tag+']');
 	
     var connection = datasource.getConnection();
     try {
@@ -112,10 +137,9 @@ exports.list = function(limit, offset, sort, order, expanded, username) {
         if (limit !== null && offset !== null) {
             sql += " " + datasource.getPaging().genTopAndStart(limit, offset);
         }
-        
-        sql += " * FROM IDM_USER";
-        if (username !== undefined && username !== null) {
-        	sql += " WHERE IDMU_UNAME LIKE '" + username + "%%'";
+        sql += " * FROM ANN_TAG";
+        if (tag !== undefined && tag !== null) {
+        	sql += " WHERE DEFAULT_LABEL LIKE '" + tag + "%%'";
     	}
         if (sort !== undefined && sort !== null) {
             sql += " ORDER BY " + sort;
@@ -134,7 +158,7 @@ exports.list = function(limit, offset, sort, order, expanded, username) {
             entities.push(entity);
         }
         
-        $log.info('' + entities.length +' IDM_USER entities found');
+        $log.info('' + entities.length +' ANN_TAG entities found');
         
         return entities;
     }  catch(e) {
@@ -148,16 +172,17 @@ exports.list = function(limit, offset, sort, order, expanded, username) {
 //create entity as JSON object from ResultSet current Row
 function createEntity(resultSet) {
     var entity = {};
-	entity.idmu_id = resultSet.getInt("IDMU_ID");
-    entity.uname = resultSet.getString("IDMU_UNAME");
-   	entity.pic = resultSet.getString("IDMU_PIC");
+	entity.ann_id = resultSet.getLong("ANN_ID");
+    entity.defaultLabel = resultSet.getString("ANN_DEFAULT_LABEL");	
+    entity.uri = resultSet.getString("ANN_URI");    
 	for(var key in Object.keys(entity)){
 		if(entity[key] === null)
 			entity[key] = undefined;
-	}
+	}	
     $log.info("Transformation from DB JSON object finished");
     return entity;
 }
+
 
 //Prepare a JSON object for insert into DB
 function createSQLEntity(entity) {
@@ -171,7 +196,8 @@ function createSQLEntity(entity) {
 		} else {
 			persistentItem[persistentProperties.optional[i]] = null;
 		}
-	}
+	}	
+		
 	$log.info("Transformation to DB JSON object finished");
 	return persistentItem;
 }
@@ -179,7 +205,7 @@ function createSQLEntity(entity) {
 // update entity from a JSON object. Returns the id of the updated entity.
 exports.update = function(entity) {
 
-	$log.info('Updating IDM_USER entity with id[' + entity!==undefined?entity.idmu_id:entity + ']');
+	$log.info('Updating ANN_TAG entity with id[' + entity!==undefined?entity.disb_id:entity + ']');
 
 	if(entity === undefined || entity === null){
 		throw new Error('Illegal argument: entity is ' + entity);
@@ -189,29 +215,30 @@ exports.update = function(entity) {
 		var propName = persistentProperties.mandatory[i];
 		var propValue = entity[propName];
 		if(propValue === undefined || propValue === null){
-			throw new Error('Illegal ' + propName + ' attribute value in IDM_USER entity for update: ' + propValue);
+			throw new Error('Illegal ' + propName + ' attribute value in ANN_TAG entity for update: ' + propValue);
 		}
 	}
 	
 	entity = createSQLEntity(entity);
-
+	
     var connection = datasource.getConnection();
     try {
-        var sql = "UPDATE IDM_USER SET IDMU_UNAME=?, IDMU_PIC=? WHERE IDMU_ID=?";
+    
+        var sql = "UPDATE ANN_TAG";
+        sql += " SET ANN_DEFAULT_LABEL=?, ANN_URI=?"; 
+        sql += " WHERE ANN_ID = ?";
         var statement = connection.prepareStatement(sql);
-        
-        var i=0;
-		statement.setString(++i, entity.uname);
-		statement.setString(++i, entity.pic);
-       	var id = entity.idmu_id;
-	    statement.setInt(++i, id);
-	    
+        var i = 0;
+        statement.setString(++i, entity.defaultLabel);        
+        statement.setString(++i, entity.uri);
+        var id = entity.ann_id;
+        statement.setLong(++i, id);
         statement.executeUpdate();
             
-        $log.info('IDM_USER entity with idmu_id[' + id + '] updated');
-                
+        $log.info('ANN_TAG entity with disb_id[' + id + '] updated');
+        
         return this;
-
+        
     } catch(e) {
 		e.errContext = sql;
 		throw e;
@@ -221,14 +248,14 @@ exports.update = function(entity) {
 };
 
 // delete entity by id. Returns the id of the deleted entity.
-exports.remove = function(id, cascaded) {
+exports.remove = function(id) {
 
-	$log.info('Deleting IDM_USER entity with id[' + id + '], cascaded['+cascaded+']');
+	$log.info('Deleting ANN_TAG entity with id[' + id + ']');
 
     var connection = datasource.getConnection();
     try {
     
-    	var sql = "DELETE FROM IDM_USER";
+    	var sql = "DELETE FROM ANN_TAG";
     	
     	if(id !== null){
     	 	sql += " WHERE " + exports.pkToSQL();
@@ -245,7 +272,7 @@ exports.remove = function(id, cascaded) {
         }
         statement.executeUpdate();
                 
-        $log.info('IDM_PIC entity with idmp_id[' + id + '] deleted');                
+        $log.info('ANN_TAG entity with ann_id[' + id + '] deleted');                
         
         return this;
 
@@ -259,12 +286,12 @@ exports.remove = function(id, cascaded) {
 
 exports.count = function() {
 
-	$log.info('Counting IDM_USER entities');
+	$log.info('Counting ANN_TAG entities');
 
     var count = 0;
     var connection = datasource.getConnection();
     try {
-    	var sql = 'SELECT COUNT(*) FROM IDM_USER';
+    	var sql = 'SELECT COUNT(*) FROM ANN_TAG';
         var statement = connection.prepareStatement(sql);
         var rs = statement.executeQuery();
         if (rs.next()) {
@@ -277,7 +304,7 @@ exports.count = function() {
         connection.close();
     }
     
-    $log.info('' + count + ' IDM_USER entities counted');
+    $log.info('' + count + ' ANN_TAG entities counted');
 
     return count;
 };
@@ -285,7 +312,7 @@ exports.count = function() {
 exports.getPrimaryKeys = function() {
     var result = [];
     var i = 0;
-    result[i++] = 'IDMU_ID';
+    result[i++] = 'ANN_ID';
     if (result === 0) {
         throw new Error("There is no primary key");
     } else if(result.length > 1) {

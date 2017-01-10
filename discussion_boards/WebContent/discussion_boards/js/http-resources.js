@@ -38,6 +38,16 @@
 	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/visit', {}, 
 	  			{update: {method:'PUT', params:{}, isArray:false, ignoreLoadingBar: true}});
 	}])		
+	.service('BoardTags', ['$resource', function($resource) {
+	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/tags', {}, 
+	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}},
+	  			{remove: {method:'DELETE', params:{}, isArray:true, ignoreLoadingBar: true}},
+	  			{save: {method:'POST', params:{}, isArray:true, ignoreLoadingBar: true}});
+	}])	
+	.service('BoardCommentsTimeline', ['$resource', '$log', function($resource) {
+	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/comments/timeline', {}, 
+	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
+	}])	
 	.service('$Comment', ['$resource', '$log', function($resource, $log) {
 	 	return $resource('../../js/discussion_boards/svc/comment.js/:commentId', { commentId:'@disc_id' }, {
 			    save: {

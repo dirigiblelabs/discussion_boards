@@ -12,7 +12,7 @@ var persistentProperties = {
 	optional: ["text", "user", "publishTime", "lastModifiedTime", "reply_to_disc_id"]
 };
 
-var $log = require("discussion_boards/lib/logger").logger;
+var $log = require("logging/lib/logger").logger;
 $log.ctx = "Comment DAO";
 
 // Parse JSON entity into SQL and insert in db. Returns the new record id.
@@ -116,7 +116,7 @@ exports.findComments = function(boardId, expanded) {
     var connection = datasource.getConnection();
     try {
         var items = [];
-        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE DISC_DISB_ID=?";
+        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE DISC_DISB_ID=? AND DISC_REPLY_TO_DISC_ID IS NULL";
         var statement = connection.prepareStatement(sql);
         statement.setInt(1, boardId);
         
@@ -159,6 +159,58 @@ exports.findReplies = function(boardId, commentId) {
         }
         
         $log.info('' + items.length +'  DIS_COMMENT entities in reply to DIS_COMMENT entity with id[' + commentId + '] for DIS_BOARD entity with id['+boardId+'] found');
+        
+        return items;
+
+    } catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
+};
+
+exports.findDiscussionPosts = function(boardId, flat) {
+
+	$log.info('Finding DIS_COMMENT entities for DIS_BOARD entity with id[' + boardId + ']');
+
+    var connection = datasource.getConnection();
+    try {
+        var items = [];
+        var sql = "SELECT * FROM DIS_COMMENT LEFT JOIN IDM_USER AS u ON DISC_USER = u.IDMU_UNAME WHERE DISC_DISB_ID=? ORDER BY ";
+        
+        if(!flat){
+        	sql += "DISC_REPLY_TO_DISC_ID,";
+        }
+        
+        sql += "DISC_PUBLISH_TIME";
+                
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, boardId);
+        
+        var resultSet = statement.executeQuery();
+		while (resultSet.next()) {
+			var item = createEntity(resultSet);
+			if(!flat){
+				if(item.reply_to_disc_id !== undefined){
+					items.map(function(_it){
+						if(item.reply_to_disc_id === _it.disc_id){
+							if(!_it.replies)
+								_it.replies = [];
+							_it.replies.push(item);
+						}
+						return _it;
+					});
+				} else {
+					items.push(item);
+				}
+			} else {
+				items.push(item);
+			}
+           	item.replies = exports.findReplies(boardId, item.disc_id);
+        }
+        
+        $log.info('' + items.length +' DIS_COMMENT entities in reply to DIS_BOARD entity with id['+boardId+'] found');
         
         return items;
 
