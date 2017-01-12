@@ -72,7 +72,7 @@
 			});
 	}])
 	.service('$LoggedUser', ['$resource', '$log', function($resource) {
-		var UserSvc =  $resource('../../js/idm/svc/user.js/$current', {}, 
+		var UserSvc =  $resource('../../js/usr/svc/user.js/$current', {}, 
 	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
 	  	var get = function(){
 		  	return UserSvc.get().$promise;
@@ -82,7 +82,7 @@
 	  	};
 	}])
 	.service('$UserImg', ['$resource', '$log', function($resource) {
-		var UserSvc = $resource('../../js/idm/svc/user.js/$pics/:userName', {}, 
+		var UserSvc = $resource('../../js/usr/svc/user.js/$pics/:userName', {}, 
 	  					{get: {method:'GET', params:{}, isArray:false, cache: true, ignoreLoadingBar: true}});
 		var get = function(userName){
 		  	return UserSvc.get({"userName":userName}).$promise
