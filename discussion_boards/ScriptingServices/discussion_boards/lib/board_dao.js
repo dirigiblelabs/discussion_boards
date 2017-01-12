@@ -236,8 +236,8 @@ function createEntity(resultSet) {
 	entity.disb_id = resultSet.getInt("DISB_ID");
     entity.shortText = resultSet.getString("DISB_SHORT_TEXT");	
     entity.description = resultSet.getString("DISB_DESCRIPTION");
-    entity.user = resultSet.getString("IDMU_UNAME");
-   	entity.user_pic = resultSet.getString("IDMU_PIC");
+    entity.user = resultSet.getString("USRU_UNAME");
+   	entity.user_pic = resultSet.getString("USRU_PIC");
    	entity.status = resultSet.getString("DISB_STATUS");
     entity.visits = resultSet.getString("DISB_VISITS");
     

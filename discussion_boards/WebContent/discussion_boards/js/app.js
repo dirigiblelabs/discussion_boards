@@ -211,7 +211,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							getUserPicture(user)
 							.then(function(pic){
 								if(pic){
-									self.pix[user] = "/services/js/idm/svc/user.js/$pics/"+user;
+									self.pix[user] = "/services/js/usr/svc/user.js/$pics/"+user;
 								}
 							});
 						}

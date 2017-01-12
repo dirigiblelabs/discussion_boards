@@ -90,7 +90,7 @@
           		return data.map(function(boardData){
           			var board = formatEntity(boardData);
           			board.userDetails = {
-						avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
+						avatar: "/services/js/usr/svc/user.js/$pics/"+board.user 
 					};
 					$UserImg.get(board.user)
 					.then(function(image){
@@ -107,7 +107,7 @@
 			.then(function(board){
 	      		board = formatEntity(board);
 	      		board.userDetails = {
-					avatar: "/services/js/idm/svc/user.js/$pics/"+board.user 
+					avatar: "/services/js/usr/svc/user.js/$pics/"+board.user 
 				};
 				$UserImg.get(board.user)
 				.then(function(image){
