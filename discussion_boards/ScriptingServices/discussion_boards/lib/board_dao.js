@@ -16,7 +16,7 @@ var persistentProperties = {
 	optional: ["shortText", "description", "publishTime", "lastModifiedTime", "status", "user"]
 };
 
-var $log = require("logging/lib/logger").logger;
+var $log = require("logging/logger").logger;
 $log.ctx = "Board DAO";
 
 // Parse JSON entity into SQL and insert in db. Returns the new record id.

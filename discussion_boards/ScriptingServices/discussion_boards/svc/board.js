@@ -113,7 +113,7 @@
 		        	throw e;
 				}		
 			}
-		}		
+		}
 	};
 	
 	var board = new Board(boardDAO);	

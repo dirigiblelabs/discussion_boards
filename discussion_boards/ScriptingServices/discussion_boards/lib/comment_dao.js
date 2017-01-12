@@ -12,7 +12,7 @@ var persistentProperties = {
 	optional: ["text", "user", "publishTime", "lastModifiedTime", "reply_to_disc_id"]
 };
 
-var $log = require("logging/lib/logger").logger;
+var $log = require("logging/logger").logger;
 $log.ctx = "Comment DAO";
 
 // Parse JSON entity into SQL and insert in db. Returns the new record id.
