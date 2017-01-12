@@ -17,6 +17,11 @@
 	        "type":"git",
 	        "url":"https://github.com/dirigiblelabs/core_users.git",
 	        "branch":"master"
+    	}, {
+    	    "guid":"tags",
+	        "type":"git",
+	        "url":"https://github.com/dirigiblelabs/tags.git",
+	        "branch":"master"
     	}
 	]
 }
