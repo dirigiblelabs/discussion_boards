@@ -13,7 +13,7 @@
             "url": "https://github.com/dirigiblelabs/arestme.git",
             "branch":"master"
     	}, {
-    	    "guid":"цоре_усерс",
+    	    "guid":"core_users",
 	        "type":"git",
 	        "url":"https://github.com/dirigiblelabs/core_users.git",
 	        "branch":"master"
