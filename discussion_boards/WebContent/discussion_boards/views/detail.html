@@ -2,7 +2,7 @@
 
 	<div class="left-compartment">
 		<div class="user-box" style="">
-			<img ng-if="detailsVm.board.userDetails.avatar" src="{{detailsVm.board.userDetails.avatar}}" class="user-pic"/>
+			<img ng-if="detailsVm.board.userDetails.avatar" ng-src="{{detailsVm.board.userDetails.avatar}}" class="user-pic"/>
 			<i ng-if="!detailsVm.board.userDetails.avatar" class="glyphicon glyphicon-user user-pic"></i>
 			<span ng-bind="detailsVm.board.user" class="user-name"></span>
 		</div>
@@ -50,12 +50,12 @@
 			<span class="rating-number">{{detailsVm.board.ratingShort}}</span>
 			<span class="votes-number">{{detailsVm.board.totalVotesShort}} Votes</span>
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;">
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="detailsVm.canVote()">
 			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
 			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.upvotesShort}}</span>
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;">
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="detailsVm.canVote()">
 			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
 			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.downvotesShort}}</span>									

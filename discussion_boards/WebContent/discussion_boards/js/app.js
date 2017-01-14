@@ -88,13 +88,20 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					} else {
 						return;
 					}
-				}]
+				}],
+				loggedUser: ['$LoggedUser', function($LoggedUser){
+					return $LoggedUser.get()
+						.then(function(user){
+							return user;
+						});	
+				}]				
 			},
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', function($state, $stateParams, $log, $Boards, $DBoardVisits, board){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, board, loggedUser){
 						this.board = board;
+						this.loggedUser = loggedUser;
 						var self = this;
 						
 						try{
@@ -124,6 +131,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							.then(function(vote){
 								self.currentUserVote = vote;
 							});
+						};
+						
+						this.canVote = function(){
+/*							if(this.loggedUser === this.board.user)
+								return false;*/
+							return true;
 						};
 						
 						this.openBoardForEdit = function(){

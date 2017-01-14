@@ -273,20 +273,32 @@ exports.vote = function(disb_id, user, vote){
 	if(vote===0 || vote === undefined)
 		throw Error('Illegal Argument: vote cannot be 0 or undefined');
 
+	var previousVote = exports.getVote(disb_id, user);
+
 	var connection = datasource.getConnection();
     try {
-        var sql = "INSERT INTO DIS_BOARD_VOTE (";
-        sql += "DISV_ID, DISV_DISB_ID, DISV_USER, DISV_VOTE) "; 
-        sql += "VALUES (?,?,?,?)";
-
-        var statement = connection.prepareStatement(sql);
-        
-        var i = 0;
-        var disv_id = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
-        statement.setInt(++i, disv_id);
-        statement.setInt(++i, disb_id);        
-        statement.setString(++i, user);        
-        statement.setShort(++i, vote);
+    	var sql;
+    	if(previousVote === undefined || previousVote === null || previousVote === 0){
+    		//Operations is INSERT
+	        sql = "INSERT INTO DIS_BOARD_VOTE (DISV_ID, DISV_DISB_ID, DISV_USER, DISV_VOTE) VALUES (?,?,?,?)";
+	        var statement = connection.prepareStatement(sql);
+	        
+	        var i = 0;
+	        var disv_id = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
+	        statement.setInt(++i, disv_id);
+	        statement.setInt(++i, disb_id);
+	        statement.setString(++i, user);        
+	        statement.setShort(++i, vote);	        
+		} else {
+    		//Operations is UPDATE
+	        sql = "UPDATE DIS_BOARD_VOTE SET DISV_VOTE=? WHERE DISV_DISB_ID=? AND DISV_USER=?";
+	        var statement = connection.prepareStatement(sql);
+	        
+	        var i = 0;
+	       	statement.setShort(++i, vote);
+	        statement.setInt(++i, disb_id);
+	        statement.setString(++i, user);        
+		}
 	    
 	    statement.executeUpdate();
     	
