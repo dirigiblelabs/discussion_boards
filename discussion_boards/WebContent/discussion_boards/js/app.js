@@ -133,10 +133,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							});
 						};
 						
-						this.canVote = function(){
-/*							if(this.loggedUser === this.board.user)
-								return false;*/
-							return true;
+						this.isAuthor = function(){
+							return this.loggedUser.uname === this.board.user;
 						};
 						
 						this.openBoardForEdit = function(){
