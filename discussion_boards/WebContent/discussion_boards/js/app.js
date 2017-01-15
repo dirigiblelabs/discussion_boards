@@ -113,9 +113,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						} catch(err){$log.error(err);}
 						
 						if($stateParams.timeline){
-							$state.go('list.entity.discussion-timeline', {boardId: self.board.disb_id, board:self.board}); 
+							$state.go('list.entity.discussion-timeline', {boardId: self.board.disb_id, board:self.board, timeline:true}); 
 						} else {
-							$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board});  	
+							$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board, timeline:false});  	
 						}
 						
 						this.saveVote = function(vote){

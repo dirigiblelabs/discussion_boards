@@ -22,7 +22,7 @@
 		  </div>
         </timeline-heading>
 		<p ng-if="vm.comment !== comment || vm.replyEdit" ng-bind-html="comment.text" style="font-size: 1.1em"></p>
-		<div ng-if="vm.comment === comment && !vm.replyEdit"> 
+		<div ng-if="!vm.board.locked && vm.comment === comment && !vm.replyEdit"> 
 			<textarea class="form-control" ng-model="vm.comment.text" style="width:100%; margin-bottom:3px" ck-editor></textarea>
 			<div class="button-group" style="margin: 5px 0;">
 				<button class="btn btn-primary" ng-click="vm.postComment()" ng-disabled="!vm.comment.text">Post</button>
@@ -30,14 +30,14 @@
 			</div>
 		</div>		
         <timeline-footer>
-			<a href ng-if="!vm.commentEdit" style="align-self:flex-end" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+			<a href ng-if="!vm.board.locked && !vm.commentEdit" style="align-self:flex-end" ng-click="vm.openCommentForEdit(comment)">Edit</a>
         </timeline-footer>
       </timeline-panel>
     </timeline-event>
   </timeline>
 </div>
 
-<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="!vm.commentEdit && !vm.replyEdit">
+<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="!vm.board.locked && !vm.commentEdit && !vm.replyEdit">
 	<span style="font-size: 1em;font-weight:bold; margin-bottom: 5px">Leave a comment</span>
 	<form>
 	  <div class="form-group">
