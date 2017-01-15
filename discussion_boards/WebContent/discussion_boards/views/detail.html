@@ -38,6 +38,7 @@
 		</div>		
 
 		<div class="tools" ng-if="!detailsVm.descriptionEdit">
+			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.toggleLock()" href title="{{detailsVm.board.locked?'locked':'unlocked'}}"><i ng-if="!detailsVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="detailsVm.board.locked" class="fa fa-lock"></i></a>
 			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.openBoardForEdit()" href>Edit</a> 
 		</div>
 

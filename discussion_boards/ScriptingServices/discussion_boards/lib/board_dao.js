@@ -240,6 +240,7 @@ function createEntity(resultSet) {
    	entity.user_pic = resultSet.getString("USRU_PIC");
    	entity.status = resultSet.getString("DISB_STATUS");
     entity.visits = resultSet.getString("DISB_VISITS");
+    entity.locked = resultSet.getShort("DISB_LOCKED")>0?true:false;
     
     entity.publishTime = resultSet.getLong("DISB_PUBLISH_TIME");
     entity.publishTime = new Date(entity.publishTime).toISOString();
@@ -327,6 +328,12 @@ function createSQLEntity(entity) {
 			persistentItem[persistentProperties.optional[i]] = null;
 		}
 	}	
+
+	if(entity.locked === false){
+		persistentItem.locked = 0;
+	} else {
+		persistentItem.locked = 1;
+	}
 	
 	if(entity.publishTime){
 		persistentItem.publishTime = new Date(entity.publishTime).getTime();
@@ -362,7 +369,7 @@ exports.update = function(entity) {
     try {
     
         var sql = "UPDATE DIS_BOARD";
-        sql += " SET DISB_SHORT_TEXT=?, DISB_DESCRIPTION=?, DISB_USER=?, DISB_LASTMODIFIED_TIME=?, DISB_STATUS=?"; 
+        sql += " SET DISB_SHORT_TEXT=?, DISB_DESCRIPTION=?, DISB_USER=?, DISB_LASTMODIFIED_TIME=?, DISB_STATUS=?, DISB_LOCKED=?"; 
         sql += " WHERE DISB_ID = ?";
         var statement = connection.prepareStatement(sql);
         var i = 0;
@@ -370,7 +377,8 @@ exports.update = function(entity) {
         statement.setString(++i, entity.description);
         statement.setString(++i, entity.user);
         statement.setLong(++i, Date.now());
-        statement.setString(++i, entity.status);        
+        statement.setString(++i, entity.status);
+        statement.setShort(++i, entity.locked);        
         var id = entity.disb_id;
         statement.setInt(++i, id);
         statement.executeUpdate();
@@ -601,6 +609,66 @@ exports.untag = function(disb_id, tags){
 	    	
 	    	$log.info('DIS_BOARD_TAG entity with id[' +  entityToRemove.disbt_id+ '] relation to DIS_BOARD entity with id['+disb_id+'] removed');
 		}
+	} catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
+
+};
+
+exports.lock = function(disb_id){
+    $log.info('Locking board entity DIS_BOARD[' +  disb_id+ ']');
+	var connection = datasource.getConnection();
+	try{
+		var sql =  "UPDATE DIS_BOARD SET DISB_LOCKED=1 WHERE DISB_ID=?";
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, disb_id);	    
+	    statement.executeUpdate();
+    	$log.info('Board entity DIS_BOARD[' +  disb_id+ '] locked');
+	} catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
+
+};
+
+exports.unlock = function(disb_id){
+    $log.info('Unlocking board entity DIS_BOARD[' +  disb_id+ ']');
+	var connection = datasource.getConnection();
+	try{
+		var sql = "UPDATE DIS_BOARD SET DISB_LOCKED=0 WHERE DISB_ID=?";
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, disb_id);	    
+	    statement.executeUpdate();
+    	$log.info('Board entity DIS_BOARD[' +  disb_id+ '] unlocked');
+	} catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }
+
+};
+
+exports.isLocked = function(disb_id){
+    $log.info('Checking board entity DIS_BOARD[' +  disb_id+ '] for lock state');
+	var connection = datasource.getConnection();
+	try{
+		var sql = "SELECT DISB_LOCKED FROM DIS_BOARD WHERE DISB_ID=?";
+        var statement = connection.prepareStatement(sql);
+        statement.setInt(1, disb_id);
+        var resultSet = statement.executeQuery();
+        
+        var isLocked = false;
+        if (resultSet.next()) {
+        	isLocked = resultSet.getShort('DISB_LOCKED')===1;
+        }
+        $log.info('Board entity DIS_BOARD[' +  disb_id+ '] lock state checked');
+        return isLocked;
 	} catch(e) {
 		e.errContext = sql;
 		throw e;

@@ -153,6 +153,15 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.cancelEdit = function(){
 							delete self.descriptionEdit;
 						};
+						
+						this.toggleLock = function(){
+							var op = self.board.locked?'unlock':'lock';
+							$Boards[op].apply(self, [self.board])
+							.then(function(){
+								$stateParams.board = self.board;
+								$state.go($state.$current, $stateParams);
+							});
+						};
 
 					}],
 					controllerAs: 'detailsVm'				

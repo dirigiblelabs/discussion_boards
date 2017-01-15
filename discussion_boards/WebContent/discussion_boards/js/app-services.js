@@ -146,6 +146,14 @@
 		};
 		var untag = function(board, tags){
 			return BoardTags.remove({"boardId": board.disb_id}, tags).$promise;
+		};
+		var lock = function(board){
+			board.locked = true;
+			return Board.update({"boardId": board.disb_id}, board).$promise;
+		};		
+		var unlock = function(board){
+			board.locked = false;
+			return Board.update({"boardId": board.disb_id}, board).$promise;
 		};		
 	 	return {
 	 		list: list,
@@ -155,7 +163,9 @@
 	 		saveVote: saveVote,
 	 		getTags: getTags,
 	 		setTags: setTags,
-	 		untag: untag
+	 		untag: untag,
+	 		lock: lock,
+	 		unlock:unlock
 	 	};
 	}])	
 	.service('FilterList', [function() {
