@@ -162,6 +162,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								$state.go($state.$current, $stateParams);
 							});
 						};
+						
+						this.remove = function(){
+							$Boards.remove(self.board)
+							.then(function(){
+								$state.go('list');
+							});
+						};
 
 					}],
 					controllerAs: 'detailsVm'				

@@ -123,6 +123,9 @@
 	      		return formatEntity(board);
 			});
 		};	
+		var remove = function(board){
+			return Board.remove({boardId: board.disb_id, cascaded:true}).$promise;
+		};		
 		var saveVote = function(board, v){
 			return BoardVote.save({"boardId": board.disb_id}, {"vote":v}).$promise
 			.then(function(){
@@ -159,6 +162,7 @@
 	 		list: list,
 	 		get :get,
 	 		update: update,
+	 		remove: remove,
 	 		getVote: getVote,
 	 		saveVote: saveVote,
 	 		getTags: getTags,

@@ -398,13 +398,12 @@ exports.update = function(entity) {
 // delete entity by id. Returns the id of the deleted entity.
 exports.remove = function(id, cascaded) {
 
-	$log.info('Deleting DIS_BOARD entity with id[' + id + '], cascaded['+cascaded+']');
+	$log.info('Deleting DIS_BOARD[' + id + '] with params cascaded['+cascaded+']');
 
     var connection = datasource.getConnection();
     try {
     
     	var sql = "DELETE FROM DIS_BOARD";
-    	
     	if(id !== null){
     	 	sql += " WHERE " + exports.pkToSQL();
     	 	if(id.constructor === Array){
@@ -413,21 +412,21 @@ exports.remove = function(id, cascaded) {
     	 		" = "  + id;
     	 	}
 		}
-
         var statement = connection.prepareStatement(sql);
         if(id!==null && id.constructor !== Array){
         	statement.setString(1, id);
         }
         statement.executeUpdate();
-        
-		if(cascaded===true && id!==null){
+
+		if(cascaded && id!==null){
 			var dependentItems = commentsLib.list(id);
+			$log.info('Deleting DIS_BOARD['+id+'] entity\'s '+dependentItems.length+' dependent posts');
 			for(var i = 0; i < dependentItems.length; i++) {
-        		commentsLib.remove(dependentItems[i].boi_id);
+        		commentsLib.remove(dependentItems[i].disc_id);
 			}
 		}        
         
-        $log.info('DIS_BOARD entity with disb_id[' + id + '] deleted');                
+        $log.info('DIS_BOARD[' + id + '] entity deleted');                
         
         return this;
 

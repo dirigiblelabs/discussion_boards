@@ -6,7 +6,7 @@
 			
 			<div class="left-compartment">
 				<div class="user-box" style="">
-					<img ng-if="board.userDetails.avatar" src="{{board.userDetails.avatar}}" class="user-pic"/>
+					<img ng-if="board.userDetails.avatar" ng-src="{{board.userDetails.avatar}}" class="user-pic"/>
 					<i ng-if="!board.userDetails.avatar" class="glyphicon glyphicon-user user-pic"></i>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
