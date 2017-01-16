@@ -10,6 +10,9 @@
 	var Board = arester.asRestAPI(boardDAO);
 	Board.prototype.logger.ctx = "Board Svc";
 	
+	Board.prototype.boardVotes = require("discussion_boards/lib/board_votes");
+	Board.prototype.boardTags = require("discussion_boards/lib/board_tags");
+	
 	Board.prototype.cfg["{id}/comments/timeline"] = {
 		"get" : {
 			handler: function(context, io){
@@ -47,10 +50,9 @@
 	
 	Board.prototype.cfg["{id}/vote"] = {
 		"get": {
-			consumes: ["application/json"],
 			handler: function(context, io){
 			    try{
-					var vote = this.dao.getVote(context.pathParams.id, userLib.getName());
+					var vote = this.boardVotes.getVote(context.pathParams.id, userLib.getName());
 					io.response.setStatus(io.response.OK);
 					io.response.println(JSON.stringify({"vote": vote}));
 				} catch(e) {
@@ -67,7 +69,7 @@
 				var input = io.request.readInputText();
 			    try{
 			    	var entity = JSON.parse(input);
-					this.dao.vote(context.pathParams.id, userLib.getName(), entity.vote);
+					this.boardVotes.vote(context.pathParams.id, userLib.getName(), entity.vote);
 					io.response.setStatus(io.response.OK);
 				} catch(e) {
 		    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
@@ -81,10 +83,9 @@
 	
 	Board.prototype.cfg["{id}/tags"] = {
 		"get": {
-			consumes: ["application/json"],
 			handler: function(context, io){
 			    try{
-					var tags = this.dao.listBoardTags(context.pathParams.id);
+					var tags = this.boardTags.listBoardTags(context.pathParams.id);
 					io.response.setStatus(io.response.OK);
 					io.response.println(JSON.stringify(tags));
 				} catch(e) {
@@ -104,7 +105,7 @@
 			    	if(!Array.isArray(tags)){
 			    		tags = [tags];
 			    	}
-					this.dao.tag(context.pathParams.id, tags, true);
+					this.boardTags.tag(context.pathParams.id, tags, true);
 					io.response.setStatus(io.response.OK);
 				} catch(e) {
 		    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;

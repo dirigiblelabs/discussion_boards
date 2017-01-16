@@ -20,50 +20,52 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		
 		$stateProvider	
 		.state('list', {
-			  url: "/",
-		      views: {
-		      	"@": {
-		              templateUrl: 'views/master.html',
-		              controller: ['$Boards', '$log', 'FilterList', function($Boards, $log, FilterList){
-		              
-		              	this.list = [];
-		              	this.filterList = FilterList;
-		              	var self = this;
-		              	
-						$Boards.list()
-						.then(function(data){
-							self.list = data;
+			url: "/",
+			resolve: {
+				loggedUser: ['$LoggedUser', '$log', function($LoggedUser, $log){
+					return $LoggedUser.get()
+						.then(function(user){
+							return user;
 						})
-		              	.catch(function(err){
-		              		$log.error(err);
-		              		throw err;
-		              	});
-		              	
-						this.saveVote = function(board, vote){
-							$Boards.saveVote(board, vote)
-							.then(function(data){
-								$log.info("voted: " + vote);
-								self.list = self.list.map(function(b){
-									if(b.disb_id === data.disb_id)
-										return data;
-									else
-										return b;
-								});
-							});
-						};
-						
-		              }],
-		              controllerAs: 'masterVm'
-		      	},
-		      	"toolbar@": {
-		              templateUrl: 'views/toolbar.html',
-		              controller: ['FilterList', function(FilterList){
-		              	this.filterList = FilterList;
-		              }],
-		              controllerAs: 'toolbarVm'
-		      	}
-		      }
-		    })
+						.catch(function(err){
+							$log.error(err);
+							if(err.status && err.status===404)
+								$log.info('No user to authenticate. Sign in first.');
+							return;
+						});	
+				}]				
+			},			  
+		  views: {
+		  	"@": {
+		          templateUrl: 'views/master.html',
+		          controller: ['$Boards', '$log', 'FilterList', 'loggedUser', function($Boards, $log, FilterList){
+		          
+		          	this.list = [];
+		          	this.filterList = FilterList;
+		          	var self = this;
+		          	
+					$Boards.list()
+					.then(function(data){
+						self.list = data;
+					})
+		          	.catch(function(err){
+		          		$log.error(err);
+		          		throw err;
+		          	});
+
+		          }],
+		          controllerAs: 'masterVm'
+		  	},
+		  	"toolbar@": {
+		          templateUrl: 'views/toolbar.html',
+		          controller: ['FilterList', 'loggedUser', function(FilterList, loggedUser){
+		          	this.filterList = FilterList;
+		          	this.loggedUser = loggedUser;
+		          }],
+		          controllerAs: 'toolbarVm'
+		  	}
+		  }
+		})
 		.state('list.entity', {
 			url: "{boardId}",
 			params: {
@@ -88,12 +90,6 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					} else {
 						return;
 					}
-				}],
-				loggedUser: ['$LoggedUser', function($LoggedUser){
-					return $LoggedUser.get()
-						.then(function(user){
-							return user;
-						});	
 				}]				
 			},
 			views: {
@@ -118,6 +114,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board, timeline:false});  	
 						}
 						
+						this.canVote = function(){
+							return self.loggedUser!==undefined && !self.isAuthor() && !self.board.locked;
+						};
+						
 						this.saveVote = function(vote){
 							$Boards.saveVote(self.board, vote)
 							.then(function(data){
@@ -134,8 +134,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 						
 						this.isAuthor = function(){
-							return this.loggedUser.uname === this.board.user;
+							return this.loggedUser!==undefined && this.loggedUser.uname === this.board.user;
 						};
+						
+						this.canPost = function(){
+							return this.loggedUser!==undefined;
+						}
 						
 						this.openBoardForEdit = function(){
 							self.descriptionEdit = self.board.description;
@@ -188,12 +192,17 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion-timeline.html",				
-					controller: ['$state', '$log', '$Boards', '$Comment','$UserImg', 'board', 'comments', function($state, $log, $Boards, $Comment, $UserImg, board, comments){
+					controller: ['$state', '$log', '$Boards', '$Comment','$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comment, $UserImg, board, comments, loggedUser){
 						
 						this.comment = {};
 						this.board = board;
+						this.loggedUser = loggedUser;
 						this.comments = comments;
 						var self = this;
+					  	
+					  	this.canPost = function(){
+					  		return self.loggedUser!==undefined && !self.board.locked;
+					  	};
 					  	
 					  	this.openCommentForEdit = function(comment){
 					  		self.comment = comment;
@@ -259,11 +268,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.html",				
-					controller: ['$state', '$log', '$Boards', '$Comment', 'board', function($state, $log, $Boards, $Comment, board){
+					controller: ['$state', '$log', '$Boards', '$Comment', 'board', 'loggedUser', function($state, $log, $Boards, $Comment, board, loggedUser){
 						
 						this.comment = {};
 						this.board = board;
+						this.loggedUser = loggedUser;
 						var self = this;
+					  	
+					  	this.canPost = function(){
+					  		return self.loggedUser!==undefined && !self.board.locked;
+					  	};
 					  	
 					  	this.openCommentForEdit = function(comment){
 					  		self.comment = comment;
@@ -360,24 +374,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			}
 		})
 		.state('list.settings', {  
-			resolve: {
-				user: ['$LoggedUser', function($LoggedUser){
-					return $LoggedUser.get()
-						.then(function(user){
-							return user;
-						});	
-				}]
-			},
 			views: {
 				"@": {
 					templateUrl: "views/settings.html",	
-					controller: ['$state', 'FileUploader', 'user', function($state, FileUploader, user){
+					controller: ['$state', 'FileUploader', 'loggedUser', function($state, FileUploader, loggedUser){
 						
-						this.user = user;
+						this.user = loggedUser;
 						var self  = this;
 						
 						var uploader = this.uploader = new FileUploader({
-							url: this.user.avatarUrl
+							url: this.user && this.user.avatarUrl
 						});
 					    this.uploader.onBeforeUploadItem = function(/*item*/) {
 							//item.url = zipUploadPath + "?path=" + this.folder.path;

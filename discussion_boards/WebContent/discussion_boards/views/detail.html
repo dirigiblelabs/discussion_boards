@@ -37,7 +37,7 @@
 			</div>
 		</div>		
 
-		<div class="tools" ng-if="!detailsVm.descriptionEdit">
+		<div class="tools" ng-if="detailsVm.isAuthor() && !detailsVm.descriptionEdit">
 			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.toggleLock()" href title="{{detailsVm.board.locked?'locked':'unlocked'}}"><i ng-if="!detailsVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="detailsVm.board.locked" class="fa fa-lock"></i></a>
 			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.openBoardForEdit()" href style="margin-left:5px"><i class="fa fa-pencil"></i> Edit</a> 
 			<a ng-if="detailsVm.board.editable" ng-click="detailsVm.remove()" href style="margin-left:5px"><i class="fa fa-trash-o"></i> Delete</a>
@@ -52,12 +52,12 @@
 			<span class="rating-number">{{detailsVm.board.ratingShort}}</span>
 			<span class="votes-number">{{detailsVm.board.totalVotesShort}} Votes</span>
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="!detailsVm.isAuthor() && !detailsVm.board.locked">
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="detailsVm.canVote()">
 			<a ng-click="detailsVm.saveVote(1)" href ng-if="detailsVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
 			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.upvotesShort}}</span>
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="!detailsVm.isAuthor() && !detailsVm.board.locked">
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="detailsVm.canVote()">
 			<a ng-click="detailsVm.saveVote(-1)" href ng-if="detailsVm.board.currentUserVote!==-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
 			<span ng-if="detailsVm.board.currentUserVote===-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
 			<span style="font-size:1.6rem;color:#767676">{{detailsVm.board.downvotesShort}}</span>									

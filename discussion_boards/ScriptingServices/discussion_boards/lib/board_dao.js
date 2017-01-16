@@ -5,6 +5,7 @@
 
 var database = require("db/database");
 var commentsLib = require("discussion_boards/lib/comment_dao");
+var boardVotes = require("discussion_boards/lib/board_votes");
 var userLib = require("net/http/user");
 
 var datasource = database.getDatasource();
@@ -122,8 +123,10 @@ exports.find = function(id, expanded) {
 				   	 entity[itemsEntitySetName] = dependentItemEntities;
 			   	   }
 			   	   var currentUser = userLib.getName();
-			   	   var userVote = exports.getVote(id, currentUser);
-			   	   entity.currentUserVote = userVote;
+			   	   if(currentUser){
+				   	   var userVote = boardVotes.getVote(id, currentUser);
+				   	   entity.currentUserVote = userVote;
+			   	   }
 				}            	
         	}
         } 
@@ -138,43 +141,6 @@ exports.find = function(id, expanded) {
 
 exports.getComments = function(boardId, isFlat){
 	return commentsLib.findDiscussionPosts(boardId, isFlat);
-};
-
-exports.getVote = function(disb_id, user){
-
-	$log.info('Getting a user['+user+'] vote for DIS_BOARD entity with disb_id['+disb_id+']');
-
-	if(disb_id === undefined || disb_id === null){
-		throw new Error('Illegal argument for disb_id parameter:' + disb_id);
-	}
-	
-	if(user === undefined || user === null){
-		throw new Error('Illegal argument for user parameter:' + user);
-	}	
-
-    var connection = datasource.getConnection();
-    var vote = 0;
-    try {
-        var sql = "SELECT * FROM DIS_BOARD_VOTE WHERE DISV_DISB_ID=? AND DISV_USER=?";
-        var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);
-        statement.setString(2, user);
-        
-        var resultSet = statement.executeQuery();
-        if (resultSet.next()) {
-            vote = resultSet.getInt("DISV_VOTE");
-			if(vote!==0){
-            	$log.info('Vote for DIS_BOARD entity with with id[' + disb_id+ '] found');
-        	}
-        } 
-    } catch(e) {
-		e.errContext = sql;
-		throw e;
-    } finally {
-        connection.close();
-    }
-	
-	return vote;
 };
 
 // Read all entities, parse and return them as an array of JSON objets
@@ -213,8 +179,10 @@ exports.list = function(limit, offset, sort, order, expanded, entityName) {
 			   	 entity[itemsEntitySetName] = dependentItemEntities;
 		   	   }
 		   	   var currentUser = userLib.getName();
-			   var userVote = exports.getVote(entity.disb_id, currentUser);
-			   entity.currentUserVote = userVote;
+		   	   if(currentUser){
+				   var userVote = boardVotes.getVote(entity.disb_id, currentUser);
+				   entity.currentUserVote = userVote;		   	   
+		   	   }
 			}
             entities.push(entity);
         }
@@ -268,52 +236,6 @@ function createEntity(resultSet) {
     $log.info("Transformation from DB JSON object finished");
     return entity;
 }
-
-exports.vote = function(disb_id, user, vote){
-	console.info("Saving user["+user+"] vote["+vote+"] for idea["+disb_id+"]");
-	if(vote===0 || vote === undefined)
-		throw Error('Illegal Argument: vote cannot be 0 or undefined');
-
-	var previousVote = exports.getVote(disb_id, user);
-
-	var connection = datasource.getConnection();
-    try {
-    	var sql;
-    	if(previousVote === undefined || previousVote === null || previousVote === 0){
-    		//Operations is INSERT
-	        sql = "INSERT INTO DIS_BOARD_VOTE (DISV_ID, DISV_DISB_ID, DISV_USER, DISV_VOTE) VALUES (?,?,?,?)";
-	        var statement = connection.prepareStatement(sql);
-	        
-	        var i = 0;
-	        var disv_id = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
-	        statement.setInt(++i, disv_id);
-	        statement.setInt(++i, disb_id);
-	        statement.setString(++i, user);        
-	        statement.setShort(++i, vote);	        
-		} else {
-    		//Operations is UPDATE
-	        sql = "UPDATE DIS_BOARD_VOTE SET DISV_VOTE=? WHERE DISV_DISB_ID=? AND DISV_USER=?";
-	        var statement = connection.prepareStatement(sql);
-	        
-	        var i = 0;
-	       	statement.setShort(++i, vote);
-	        statement.setInt(++i, disb_id);
-	        statement.setString(++i, user);        
-		}
-	    
-	    statement.executeUpdate();
-    	
-    	$log.info('DIS_BOARD_VOTE entity inserted with id[' +  disv_id + '] for DIS_BOARD entity with id['+disb_id+']');
-
-        return disv_id;
-
-    } catch(e) {
-		e.errContext = sql;
-		throw e;
-    } finally {
-        connection.close();
-    } 
-};
 
 //Prepare a JSON object for insert into DB
 function createSQLEntity(entity) {
@@ -483,138 +405,6 @@ exports.visit = function(disb_id){
     } finally {
         connection.close();
     }
-};
-
-exports.listBoardTags = function(disb_id){
-
-	$log.info('Finding DIS_BOARD_TAG entity with id[' + disb_id + ']');
-
-	if(disb_id === undefined || disb_id === null){
-		throw new Error('Illegal argument for disb_id parameter:' + disb_id);
-	}
-
-    var connection = datasource.getConnection();
-    try {
-        var sql = "SELECT * FROM ANN_TAG LEFT JOIN DIS_BOARD_TAG ON DISBT_ANN_ID=ANN_ID WHERE DISBT_DISB_ID=?";
-     
-        var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);
-
-        var resultSet = statement.executeQuery();
-        var tagEntities = [];
-        while (resultSet.next()) {
-        	var tagEntity = {
-        		ann_id: resultSet.getInt("ANN_ID"),
-			    defaultLabel: resultSet.getString("ANN_DEFAULT_LABEL"),
-			    uri: resultSet.getString("ANN_URI")
-        	};
-        	tagEntities.push(tagEntity);
-        } 
-        $log.info(tagEntities.length+' DIS_BOARD_TAG entities for DIS_BOARD_TAG ntity with disb_id[' + disb_id+ '] found');
-        return tagEntities;
-    } catch(e) {
-		e.errContext = sql;
-		throw e;
-    } finally {
-        connection.close();
-    }	
-};
-
-exports.tag = function(disb_id, tags, createOnDemand){
-	var tagsLib = require('annotations/lib/tags_dao');
-	var connection = datasource.getConnection();
-	try{
-	
-		var existingBoardTagEntities = exports.listBoardTags(disb_id);
-		var existingBoardTags = [];
-		if(existingBoardTagEntities!==null){
-			existingBoardTags = existingBoardTagEntities.map(function(tagEntity){
-				return tagEntity.defaultLabel;
-			});
-		}
-	
-		for(var i=0; i < tags.length; i++){
-			
-			if(existingBoardTags.indexOf(tags[i])>-1)
-				continue;
-			
-			var tagEntity = tagsLib.findByTagValue(tags[i]);
-			
-			if(tagEntity === null && createOnDemand){
-				tagEntity = tagsLib.insert({
-										defaultLabel: tags[i],
-										uri: tags[i]
-									});
-			}
-			
-			if(tagEntity.ann_id){
-			
-				var sql =  "INSERT INTO DIS_BOARD_TAG (";
-		        	sql += "DISBT_ID, DISBT_DISB_ID, DISBT_ANN_ID) "; 
-		        	sql += "VALUES (?,?,?)";
-		
-		        var statement = connection.prepareStatement(sql);
-		        
-		        var j = 0;
-		        var disbt_id = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
-		        statement.setInt(++j, disbt_id);
-		        statement.setInt(++j, disb_id);        
-		        statement.setString(++j, tagEntity.ann_id);        
-			    
-			    statement.executeUpdate();
-		    	
-		    	$log.info('DIS_BOARD_TAG entity inserted with id[' +  disbt_id + '] for DIS_BOARD entity with id['+disb_id+']');
-			}
-		}
-	} catch(e) {
-		e.errContext = sql;
-		throw e;
-    } finally {
-        connection.close();
-    }
-
-};
-
-exports.untag = function(disb_id, tags){
-	var connection = datasource.getConnection();
-	try{
-	
-		var existingBoardTagEntities = exports.listBoardTags(disb_id);
-		var existingBoardTags = [];
-		if(existingBoardTagEntities!==null){
-			existingBoardTags = existingBoardTagEntities.map(function(tagEntity){
-				return tagEntity.defaultLabel;
-			});
-		}
-	
-		for(var i=0; i < tags.length; i++){
-			
-			if(existingBoardTags.indexOf(tags[i])<0)
-				continue;
-			
-			var entityToRemove = existingBoardTagEntities[existingBoardTags.indexOf(tags[i])];
-			
-			var sql =  "DELETE FROM DIS_BOARD_TAG ";
-	        	sql += "WHERE DISBT_DISB_ID=? AND DISBT_ANN_ID=? "; 
-	        	sql += "VALUES (?,?)";
-	
-	        var statement = connection.prepareStatement(sql);
-	        
-	        var j = 0;
-	        statement.setInt(++j, disb_id);        
-	        statement.setString(++j, entityToRemove.ann_id);        
-		    
-		    statement.executeUpdate();
-	    	
-	    	$log.info('DIS_BOARD_TAG entity with id[' +  entityToRemove.disbt_id+ '] relation to DIS_BOARD entity with id['+disb_id+'] removed');
-		}
-	} catch(e) {
-		e.errContext = sql;
-		throw e;
-    } finally {
-        connection.close();
-    }
-
 };
 
 exports.lock = function(disb_id){
