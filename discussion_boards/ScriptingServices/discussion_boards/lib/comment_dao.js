@@ -97,6 +97,8 @@ exports.find = function(id, expanded) {
             		item.comments = exports.findComments(item.replyToCommentId, expanded);
             	}            	
         	}
+        } else {
+	       $log.info('DIS_COMMENT[' + id + '] entity not found');
         }
         
         return item;

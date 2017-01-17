@@ -128,6 +128,8 @@ exports.find = function(id, expanded) {
 				   	   entity.currentUserVote = userVote;
 			   	   }
 				}            	
+        	} else {
+	        	$log.info('DIS_BOARD_STATS[' +  entity.id + '] entity not found');
         	}
         } 
         return entity;
@@ -300,7 +302,7 @@ exports.update = function(entity) {
         statement.setString(++i, entity.user);
         statement.setLong(++i, Date.now());
         statement.setString(++i, entity.status);
-        statement.setShort(++i, entity.locked);        
+        statement.setShort(++i, entity.locked);
         var id = entity.id;
         statement.setInt(++i, id);
         statement.executeUpdate();
@@ -385,8 +387,8 @@ exports.count = function() {
     return count;
 };
 
-exports.visit = function(id){
-	console.info('Updating DIS_BOARD['+id+'] entity visits');
+exports.visit = function(boardId){
+	$log.info('Updating DIS_BOARD['+boardId+'] entity visits');
 	var connection = datasource.getConnection();
     try {
     
@@ -394,9 +396,9 @@ exports.visit = function(id){
         sql += " SET DISB_VISITS=DISB_VISITS+1"; 
         sql += " WHERE DISB_ID = ?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, id);        
+        statement.setInt(1, boardId);        
         statement.executeUpdate();
-        console.info('DIS_BOARD['+id+'] entity visits updated');
+        $log.info('DIS_BOARD['+boardId+'] entity visits updated');
         return this;
         
     } catch(e) {
@@ -407,33 +409,32 @@ exports.visit = function(id){
     }
 };
 
-exports.lock = function(id){
-    $log.info('Updating DIS_BOARD[' +  id+ '] entity lock[true]');
+exports.lock = function(boardId){
+    $log.info('Updating DIS_BOARD[' +  boardId+ '] entity lock[true]');
 	var connection = datasource.getConnection();
 	try{
 		var sql =  "UPDATE DIS_BOARD SET DISB_LOCKED=1 WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, id);	    
+        statement.setInt(1, boardId);	    
 	    statement.executeUpdate();
-    	$log.info('DIS_BOARD[' +  id+ '] entity lock[true] updated');
+    	$log.info('DIS_BOARD[' +  boardId+ '] entity lock[true] updated');
 	} catch(e) {
 		e.errContext = sql;
 		throw e;
     } finally {
         connection.close();
     }
-
 };
 
-exports.unlock = function(id){
-	$log.info('Updating DIS_BOARD[' +  id+ '] entity lock[false]');
+exports.unlock = function(boardId){
+	$log.info('Updating DIS_BOARD[' +  boardId + '] entity lock[false]');
 	var connection = datasource.getConnection();
 	try{
 		var sql = "UPDATE DIS_BOARD SET DISB_LOCKED=0 WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, id);	    
+        statement.setInt(1, boardId);	    
 	    statement.executeUpdate();
-	    $log.info('DIS_BOARD[' +  id+ '] entity lock[false] updated');
+	    $log.info('DIS_BOARD[' +  boardId + '] entity lock[false] updated');
 	} catch(e) {
 		e.errContext = sql;
 		throw e;
@@ -443,20 +444,20 @@ exports.unlock = function(id){
 
 };
 
-exports.isLocked = function(id){
-    $log.info('Finding DIS_BOARD[' +  id+ '] entity lock value');
+exports.isLocked = function(boardId){
+    $log.info('Finding DIS_BOARD[' +  boardId+ '] entity lock value');
 	var connection = datasource.getConnection();
 	try{
 		var sql = "SELECT DISB_LOCKED FROM DIS_BOARD WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, id);
+        statement.setInt(1, boardId);
         var resultSet = statement.executeQuery();
         
         var isLocked = false;
         if (resultSet.next()) {
         	isLocked = resultSet.getShort('DISB_LOCKED')===1;
         }
-        $log.info('DIS_BOARD[' +  id+ '] entity lock value found');
+        $log.info('DIS_BOARD[' +  boardId+ '] entity lock value found');
         return isLocked;
 	} catch(e) {
 		e.errContext = sql;
