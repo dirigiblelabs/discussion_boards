@@ -98,7 +98,7 @@ exports.insert = function(entity, cascaded) {
 // Reads a single entity by id, parsed into JSON object 
 exports.find = function(id, expanded) {
 
-	$log.info('Finding DIS_BOARD[' +  entity.id + '] entity');
+	$log.info('Finding DIS_BOARD[' +  id + '] entity');
 
 	if(id === undefined || id === null){
 		throw new Error('Illegal argument for id parameter:' + id);

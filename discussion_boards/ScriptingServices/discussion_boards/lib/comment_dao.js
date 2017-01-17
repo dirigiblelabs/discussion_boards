@@ -8,7 +8,7 @@ var database = require("db/database");
 var datasource = database.getDatasource();
 
 var persistentProperties = {
-	mandatory: ["id", "replyToCommentId"],
+	mandatory: ["id", "boardId"],
 	optional: ["text", "user", "publishTime", "lastModifiedTime", "replyToCommentId"]
 };
 
@@ -46,7 +46,7 @@ exports.insert = function(item) {
 
         var j = 0;
         statement.setInt(++j, item.id);
-        statement.setInt(++j, item.replyToCommentId);
+        statement.setInt(++j, item.boardId);
         statement.setInt(++j, item.replyToCommentId);
         statement.setString(++j, item.text);
         
@@ -255,7 +255,7 @@ exports.list = function(boardId, limit, offset, sort, order, expanded) {
         while (resultSet.next()) {
         	var item = createEntity(resultSet);
         	if(item.replyToCommentId === undefined){
-        		item.replies = exports.findReplies(item.replyToCommentId, item.id);
+        		item.replies = exports.findReplies(item.boardId, item.id);
         		items.push(item);
     		}
         }
@@ -277,7 +277,7 @@ function createEntity(resultSet) {
     var entity = {};
 	entity.id = resultSet.getInt("DISC_ID");
 	entity.text = resultSet.getString("DISC_COMMENT_TEXT");
-	entity.replyToCommentId = resultSet.getString("DISC_DISB_ID");
+	entity.boardId = resultSet.getString("DISC_DISB_ID");
     entity.user = resultSet.getString("USRU_UNAME");
     entity.pic = resultSet.getString("USRU_PIC");
     entity.replyToCommentId = resultSet.getString("DISC_REPLY_TO_DISC_ID");
