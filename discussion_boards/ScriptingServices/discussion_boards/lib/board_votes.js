@@ -64,8 +64,8 @@ exports.vote = function(id, user, vote){
 	        statement = connection.prepareStatement(sql);
 	        
 	        var i = 0;
-	        var disv_id = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
-	        statement.setInt(++i, disv_id);
+	        var voteId = datasource.getSequence('DIS_BOARD_VOTE_DISV_ID').next();
+	        statement.setInt(++i, voteId);
 	        statement.setInt(++i, id);
 	        statement.setString(++i, user);        
 	        statement.setShort(++i, vote);	        
@@ -85,9 +85,9 @@ exports.vote = function(id, user, vote){
 	    statement.executeUpdate();
 	    
 	    var msgOperationResult = isInsert?"inserted":"updated";
-	    $log.info('DIS_BOARD_VOTE[' + disv_id + '] entity relation between DIS_BOARD[' + id + '] and USR_USER[' + user + '] ' + msgOperationResult);
+	    $log.info('DIS_BOARD_VOTE[' + voteId + '] entity relation between DIS_BOARD[' + id + '] and USR_USER[' + user + '] ' + msgOperationResult);
 	    
-        return disv_id;
+        return voteId;
 
     } catch(e) {
 		e.errContext = sql;
