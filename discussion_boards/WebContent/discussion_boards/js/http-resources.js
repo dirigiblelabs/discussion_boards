@@ -40,9 +40,11 @@
 	}])		
 	.service('BoardTags', ['$resource', function($resource) {
 	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/tags', {}, 
-	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}},
-	  			{remove: {method:'DELETE', params:{}, isArray:true, ignoreLoadingBar: true}},
-	  			{save: {method:'POST', params:{}, isArray:true, ignoreLoadingBar: true}});
+	  			{
+	  				get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true},
+	  				save: {method:'POST', params:{}, isArray:true, ignoreLoadingBar: true},
+	  				remove: {method:'DELETE', params:{}, isArray:true, ignoreLoadingBar: true}
+	  			});
 	}])	
 	.service('BoardCommentsTimeline', ['$resource', '$log', function($resource) {
 	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/comments/timeline', {}, 

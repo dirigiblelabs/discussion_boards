@@ -7,11 +7,11 @@ var database = require("db/database");
 var datasource = database.getDatasource();
 
 var $log = require("logging/logger").logger;
-$log.ctx = "Board DAO";
+$log.ctx = "BoardTags DAO";
 
 exports.listBoardTags = function(disb_id){
 
-	$log.info('Finding DIS_BOARD_TAG entity with id[' + disb_id + ']');
+	$log.info('Finding DIS_BOARD_TAG[' + disb_id + '] entity');
 
 	if(disb_id === undefined || disb_id === null){
 		throw new Error('Illegal argument for disb_id parameter:' + disb_id);
@@ -34,7 +34,7 @@ exports.listBoardTags = function(disb_id){
         	};
         	tagEntities.push(tagEntity);
         } 
-        $log.info(tagEntities.length+' DIS_BOARD_TAG entities for DIS_BOARD_TAG ntity with disb_id[' + disb_id+ '] found');
+        $log.info(tagEntities.length+' DIS_BOARD_TAG entities for DIS_BOARD_TAG[' + disb_id+ '] found');
         return tagEntities;
     } catch(e) {
 		e.errContext = sql;
@@ -64,31 +64,31 @@ exports.tag = function(disb_id, tags, createOnDemand){
 			
 			var tagEntity = tagsLib.findByTagValue(tags[i]);
 			
-			if(tagEntity === null && createOnDemand){
-				tagEntity = tagsLib.insert({
-										defaultLabel: tags[i],
-										uri: tags[i]
-									});
+			var tagId = tagEntity && tagEntity.ann_id;
+			if(!tagEntity && createOnDemand){
+				tagId = tagsLib.insert({
+										"defaultLabel": tags[i],
+										"uri": tags[i]
+									});								
 			}
+
+			$log.info('Creating relation between tag['+tagId+'] and board['+disb_id+']');
 			
-			if(tagEntity.ann_id){
-			
-				var sql =  "INSERT INTO DIS_BOARD_TAG (";
-		        	sql += "DISBT_ID, DISBT_DISB_ID, DISBT_ANN_ID) "; 
-		        	sql += "VALUES (?,?,?)";
-		
-		        var statement = connection.prepareStatement(sql);
-		        
-		        var j = 0;
-		        var disbt_id = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
-		        statement.setInt(++j, disbt_id);
-		        statement.setInt(++j, disb_id);        
-		        statement.setString(++j, tagEntity.ann_id);        
-			    
-			    statement.executeUpdate();
-		    	
-		    	$log.info('DIS_BOARD_TAG entity inserted with id[' +  disbt_id + '] for DIS_BOARD entity with id['+disb_id+']');
-			}
+			var sql =  "INSERT INTO DIS_BOARD_TAG (";
+	        	sql += "DISBT_ID, DISBT_DISB_ID, DISBT_ANN_ID) "; 
+	        	sql += "VALUES (?,?,?)";
+	
+	        var statement = connection.prepareStatement(sql);
+	        
+	        var j = 0;
+	        var disbt_id = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
+	        statement.setLong(++j, disbt_id);
+	        statement.setInt(++j, disb_id);        
+	        statement.setLong(++j, tagId);        
+		    
+		    statement.executeUpdate();
+	    	
+	    	$log.info('DIS_BOARD_TAG[' +  disbt_id + '] entity inserted for DIS_BOARD['+disb_id+'] entity');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -130,7 +130,7 @@ exports.untag = function(disb_id, tags){
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG entity with id[' +  entityToRemove.disbt_id+ '] relation to DIS_BOARD entity with id['+disb_id+'] removed');
+	    	$log.info('DIS_BOARD_TAG[' +  entityToRemove.disbt_id+ '] entity relation to DIS_BOARD['+disb_id+'] entity removed');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -139,6 +139,31 @@ exports.untag = function(disb_id, tags){
         connection.close();
     }
 
+};
+
+exports.setTags = function(disb_id, tags, createOnDemand){
+	$log.info('Inserting tag relations to DIS_BOARD_TAG[' +  disb_id+ '] entity');
+	var boardTags = exports.listBoardTags(disb_id);	
+	var sql;
+	try{ 
+		var connection = datasource.getConnection();
+		for(var i=0; i < boardTags.length; i++){
+			sql =  "DELETE FROM DIS_BOARD_TAG ";
+	        sql += "WHERE DISBT_DISB_ID=? AND DISBT_ANN_ID=? "; 
+	        var statement = connection.prepareStatement(sql);
+	        var j = 0;
+	        statement.setInt(++j, disb_id);        
+	        statement.setString(++j, boardTags[i].ann_id);       
+		    statement.executeUpdate();
+		}
+		$log.info(boardTags.length + ' tag relations to DIS_BOARD_TAG[' +  disb_id+ '] entity inserted');
+	} catch(e) {
+		e.errContext = sql;
+		throw e;
+    } finally {
+        connection.close();
+    }		
+	exports.tag(disb_id, tags, createOnDemand);	
 };
 
 })();

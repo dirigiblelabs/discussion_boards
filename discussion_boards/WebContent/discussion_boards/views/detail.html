@@ -28,6 +28,13 @@
 		</div>
 
 		<div class="description" ng-bind-html="detailsVm.board.description" ng-if="!detailsVm.descriptionEdit"></div>
+		
+		<tags-input ng-if="detailsVm.isAuthor()" ng-model="detailsVm.tags" on-tag-added="detailsVm.tagAdded($tag)" 
+											  							   on-tag-removed="detailsVm.tagRemoved($tag)"></tags-input>
+		<div ng-if="!detailsVm.isAuthor()">
+			<span ng-repeat="tag in detailsVm.tags" ng-bind="tag.text" style="margin: 2px; padding: 0 5px; display: inline-block; float: left; height: 26px; line-height: 25px; border: 1px solid #acacac; border-radius: 3px;  background: #f1f1f1"><span>
+		</div>									  							   
+		
 		<span ng-if="detailsVm.board.timeSinceLastModified" title="{{detailsVm.board.lastModifiedTimeLocal}}" style="color:#767676;font-size:0.875em">- last edit {{detailsVm.board.timeSinceLastModified}}</span>
 		<div ng-if="detailsVm.descriptionEdit"> 
 			<textarea class="form-control" ng-model="detailsVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>

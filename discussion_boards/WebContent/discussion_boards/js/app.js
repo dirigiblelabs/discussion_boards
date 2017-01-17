@@ -13,7 +13,7 @@ angular.module('$ckeditor', [])
 }]);
 
 
-angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate'])
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput'])
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider) {
 
 		$urlRouterProvider.otherwise("/");
@@ -47,6 +47,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					$Boards.list()
 					.then(function(data){
 						self.list = data;
+						self.list = self.list.map(function(board){
+							$Boards.getTags(board)
+							.then(function(tags){
+								board.tags = tags;
+							})
+							.catch(function(err){
+								$log.warn('Could not get board['+board.boardId+'] tags');
+							});
+							return board;
+						});
 					})
 		          	.catch(function(err){
 		          		$log.error(err);
@@ -84,19 +94,34 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						else
 							return $Boards.get(boardId)
 							.catch(function(err){
-								$log('Could not resolveboard entity with id['+$stateParams.boardId+']');
+								$log.error('Could not resolve board entity with id['+$stateParams.boardId+']');
 								$state.go('list');
 							});
 					} else {
 						return;
 					}
-				}]				
+				}],
+				tags: ['$Boards', 'board', '$log', function($Boards, board, $log){
+					if(board){
+						return $Boards.getTags(board)
+							.catch(function(err){
+								$log.warn('Could not get board['+board.boardId+'] tags');
+							});
+					} else {
+						return;
+					}
+				}]
 			},
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, board, loggedUser){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', 'tags', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, board, tags, loggedUser){
 						this.board = board;
+						this.tags = tags && tags.map(function(tag){
+							return {
+								"text": tag.defaultLabel,
+							};
+						});
 						this.loggedUser = loggedUser;
 						var self = this;
 						
@@ -172,6 +197,20 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							.then(function(){
 								$state.go('list');
 							});
+						};
+						
+						this.tagAdded = function($tag){
+							var tags = self.tags.map(function(tag){
+								return tag.text;
+							});
+							$Boards.setTags(self.board, tags);
+						};
+						
+						this.tagRemoved = function($tag){
+							var tags = self.tags.map(function(tag){
+								return tag.text;
+							});
+							$Boards.setTags(self.board, tags);
 						};
 
 					}],

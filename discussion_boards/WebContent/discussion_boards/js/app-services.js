@@ -140,8 +140,8 @@
 		};
 		var getTags = function(board){
 			return BoardTags.get({"boardId":board.disb_id}).$promise
-			.then(function(vote){
-	      		return vote;
+			.then(function(tags){
+	      		return tags;
 			});
 		};
 		var setTags = function(board, tags){

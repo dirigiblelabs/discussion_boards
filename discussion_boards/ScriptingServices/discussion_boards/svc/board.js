@@ -105,7 +105,7 @@
 			    	if(!Array.isArray(tags)){
 			    		tags = [tags];
 			    	}
-					this.boardTags.tag(context.pathParams.id, tags, true);
+					this.boardTags.setTags(context.pathParams.id, tags, true);
 					io.response.setStatus(io.response.OK);
 				} catch(e) {
 		    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
