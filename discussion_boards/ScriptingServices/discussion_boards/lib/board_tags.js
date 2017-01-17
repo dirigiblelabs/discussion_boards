@@ -28,7 +28,7 @@ exports.listBoardTags = function(id){
         var tagEntities = [];
         while (resultSet.next()) {
         	var tagEntity = {
-        		ann_id: resultSet.getInt("ANN_ID"),
+        		id: resultSet.getInt("ANN_ID"),
 			    defaultLabel: resultSet.getString("ANN_DEFAULT_LABEL"),
 			    uri: resultSet.getString("ANN_URI")
         	};
@@ -64,7 +64,7 @@ exports.tag = function(id, tags, createOnDemand){
 			
 			var tagEntity = tagsLib.findByTagValue(tags[i]);
 			
-			var tagId = tagEntity && tagEntity.ann_id;
+			var tagId = tagEntity && tagEntity.id;
 			if(!tagEntity && createOnDemand){
 				tagId = tagsLib.insert({
 										"defaultLabel": tags[i],
@@ -117,7 +117,7 @@ exports.untag = function(id, tags){
 			if(existingBoardTags.indexOf(tags[i])<0)
 				continue;
 			
-			var entityToRemove = existingBoardTagEntities[existingBoardTags.indexOf(tags[i])];
+			var tagEntity = existingBoardTagEntities[existingBoardTags.indexOf(tags[i])];
 			
 			var sql =  "DELETE FROM DIS_BOARD_TAG ";
 	        	sql += "WHERE DISBT_DISB_ID=? AND DISBT_ANN_ID=? "; 
@@ -127,11 +127,11 @@ exports.untag = function(id, tags){
 	        
 	        var j = 0;
 	        statement.setInt(++j, id);        
-	        statement.setString(++j, entityToRemove.ann_id);        
+	        statement.setString(++j, tagEntity.id);        
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG[' +  entityToRemove.disbt_id+ '] entity relation between DIS_BOARD[' + id + '] entity and ANN_TAG['+entityToRemove.ann_id+'] removed');
+	    	$log.info('DIS_BOARD_TAG[' +  tagEntity.disbt_id+ '] entity relation between DIS_BOARD[' + id + '] entity and ANN_TAG['+tagEntity.id+'] removed');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -149,15 +149,15 @@ exports.setTags = function(id, tags, createOnDemand){
 	try{ 
 		var connection = datasource.getConnection();
 		for(var i=0; i < boardTags.length; i++){
-			$log.info('Removing DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].ann_id+']');
+			$log.info('Removing DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].id+']');
 			sql =  "DELETE FROM DIS_BOARD_TAG ";
 	        sql += "WHERE DISBT_DISB_ID=? AND DISBT_ANN_ID=? "; 
 	        var statement = connection.prepareStatement(sql);
 	        var j = 0;
 	        statement.setInt(++j, id);        
-	        statement.setString(++j, boardTags[i].ann_id);       
+	        statement.setString(++j, boardTags[i].id);       
 		    statement.executeUpdate();
-		    $log.info('DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].ann_id+'] removed');
+		    $log.info('DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].id+'] removed');
 		}
 		$log.info(boardTags.length + ' DIS_BOARD_TAG entity relations to DIS_BOARD_TAG[' +  id+ '] entity removed');
 	} catch(e) {
