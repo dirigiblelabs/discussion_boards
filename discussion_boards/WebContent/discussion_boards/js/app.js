@@ -126,7 +126,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						var self = this;
 						
 						try{
-							$DBoardVisits.visit(this.board.disb_id)
+							$DBoardVisits.visit(this.board.id)
 							.then(function(res){
 								if(res!==false)
 									self.board.visits++;
@@ -134,9 +134,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						} catch(err){$log.error(err);}
 						
 						if($stateParams.timeline){
-							$state.go('list.entity.discussion-timeline', {boardId: self.board.disb_id, board:self.board, timeline:true}); 
+							$state.go('list.entity.discussion-timeline', {boardId: self.board.id, board:self.board, timeline:true}); 
 						} else {
-							$state.go('list.entity.discussion', {boardId: self.board.disb_id, board:self.board, timeline:false});  	
+							$state.go('list.entity.discussion', {boardId: self.board.id, board:self.board, timeline:false});  	
 						}
 						
 						this.canVote = function(){
@@ -222,7 +222,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			resolve: {
 				comments: ['BoardCommentsTimeline', 'board', function(BoardCommentsTimeline, board){
 					return BoardCommentsTimeline
-							.get({boardId: board.disb_id}).$promise.
+							.get({boardId: board.id}).$promise.
 							then(function(comments){
 								return comments;
 							});
@@ -254,13 +254,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  	};
 					  	
 						this.postComment = function(){
-							self.comment.disc_disb_id = this.board.disb_id;
-							var operation = self.comment.disc_id!==undefined?'update':'save';
+							self.comment.boardId = this.board.id;
+							var operation = self.comment.id!==undefined?'update':'save';
 							$Comment[operation](self.comment).$promise
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
-								$log.info('Comment with id['+commentData.disc_id+'] saved');
-								$Boards.get(board.disb_id)
+								$log.info('Comment with id['+commentData.id+'] saved');
+								$Boards.get(board.id)
 								.then(function(board){
 									$state.go('list.entity', {board: board, timeline: true});
 									//$state.go('list.entity.discussion-timeline', {board: board});
@@ -331,13 +331,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  	};
 					  	
 						this.postComment = function(){
-							self.comment.disc_disb_id = this.board.disb_id;
-							var operation = self.comment.disc_id!==undefined?'update':'save';
+							self.comment.boardId = this.board.id;
+							var operation = self.comment.id!==undefined?'update':'save';
 							$Comment[operation](self.comment).$promise
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
-								$log.info('Comment with id['+commentData.disc_id+'] saved');
-								$Boards.get(board.disb_id)
+								$log.info('Comment with id['+commentData.id+'] saved');
+								$Boards.get(board.id)
 								.then(function(board){
 									$state.go('list.entity', {board: board}, {reload:true});
 								});
@@ -355,24 +355,24 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							self.comment = comment;
 							self.replyEdit = true;
 							self.reply = reply || {
-								reply_to_disc_id: comment.disc_id,
-								disc_disb_id: self.board.disb_id
+								replyToCommentId: comment.id,
+								boardId: self.board.id
 							};
 						};
 
 						this.replyCancel = function(){
 							delete self.reply;
 							self.replyEdit = false;
-							if(!self.commentEdit && self.comment.disc_id!==undefined)
+							if(!self.commentEdit && self.comment.id!==undefined)
 								self.cancelCommentEdit();
 						};
 
 						this.replyPost = function(){
-							var upsertOperation = self.reply.disc_id===undefined?'save':'update';
+							var upsertOperation = self.reply.id===undefined?'save':'update';
 							$Comment[upsertOperation ](self.reply).$promise
 							.then(function(){
 								$log.info('reply saved');
-								$Boards.get(board.disb_id)
+								$Boards.get(board.id)
 								.then(function(board){
 									$state.go('list.entity', {board: board}, {reload:true});
 								});
@@ -399,7 +399,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  		this.submit = function(){
 					  			Board.save(this.board).$promise
 					  			.then(function(data){
-					  				$log.info('board with id['+data.disb_id+'] saved');
+					  				$log.info('board with id['+data.id+'] saved');
 		              				$state.go('list');
 					  			})
 					  			.catch(function(err){

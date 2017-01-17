@@ -9,12 +9,12 @@ var datasource = database.getDatasource();
 var $log = require("logging/logger").logger;
 $log.ctx = "BoardTags DAO";
 
-exports.listBoardTags = function(disb_id){
+exports.listBoardTags = function(id){
 
-	$log.info('Finding DIS_BOARD_TAG[' + disb_id + '] entity');
+	$log.info('Finding DIS_BOARD_TAG entities related to DIS_BOARD['+id+']');
 
-	if(disb_id === undefined || disb_id === null){
-		throw new Error('Illegal argument for disb_id parameter:' + disb_id);
+	if(id === undefined || id === null){
+		throw new Error('Illegal argument for id parameter:' + id);
 	}
 
     var connection = datasource.getConnection();
@@ -22,7 +22,7 @@ exports.listBoardTags = function(disb_id){
         var sql = "SELECT * FROM ANN_TAG LEFT JOIN DIS_BOARD_TAG ON DISBT_ANN_ID=ANN_ID WHERE DISBT_DISB_ID=?";
      
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);
+        statement.setInt(1, id);
 
         var resultSet = statement.executeQuery();
         var tagEntities = [];
@@ -34,7 +34,7 @@ exports.listBoardTags = function(disb_id){
         	};
         	tagEntities.push(tagEntity);
         } 
-        $log.info(tagEntities.length+' DIS_BOARD_TAG entities for DIS_BOARD_TAG[' + disb_id+ '] found');
+        $log.info(tagEntities.length+' DIS_BOARD_TAG entities related to DIS_BOARD[' + id+ '] found');
         return tagEntities;
     } catch(e) {
 		e.errContext = sql;
@@ -44,12 +44,12 @@ exports.listBoardTags = function(disb_id){
     }	
 };
 
-exports.tag = function(disb_id, tags, createOnDemand){
+exports.tag = function(id, tags, createOnDemand){
 	var tagsLib = require('annotations/lib/tags_dao');
 	var connection = datasource.getConnection();
 	try{
 	
-		var existingBoardTagEntities = exports.listBoardTags(disb_id);
+		var existingBoardTagEntities = exports.listBoardTags(id);
 		var existingBoardTags = [];
 		if(existingBoardTagEntities!==null){
 			existingBoardTags = existingBoardTagEntities.map(function(tagEntity){
@@ -72,7 +72,7 @@ exports.tag = function(disb_id, tags, createOnDemand){
 									});								
 			}
 
-			$log.info('Creating relation between tag['+tagId+'] and board['+disb_id+']');
+			$log.info('Inserting DIS_BOARD_TAG entity relation between ANN_TAG['+tagId+'] entity and DIS_BOARD['+id+'] entity');
 			
 			var sql =  "INSERT INTO DIS_BOARD_TAG (";
 	        	sql += "DISBT_ID, DISBT_DISB_ID, DISBT_ANN_ID) "; 
@@ -83,12 +83,12 @@ exports.tag = function(disb_id, tags, createOnDemand){
 	        var j = 0;
 	        var disbt_id = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
 	        statement.setLong(++j, disbt_id);
-	        statement.setInt(++j, disb_id);        
+	        statement.setInt(++j, id);        
 	        statement.setLong(++j, tagId);        
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG[' +  disbt_id + '] entity inserted for DIS_BOARD['+disb_id+'] entity');
+	    	$log.info('DIS_BOARD_TAG[' +  disbt_id + '] entity relation for ANN_TAG['+tagId+'] and DIS_BOARD['+id+'] entity inserted');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -99,11 +99,12 @@ exports.tag = function(disb_id, tags, createOnDemand){
 
 };
 
-exports.untag = function(disb_id, tags){
+exports.untag = function(id, tags){
+	$log.info('Removing DIS_BOARD_TAG entity relations to DIS_BOARD['+id+'] entity');
 	var connection = datasource.getConnection();
 	try{
 	
-		var existingBoardTagEntities = exports.listBoardTags(disb_id);
+		var existingBoardTagEntities = exports.listBoardTags(id);
 		var existingBoardTags = [];
 		if(existingBoardTagEntities!==null){
 			existingBoardTags = existingBoardTagEntities.map(function(tagEntity){
@@ -125,12 +126,12 @@ exports.untag = function(disb_id, tags){
 	        var statement = connection.prepareStatement(sql);
 	        
 	        var j = 0;
-	        statement.setInt(++j, disb_id);        
+	        statement.setInt(++j, id);        
 	        statement.setString(++j, entityToRemove.ann_id);        
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG[' +  entityToRemove.disbt_id+ '] entity relation to DIS_BOARD['+disb_id+'] entity removed');
+	    	$log.info('DIS_BOARD_TAG[' +  entityToRemove.disbt_id+ '] entity relation between DIS_BOARD[' + id + '] entity and ANN_TAG['+entityToRemove.ann_id+'] removed');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -141,29 +142,31 @@ exports.untag = function(disb_id, tags){
 
 };
 
-exports.setTags = function(disb_id, tags, createOnDemand){
-	$log.info('Inserting tag relations to DIS_BOARD_TAG[' +  disb_id+ '] entity');
-	var boardTags = exports.listBoardTags(disb_id);	
+exports.setTags = function(id, tags, createOnDemand){
+	$log.info('Inserting DIS_BOARD_TAG entity relations to DIS_BOARD[' +  id+ '] entity');
+	var boardTags = exports.listBoardTags(id);	
 	var sql;
 	try{ 
 		var connection = datasource.getConnection();
 		for(var i=0; i < boardTags.length; i++){
+			$log.info('Removing DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].ann_id+']');
 			sql =  "DELETE FROM DIS_BOARD_TAG ";
 	        sql += "WHERE DISBT_DISB_ID=? AND DISBT_ANN_ID=? "; 
 	        var statement = connection.prepareStatement(sql);
 	        var j = 0;
-	        statement.setInt(++j, disb_id);        
+	        statement.setInt(++j, id);        
 	        statement.setString(++j, boardTags[i].ann_id);       
 		    statement.executeUpdate();
+		    $log.info('DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].ann_id+'] removed');
 		}
-		$log.info(boardTags.length + ' tag relations to DIS_BOARD_TAG[' +  disb_id+ '] entity inserted');
+		$log.info(boardTags.length + ' DIS_BOARD_TAG entity relations to DIS_BOARD_TAG[' +  id+ '] entity removed');
 	} catch(e) {
 		e.errContext = sql;
 		throw e;
     } finally {
         connection.close();
     }		
-	exports.tag(disb_id, tags, createOnDemand);	
+	exports.tag(id, tags, createOnDemand);	
 };
 
 })();

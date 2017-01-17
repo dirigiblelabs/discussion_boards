@@ -3,7 +3,7 @@
 
 	angular.module('discussion-boards')
 	.service('Board', ['$resource', '$log', function($resource, $log) {
-	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId', { boardId:'@disb_id' }, {
+	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId', { boardId:'@id' }, {
 			    save: {
 			        method: 'POST',
 			        interceptor: {
@@ -11,7 +11,7 @@
 		                	var location = res.headers('Location');
 		                	if(location){
 		                		var id = location.substring(location.lastIndexOf('/')+1);
-		                		angular.extend(res.resource, { "disb_id": id });
+		                		angular.extend(res.resource, { "id": id });
 	                		} else {
 	                			$log.error('Cannot infer id after save operation. HTTP Response Header "Location" is missing: ' + location);
 	            			}
@@ -51,7 +51,7 @@
 	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
 	}])	
 	.service('$Comment', ['$resource', '$log', function($resource, $log) {
-	 	return $resource('../../js/discussion_boards/svc/comment.js/:commentId', { commentId:'@disc_id' }, {
+	 	return $resource('../../js/discussion_boards/svc/comment.js/:commentId', { commentId:'@id' }, {
 			    save: {
 			        method: 'POST',
 			        interceptor: {
@@ -59,7 +59,7 @@
 		                	var location = res.headers('Location');
 		                	if(location){
 		                		var id = location.substring(location.lastIndexOf('/')+1);
-		                		angular.extend(res.resource, { "disc_id": id });
+		                		angular.extend(res.resource, { "id": id });
 	                		} else {
 	                			$log.error('Cannot infer id after save operation. HTTP Response Header "Location" is missing: ' + location);
 	            			}

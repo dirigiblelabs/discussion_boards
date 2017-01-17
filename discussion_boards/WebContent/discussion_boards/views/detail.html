@@ -11,7 +11,7 @@
 	
 	<div class="main-compartment">
 		
-		<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.disb_id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
+		<a class="title" ng-bind="detailsVm.board.shortText" ui-sref="list.entity({boardId:detailsVm.board.id, board: detailsVm.board})" ui-sref-opts="{reload: true}"></a>
 
 		<div class="stats">
 			<span>{{detailsVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>

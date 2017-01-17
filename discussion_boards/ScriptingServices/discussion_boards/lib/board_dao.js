@@ -13,7 +13,7 @@ var datasource = database.getDatasource();
 var itemsEntitySetName = "comments";
 
 var persistentProperties = {
-	mandatory: ["disb_id"],
+	mandatory: ["id"],
 	optional: ["shortText", "description", "publishTime", "lastModifiedTime", "status", "user"]
 };
 
@@ -31,7 +31,7 @@ exports.insert = function(entity, cascaded) {
 	
 	for(var i = 0; i< persistentProperties.mandatory.length; i++){
 		var propName = persistentProperties.mandatory[i];
-		if(propName==='disb_id')
+		if(propName === 'id')
 			continue;//Skip validaiton check for id. It's epxected to be null on insert.
 		var propValue = entity[propName];
 		if(propValue === undefined || propValue === null){
@@ -54,8 +54,8 @@ exports.insert = function(entity, cascaded) {
         var statement = connection.prepareStatement(sql);
         
         var i = 0;
-        entity.disb_id = datasource.getSequence('DIS_BOARD_DISB_ID').next();
-        statement.setInt(++i,  entity.disb_id);
+        entity.id = datasource.getSequence('DIS_BOARD_DISB_ID').next();
+        statement.setInt(++i,  entity.id);
         statement.setString(++i, entity.shortText);        
         statement.setString(++i, entity.description);
 
@@ -83,9 +83,9 @@ exports.insert = function(entity, cascaded) {
 	    	}
 		}
 
-        $log.info('DIS_BOARD entity inserted with id[' +  entity.disb_id + ']');
+        $log.info('DIS_BOARD[' +  entity.id + '] entity inserted');
 
-        return entity.disb_id;
+        return entity.id;
 
     } catch(e) {
 		e.errContext = sql;
@@ -98,7 +98,7 @@ exports.insert = function(entity, cascaded) {
 // Reads a single entity by id, parsed into JSON object 
 exports.find = function(id, expanded) {
 
-	$log.info('Finding DIS_BOARD entity with id[' + id + ']');
+	$log.info('Finding DIS_BOARD[' +  entity.id + '] entity');
 
 	if(id === undefined || id === null){
 		throw new Error('Illegal argument for id parameter:' + id);
@@ -116,9 +116,9 @@ exports.find = function(id, expanded) {
         if (resultSet.next()) {
         	entity = createEntity(resultSet);
 			if(entity){
-            	$log.info('DIS_BOARD_STATS entity with id[' + id + '] found');
+            	$log.info('DIS_BOARD_STATS[' +  entity.id + '] entity found');
 				if(expanded !== null && expanded!==undefined){
-				   var dependentItemEntities = commentsLib.findDiscussionPosts(entity.disb_id, false);
+				   var dependentItemEntities = commentsLib.findDiscussionPosts(entity.id, false);
 				   if(dependentItemEntities) {
 				   	 entity[itemsEntitySetName] = dependentItemEntities;
 			   	   }
@@ -174,13 +174,13 @@ exports.list = function(limit, offset, sort, order, expanded, entityName) {
         while (resultSet.next()) {
         	var entity = createEntity(resultSet);
         	if(expanded !== null && expanded!==undefined){
-			   var dependentItemEntities = commentsLib.list(entity.disb_id, null, null, null, null);
+			   var dependentItemEntities = commentsLib.list(entity.id, null, null, null, null);
 			   if(dependentItemEntities) {
 			   	 entity[itemsEntitySetName] = dependentItemEntities;
 		   	   }
 		   	   var currentUser = userLib.getName();
 		   	   if(currentUser){
-				   var userVote = boardVotes.getVote(entity.disb_id, currentUser);
+				   var userVote = boardVotes.getVote(entity.id, currentUser);
 				   entity.currentUserVote = userVote;		   	   
 		   	   }
 			}
@@ -201,7 +201,7 @@ exports.list = function(limit, offset, sort, order, expanded, entityName) {
 //create entity as JSON object from ResultSet current Row
 function createEntity(resultSet) {
     var entity = {};
-	entity.disb_id = resultSet.getInt("DISB_ID");
+	entity.id = resultSet.getInt("DISB_ID");
     entity.shortText = resultSet.getString("DISB_SHORT_TEXT");	
     entity.description = resultSet.getString("DISB_DESCRIPTION");
     entity.user = resultSet.getString("USRU_UNAME");
@@ -233,7 +233,7 @@ function createEntity(resultSet) {
 			entity[key] = undefined;
 	}	
     entity.editable = entity.user === userLib.getName();
-    $log.info("Transformation from DB JSON object finished");
+    $log.info("Transformation from DIS_BOARD["+entity.id+"] DB JSON object finished");
     return entity;
 }
 
@@ -264,14 +264,14 @@ function createSQLEntity(entity) {
 		persistentItem.latestpublishTime = new Date(entity.latestpublishTime).getTime();
 	}
 	
-	$log.info("Transformation to DB JSON object finished");
+	$log.info("Transformation to DIS_BOARD["+entity.id+"] DB JSON object finished");
 	return persistentItem;
 }
 
 // update entity from a JSON object. Returns the id of the updated entity.
 exports.update = function(entity) {
 
-	$log.info('Updating DIS_BOARD entity with id[' + entity!==undefined?entity.disb_id:entity + ']');
+	$log.info('Updating DIS_BOARD[' + entity!==undefined?entity.id:entity + '] entity');
 
 	if(entity === undefined || entity === null){
 		throw new Error('Illegal argument: entity is ' + entity);
@@ -301,11 +301,11 @@ exports.update = function(entity) {
         statement.setLong(++i, Date.now());
         statement.setString(++i, entity.status);
         statement.setShort(++i, entity.locked);        
-        var id = entity.disb_id;
+        var id = entity.id;
         statement.setInt(++i, id);
         statement.executeUpdate();
             
-        $log.info('DIS_BOARD entity with disb_id[' + id + '] updated');
+        $log.info('DIS_BOARD[' + id + '] entity updated');
         
         return this;
         
@@ -344,7 +344,7 @@ exports.remove = function(id, cascaded) {
 			var dependentItems = commentsLib.list(id);
 			$log.info('Deleting DIS_BOARD['+id+'] entity\'s '+dependentItems.length+' dependent posts');
 			for(var i = 0; i < dependentItems.length; i++) {
-        		commentsLib.remove(dependentItems[i].disc_id);
+        		commentsLib.remove(dependentItems[i].id);
 			}
 		}        
         
@@ -385,8 +385,8 @@ exports.count = function() {
     return count;
 };
 
-exports.visit = function(disb_id){
-	console.info('visit recording')
+exports.visit = function(id){
+	console.info('Updating DIS_BOARD['+id+'] entity visits');
 	var connection = datasource.getConnection();
     try {
     
@@ -394,9 +394,9 @@ exports.visit = function(disb_id){
         sql += " SET DISB_VISITS=DISB_VISITS+1"; 
         sql += " WHERE DISB_ID = ?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);        
+        statement.setInt(1, id);        
         statement.executeUpdate();
-
+        console.info('DIS_BOARD['+id+'] entity visits updated');
         return this;
         
     } catch(e) {
@@ -407,15 +407,15 @@ exports.visit = function(disb_id){
     }
 };
 
-exports.lock = function(disb_id){
-    $log.info('Locking board entity DIS_BOARD[' +  disb_id+ ']');
+exports.lock = function(id){
+    $log.info('Updating DIS_BOARD[' +  id+ '] entity lock[true]');
 	var connection = datasource.getConnection();
 	try{
 		var sql =  "UPDATE DIS_BOARD SET DISB_LOCKED=1 WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);	    
+        statement.setInt(1, id);	    
 	    statement.executeUpdate();
-    	$log.info('Board entity DIS_BOARD[' +  disb_id+ '] locked');
+    	$log.info('DIS_BOARD[' +  id+ '] entity lock[true] updated');
 	} catch(e) {
 		e.errContext = sql;
 		throw e;
@@ -425,15 +425,15 @@ exports.lock = function(disb_id){
 
 };
 
-exports.unlock = function(disb_id){
-    $log.info('Unlocking board entity DIS_BOARD[' +  disb_id+ ']');
+exports.unlock = function(id){
+	$log.info('Updating DIS_BOARD[' +  id+ '] entity lock[false]');
 	var connection = datasource.getConnection();
 	try{
 		var sql = "UPDATE DIS_BOARD SET DISB_LOCKED=0 WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);	    
+        statement.setInt(1, id);	    
 	    statement.executeUpdate();
-    	$log.info('Board entity DIS_BOARD[' +  disb_id+ '] unlocked');
+	    $log.info('DIS_BOARD[' +  id+ '] entity lock[false] updated');
 	} catch(e) {
 		e.errContext = sql;
 		throw e;
@@ -443,20 +443,20 @@ exports.unlock = function(disb_id){
 
 };
 
-exports.isLocked = function(disb_id){
-    $log.info('Checking board entity DIS_BOARD[' +  disb_id+ '] for lock state');
+exports.isLocked = function(id){
+    $log.info('Finding DIS_BOARD[' +  id+ '] entity lock value');
 	var connection = datasource.getConnection();
 	try{
 		var sql = "SELECT DISB_LOCKED FROM DIS_BOARD WHERE DISB_ID=?";
         var statement = connection.prepareStatement(sql);
-        statement.setInt(1, disb_id);
+        statement.setInt(1, id);
         var resultSet = statement.executeQuery();
         
         var isLocked = false;
         if (resultSet.next()) {
         	isLocked = resultSet.getShort('DISB_LOCKED')===1;
         }
-        $log.info('Board entity DIS_BOARD[' +  disb_id+ '] lock state checked');
+        $log.info('DIS_BOARD[' +  id+ '] entity lock value found');
         return isLocked;
 	} catch(e) {
 		e.errContext = sql;

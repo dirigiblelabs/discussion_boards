@@ -3,10 +3,10 @@
 	angular.module('discussion-boards')
 	.service('$DBoardVisits', ['BoardVisits', '$q', function(BoardVisits, $q) {
 		var visited = [];
-		var put = function(disb_id){
-			if(visited.indexOf(disb_id)<0){
-				visited.push(disb_id);
-				return BoardVisits.update({"boardId": disb_id}, {}).$promise;
+		var put = function(boardId){
+			if(visited.indexOf(boardId)<0){
+				visited.push(boardId);
+				return BoardVisits.update({"boardId": boardId}, {}).$promise;
 			} else {
 				return $q.when(false);
 			}
@@ -124,39 +124,39 @@
 			});
 		};	
 		var remove = function(board){
-			return Board.remove({boardId: board.disb_id, cascaded:true}).$promise;
+			return Board.remove({boardId: board.id, cascaded:true}).$promise;
 		};		
 		var saveVote = function(board, v){
-			return BoardVote.save({"boardId": board.disb_id}, {"vote":v}).$promise
+			return BoardVote.save({"boardId": board.id}, {"vote":v}).$promise
 			.then(function(){
-	      		return get(board.disb_id);
+	      		return get(board.id);
 			});
 		};
 		var getVote = function(board){
-			return BoardVote.get({"boardId":board.disb_id}).$promise
+			return BoardVote.get({"boardId":board.id}).$promise
 			.then(function(vote){
 	      		return vote;
 			});
 		};
 		var getTags = function(board){
-			return BoardTags.get({"boardId":board.disb_id}).$promise
+			return BoardTags.get({"boardId":board.id}).$promise
 			.then(function(tags){
 	      		return tags;
 			});
 		};
 		var setTags = function(board, tags){
-			return BoardTags.save({"boardId": board.disb_id}, tags).$promise;
+			return BoardTags.save({"boardId": board.id}, tags).$promise;
 		};
 		var untag = function(board, tags){
-			return BoardTags.remove({"boardId": board.disb_id}, tags).$promise;
+			return BoardTags.remove({"boardId": board.id}, tags).$promise;
 		};
 		var lock = function(board){
 			board.locked = true;
-			return Board.update({"boardId": board.disb_id}, board).$promise;
+			return Board.update({"boardId": board.id}, board).$promise;
 		};		
 		var unlock = function(board){
 			board.locked = false;
-			return Board.update({"boardId": board.disb_id}, board).$promise;
+			return Board.update({"boardId": board.id}, board).$promise;
 		};		
 	 	return {
 	 		list: list,

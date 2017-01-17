@@ -8,8 +8,8 @@ var database = require("db/database");
 var datasource = database.getDatasource();
 
 var persistentProperties = {
-	mandatory: ["disc_id", "disc_disb_id"],
-	optional: ["text", "user", "publishTime", "lastModifiedTime", "reply_to_disc_id"]
+	mandatory: ["id", "replyToCommentId"],
+	optional: ["text", "user", "publishTime", "lastModifiedTime", "replyToCommentId"]
 };
 
 var $log = require("logging/logger").logger;
@@ -26,7 +26,7 @@ exports.insert = function(item) {
 	
 	for(var i = 0; i< persistentProperties.mandatory.length; i++){
 		var propName = persistentProperties.mandatory[i];
-		if(propName==='disc_id')
+		if(propName==='id')
 			continue;//Skip validaiton check for id. It's epxected to be null on insert.
 		var propValue = item[propName];
 		if(propValue === undefined || propValue === null){
@@ -42,12 +42,12 @@ exports.insert = function(item) {
         var statement = connection.prepareStatement(sql);
         item = createSQLEntity(item);
         
-        item.disc_id = datasource.getSequence('DIS_COMMENT_DISC_ID').next();
+        item.id = datasource.getSequence('DIS_COMMENT_DISC_ID').next();
 
         var j = 0;
-        statement.setInt(++j, item.disc_id);
-        statement.setInt(++j, item.disc_disb_id);
-        statement.setInt(++j, item.reply_to_disc_id);
+        statement.setInt(++j, item.id);
+        statement.setInt(++j, item.replyToCommentId);
+        statement.setInt(++j, item.replyToCommentId);
         statement.setString(++j, item.text);
         
         //TODO: move to frontend svc
@@ -64,9 +64,9 @@ exports.insert = function(item) {
 
         statement.executeUpdate();
         
-        $log.info('DIS_COMMENT entity inserted with disc_id[' + item.disc_id + ']');
+        $log.info('DIS_COMMENT[' + item.id + '] entity inserted');
         
-        return item.disc_id;
+        return item.id;
         
     } catch(e) {
 		e.errContext = sql;
@@ -79,7 +79,7 @@ exports.insert = function(item) {
 // Reads a single entity by id, parsed into JSON object 
 exports.find = function(id, expanded) {
 
-	$log.info('Finding DIS_COMMENT entity with id[' + id + ']');
+	$log.info('Finding DIS_COMMENT[' + id + '] entity');
 
     var connection = datasource.getConnection();
     try {
@@ -92,9 +92,9 @@ exports.find = function(id, expanded) {
         if (resultSet.next()) {
             item = createEntity(resultSet);
             if(item){
-            	$log.info('DIS_COMMENT entity with id[' + id + '] found');
+            	$log.info('DIS_COMMENT[' + id + '] entity found');
             	if(expanded){
-            		item.comments = exports.findComments(item.disc_disb_id, expanded);
+            		item.comments = exports.findComments(item.replyToCommentId, expanded);
             	}            	
         	}
         }
@@ -111,7 +111,7 @@ exports.find = function(id, expanded) {
 
 exports.findComments = function(boardId, expanded) {
 
-	$log.info('Finding DIS_COMMENT entities in reply to DIS_BOARD entity with id[' + boardId + ']');
+	$log.info('Finding DIS_COMMENT entities in reply to DIS_BOARD[' + boardId + '] entity');
 
     var connection = datasource.getConnection();
     try {
@@ -125,11 +125,11 @@ exports.findComments = function(boardId, expanded) {
 			var item = createEntity(resultSet);
             items.push(item);
             if(expanded){
-            	item.replies = exports.findReplies(boardId, item.disc_id);
+            	item.replies = exports.findReplies(boardId, item.id);
             }
         }
         
-        $log.info('' + items.length +' DIS_COMMENT entities in reply to DIS_BOARD entity with id['+boardId+'] found');
+        $log.info('' + items.length +' DIS_COMMENT entities in reply to DIS_BOARD['+boardId+'] entity found');
         
         return items;
 
@@ -143,7 +143,7 @@ exports.findComments = function(boardId, expanded) {
 
 exports.findReplies = function(boardId, commentId) {
 
-	$log.info('Finding DIS_COMMENT entities in reply to DIS_COMMENT entity with id[' + commentId + '] for DIS_BOARD entity with id['+boardId+']');
+	$log.info('Finding DIS_COMMENT entities in reply to DIS_COMMENT[' + commentId + '] entity for DIS_BOARD['+boardId+'] entity');
 
     var connection = datasource.getConnection();
     try {
@@ -158,7 +158,7 @@ exports.findReplies = function(boardId, commentId) {
             items.push(createEntity(resultSet));
         }
         
-        $log.info('' + items.length +'  DIS_COMMENT entities in reply to DIS_COMMENT entity with id[' + commentId + '] for DIS_BOARD entity with id['+boardId+'] found');
+        $log.info('' + items.length +'  DIS_COMMENT entities in reply to DIS_COMMENT[' + commentId + '] entity for DIS_BOARD['+boardId+'] entity found');
         
         return items;
 
@@ -172,7 +172,7 @@ exports.findReplies = function(boardId, commentId) {
 
 exports.findDiscussionPosts = function(boardId, flat) {
 
-	$log.info('Finding DIS_COMMENT entities for DIS_BOARD entity with id[' + boardId + ']');
+	$log.info('Finding DIS_COMMENT entities for DIS_BOARD[' + boardId + '] entity');
 
     var connection = datasource.getConnection();
     try {
@@ -192,9 +192,9 @@ exports.findDiscussionPosts = function(boardId, flat) {
 		while (resultSet.next()) {
 			var item = createEntity(resultSet);
 			if(!flat){
-				if(item.reply_to_disc_id !== undefined){
+				if(item.replyToCommentId !== undefined){
 					items.map(function(_it){
-						if(item.reply_to_disc_id === _it.disc_id){
+						if(item.replyToCommentId === _it.id){
 							if(!_it.replies)
 								_it.replies = [];
 							_it.replies.push(item);
@@ -207,10 +207,10 @@ exports.findDiscussionPosts = function(boardId, flat) {
 			} else {
 				items.push(item);
 			}
-           	item.replies = exports.findReplies(boardId, item.disc_id);
+           	item.replies = exports.findReplies(boardId, item.id);
         }
         
-        $log.info('' + items.length +' DIS_COMMENT entities in reply to DIS_BOARD entity with id['+boardId+'] found');
+        $log.info('' + items.length +' DIS_COMMENT entities in reply to DIS_BOARD['+boardId+'] entity found');
         
         return items;
 
@@ -226,7 +226,7 @@ exports.findDiscussionPosts = function(boardId, flat) {
 // Read all entities, parse and return them as an array of JSON objets
 exports.list = function(boardId, limit, offset, sort, order, expanded) {
 
-	$log.info('Listing DIS_COMMENT entity collection for DIS_BOARD id [' + boardId + '] with list operators: limit['+limit+'], offset['+offset+'], sort['+sort+'], order['+order+'], expanded['+expanded+']');
+	$log.info('Listing DIS_COMMENT entity collection for DIS_BOARD[' + boardId + '] with list operators: limit['+limit+'], offset['+offset+'], sort['+sort+'], order['+order+'], expanded['+expanded+']');
 
     var connection = datasource.getConnection();
     try {
@@ -254,13 +254,13 @@ exports.list = function(boardId, limit, offset, sort, order, expanded) {
         var resultSet = statement.executeQuery();
         while (resultSet.next()) {
         	var item = createEntity(resultSet);
-        	if(item.reply_to_disc_id === undefined){
-        		item.replies = exports.findReplies(item.disc_disb_id, item.disc_id);
+        	if(item.replyToCommentId === undefined){
+        		item.replies = exports.findReplies(item.replyToCommentId, item.id);
         		items.push(item);
     		}
         }
         
-        $log.info('' + items.length +' DIS_COMMENT entities found');
+        $log.info('' + items.length +' DIS_COMMENT entities for DIS_BOARD[' + boardId + '] found');
         
         return items;
         
@@ -275,14 +275,14 @@ exports.list = function(boardId, limit, offset, sort, order, expanded) {
 //create entity as JSON object from ResultSet current Row
 function createEntity(resultSet) {
     var entity = {};
-	entity.disc_id = resultSet.getInt("DISC_ID");
+	entity.id = resultSet.getInt("DISC_ID");
 	entity.text = resultSet.getString("DISC_COMMENT_TEXT");
-	entity.disc_disb_id = resultSet.getString("DISC_DISB_ID");
+	entity.replyToCommentId = resultSet.getString("DISC_DISB_ID");
     entity.user = resultSet.getString("USRU_UNAME");
     entity.pic = resultSet.getString("USRU_PIC");
-    entity.reply_to_disc_id = resultSet.getString("DISC_REPLY_TO_DISC_ID");
-    if(entity.reply_to_disc_id < 0){
-    	entity.reply_to_disc_id = undefined;
+    entity.replyToCommentId = resultSet.getString("DISC_REPLY_TO_DISC_ID");
+    if(entity.replyToCommentId < 0){
+    	entity.replyToCommentId = undefined;
     }
     
   	entity.publishTime = resultSet.getLong("DISC_PUBLISH_TIME");
@@ -294,7 +294,7 @@ function createEntity(resultSet) {
     
     var user = require("net/http/user");
     entity.editable = entity.user === user.getName();    
-    $log.info("Transformation from DB JSON object finished");
+    $log.info("Transformation from DIS_COMMENT["+entity.id+"] DB JSON object finished");
     return entity;
 }
 
@@ -311,17 +311,17 @@ function createSQLEntity(item) {
 			persistentItem[persistentProperties.optional[i]] = null;
 		}
 	}
-	if(persistentItem.reply_to_disc_id === null){
-    	persistentItem.reply_to_disc_id = -1;
+	if(persistentItem.replyToCommentId === null){
+    	persistentItem.replyToCommentId = -1;
     }
-	$log.info("Transformation to DB JSON object finished");
+	$log.info("Transformation to DIS_COMMENT[" + persistentItem.id + "] DB JSON object finished");
 	return persistentItem;
 }
 
 // update entity from a JSON object. Returns the id of the updated entity.
 exports.update = function(item) {
 
-	$log.info('Updating DIS_COMMENT entity with id[' + item!==undefined?item.disc_id:item + ']');
+	$log.info('Updating DIS_COMMENT[' + item!==undefined?item.id:item + '] entity');
 
 	if(item === undefined || item === null){
 		throw new Error('Illegal argument: entity is ' + item);
@@ -346,11 +346,11 @@ exports.update = function(item) {
         var i = 0;
         statement.setString(++i, item.text);
         statement.setLong(++i, Date.now());
-        var id = item.disc_id;
+        var id = item.id;
         statement.setInt(++i, id);
         statement.executeUpdate();
         
-        $log.info('DIS_COMMENT entity with id[' + id + '] updated');
+        $log.info('DIS_COMMENT[' + id + '] entity updated');
         
         return this;
 
@@ -365,7 +365,7 @@ exports.update = function(item) {
 // delete entity by id. Returns the id of the deleted entity.
 exports.remove = function(id) {
 
-	$log.info('Deleting DIS_COMMENT entity with id[' + id + ']');
+	$log.info('Deleting DIS_COMMENT[' + id + '] entity');
 	
 	if(id === undefined || id === null){
 		throw new Error('Illegal argument: id[' + id + ']');
@@ -378,7 +378,7 @@ exports.remove = function(id) {
         statement.setInt(1, id);
         statement.executeUpdate();
         
-        $log.info('DIS_COMMENT entity with id[' + id + '] deleted');        
+        $log.info('DIS_COMMENT[' + id + '] entity deleted');        
         
         return this;
         

@@ -15,7 +15,7 @@
 			
 			<div class="main-compartment">
 				
-				<a class="title" ng-bind="board.shortText" ui-sref="list.entity({boardId:board.disb_id, board: board})"></a>
+				<a class="title" ng-bind="board.shortText" ui-sref="list.entity({boardId:board.id, board: board})"></a>
 
 				<div class="stats">
 					<span>{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
@@ -27,7 +27,7 @@
 						</span>
 					</div>
 					<div ng-if="!board.comments.length" style="display:inline-block">
-						No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:board.disb_id, board: board})" href>comment</a> !
+						No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:board.id, board: board})" href>comment</a> !
 					</div>
 				</div>
 									
