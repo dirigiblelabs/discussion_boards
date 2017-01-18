@@ -14,7 +14,7 @@ exports.listBoardTags = function(id){
 	$log.info('Finding DIS_BOARD_TAG entities related to DIS_BOARD['+id+']');
 
 	if(id === undefined || id === null){
-		throw new Error('Illegal argument for id parameter:' + id);board
+		throw new Error('Illegal argument for id parameter:' + id);
 	}
 
     var connection = datasource.getConnection();
