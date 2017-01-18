@@ -116,7 +116,7 @@ exports.find = function(id, expanded) {
         if (resultSet.next()) {
         	entity = createEntity(resultSet);
 			if(entity){
-            	$log.info('DIS_BOARD_STATS[' +  entity.id + '] entity found');
+            	$log.info('DIS_BOARD_STATS[' +  id + '] entity found');
 				if(expanded !== null && expanded!==undefined){
 				   var dependentItemEntities = commentsLib.findDiscussionPosts(entity.id, false);
 				   if(dependentItemEntities) {
@@ -129,7 +129,7 @@ exports.find = function(id, expanded) {
 			   	   }
 				}            	
         	} else {
-	        	$log.info('DIS_BOARD_STATS[' +  entity.id + '] entity not found');
+	        	$log.info('DIS_BOARD_STATS[' +  id + '] entity not found');
         	}
         } 
         return entity;
@@ -441,7 +441,6 @@ exports.unlock = function(boardId){
     } finally {
         connection.close();
     }
-
 };
 
 exports.isLocked = function(boardId){
@@ -465,7 +464,6 @@ exports.isLocked = function(boardId){
     } finally {
         connection.close();
     }
-
 };
 
 exports.getPrimaryKeys = function() {
