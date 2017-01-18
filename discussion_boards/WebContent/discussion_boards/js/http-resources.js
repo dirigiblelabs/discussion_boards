@@ -46,10 +46,10 @@
 	  				remove: {method:'DELETE', params:{}, isArray:true, ignoreLoadingBar: true}
 	  			});
 	}])	
-	.service('BoardCommentsTimeline', ['$resource', '$log', function($resource) {
-	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/comments/timeline', {}, 
+	.service('BoardComments', ['$resource', '$log', function($resource) {
+	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/comments/:listMode', {}, 
 	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
-	}])	
+	}])		
 	.service('$Comment', ['$resource', '$log', function($resource, $log) {
 	 	return $resource('../../js/discussion_boards/svc/comment.js/:commentId', { commentId:'@id' }, {
 			    save: {

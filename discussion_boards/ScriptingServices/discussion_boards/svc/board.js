@@ -29,6 +29,23 @@ Board.prototype.cfg["{id}/comments/timeline"] = {
 	}
 };
 
+Board.prototype.cfg["{id}/comments"] = {
+	"get" : {
+		handler: function(context, io){
+		    try{
+				var comments = this.dao.getComments(context.pathParams.id, false);
+				io.response.setStatus(io.response.OK);
+				io.response.println(JSON.stringify(comments));
+			} catch(e) {
+	    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
+	    	    this.logger.error(errorCode, e.message, e.errContext);
+	        	this.sendError(io, errorCode, errorCode, e.message, e.errContext);
+	        	throw e;
+			}		
+		}
+	}
+};
+
 Board.prototype.cfg["{id}/visit"] = {
 	"put" : {
 		consumes: ["application/json"],	

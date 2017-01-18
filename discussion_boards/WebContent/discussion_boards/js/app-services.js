@@ -14,8 +14,51 @@
 	  	return {
 	  		visit: put
 	  	};
+	}])
+	.service('$TimeFormat', ['$moment', function($moment){
+		function asElapsedTimeString(time){
+			if(time)
+				return $moment(new Date(time).toISOString()).fromNow();
+		}
+		function asFormattedTimeString(time){
+			return $moment(time).format('LLL');
+		}		
+		return {
+			asElapsedTimeString: asElapsedTimeString,
+			asFormattedTimeString: asFormattedTimeString
+		};
+	}])
+	.service('$Comments', ['BoardComments', '$TimeFormat', '$moment', function(BoardComments, $TimeFormat, $moment){
+	
+		var formatComment = function(comment){
+			comment.timeSincePublish = $TimeFormat.asElapsedTimeString(comment.publishTime);
+			comment.publishTimeLocal = $TimeFormat.asFormattedTimeString(comment.publishTime); 	      			
+      		if($moment(comment.lastModifiedTime).isAfter($moment(comment.publishTime))){
+      			comment.lastModifiedTimeLocal = $TimeFormat.asFormattedTimeString(comment.lastModifiedTime);
+      			comment.timeSinceLastModified = $TimeFormat.asElapsedTimeString(comment.lastModifiedTime);
+  			}
+            return comment;
+		};
+	
+		var list = function(boardId, mode){
+			if(mode && mode!=='timeline')
+				throw Error('Unknown list mode for requesting board comments: ' + mode);
+			return BoardComments
+					.get({boardId: boardId, listMode: mode}).$promise.
+					then(function(commentsData){
+						var comments = commentsData.map(function(comment){
+							return formatComment(comment);
+						});
+						return comments;
+					});
+		};
+	
+		return {
+			list: list,
+			formatComment: formatComment
+		};
 	}])	
-	.service('$Boards', ['Board', 'BoardVote', 'BoardTags', '$UserImg', '$moment', function(Board, BoardVote, BoardTags, $UserImg, $moment) {
+	.service('$Boards', ['Board', 'BoardVote', 'BoardTags', '$Comments', '$UserImg', '$moment', function(Board, BoardVote, BoardTags, $Comments, $UserImg, $moment) {
 		
 		function asElapsedTimeString(time){
 			if(time)
@@ -50,25 +93,13 @@
 			if(board.latestDiscussionUpdateTime){
 				board.latestDiscussionUpdateTimeLocal = $moment(board.latestDiscussionUpdateTime).format('LLL');  	
   				board.timeSinceLatestDiscussionUpdateTime = asElapsedTimeString(board.latestDiscussionUpdateTime); 
-  			}
-  			
+  			}  			
   			if(board.comments){
           		board.comments = board.comments.map(function(comment){
-	      			comment.timeSincePublish = asElapsedTimeString(comment.publishTime);
-					comment.publishTimeLocal = $moment(comment.publishTime).format('LLL'); 	      			
-	      			if($moment(comment.lastModifiedTime).isAfter($moment(comment.publishTime))){
-	      				comment.lastModifiedTimeLocal = $moment(comment.lastModifiedTime).format('LLL');
-	      				comment.timeSinceLastModified = asElapsedTimeString(comment.lastModifiedTime);
-      				}
+	      			var comment = $Comments.formatComment(comment);
 	      			if(comment.replies){
 	      				comment.replies = comment.replies.map(function(reply){
-	          				reply.timeSincePublish = asElapsedTimeString(reply.publishTime);
-	          				reply.publishTimeLocal = $moment(reply.publishTime).format('LLL');
-	          				if($moment(reply.lastModifiedTime).isAfter($moment(reply.publishTime))){
-	      						reply.lastModifiedTime = asElapsedTimeString(reply.lastModifiedTime);
-	          					reply.lastModifiedTimeLocal = $moment(reply.lastModifiedTime).format('LLL');	      						
-      						}
-	          				return reply;
+	      					return $Comments.formatComment(reply);
 	          			});
 	            	}
 	            	return comment;
@@ -177,5 +208,5 @@
 	  	return {
 	  		filterText: _filterText
 	  	};
-	}])
+	}]);
 })(angular);	

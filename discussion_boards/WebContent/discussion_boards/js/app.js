@@ -220,10 +220,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		})
 		.state('list.entity.discussion-timeline', {
 			resolve: {
-				comments: ['BoardCommentsTimeline', 'board', function(BoardCommentsTimeline, board){
-					return BoardCommentsTimeline
-							.get({boardId: board.id}).$promise.
-							then(function(comments){
+				comments: ['$Comments', 'board', function($Comments, board){
+					return 	$Comments
+							.list(board.id, 'timeline')
+							.then(function(comments){
 								return comments;
 							});
 				}]

@@ -22,7 +22,7 @@
       <timeline-panel class="default">
         <timeline-heading>
           <div style="font-size: 0.9em;color:#848d95">
-		    <span ng-bind="comment.user"></span> said <span title="{{comment.lastModifiedTimeLocal || comment.publishTimeLocal}}" ng-bind="comment.timeSinceLastModified || comment.timeSincePublish">:</span>
+		    <span ng-bind="comment.user"></span> said <span title="{{comment.lastModifiedTimeLocal || comment.publishTimeLocal}}" ng-bind="comment.timeSinceLastModified || comment.timeSincePublish"></span>:
 		  </div>
         </timeline-heading>
 		<p ng-if="vm.comment !== comment || vm.replyEdit" ng-bind-html="comment.text" style="font-size: 1.1em"></p>
