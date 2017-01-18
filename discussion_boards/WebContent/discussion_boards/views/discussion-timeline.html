@@ -34,7 +34,10 @@
 			</div>
 		</div>		
         <timeline-footer>
-			<a href ng-if="vm.canPost() && !vm.commentEdit" style="align-self:flex-end" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+        	<div style="align-self:flex-end" >
+				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.remove(comment)">Delete</a>
+			</div>
         </timeline-footer>
       </timeline-panel>
     </timeline-event>

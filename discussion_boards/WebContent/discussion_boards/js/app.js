@@ -296,7 +296,21 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							.then(function(data){
 								return data;
 							});
-						};
+						}
+						
+						this.remove = function(comment){
+							$Comment['delete']({commentId:comment.id}).$promise
+							.then(function(){
+								$Boards.get(board.id)
+								.then(function(board){
+									$state.go('list.entity', {board: board}, {reload:true});
+								});
+							})
+							.catch(function(err){
+								throw err;
+							});
+						};						
+
 
 					}],
 					controllerAs: 'vm'				
@@ -384,6 +398,19 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								self.replyCancel();
 							});
 						};
+						
+						this.remove = function(comment){
+							$Comment['delete']({commentId:comment.id}).$promise
+							.then(function(){
+								$Boards.get(board.id)
+								.then(function(board){
+									$state.go('list.entity', {board: board}, {reload:true});
+								});
+							})
+							.catch(function(err){
+								throw err;
+							});
+						};						
 
 					}],
 					controllerAs: 'vm'				
