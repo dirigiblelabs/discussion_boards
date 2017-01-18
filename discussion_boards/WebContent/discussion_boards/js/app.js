@@ -369,7 +369,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 
 						this.replyPost = function(){
 							var upsertOperation = self.reply.id===undefined?'save':'update';
-							$Comment[upsertOperation ](self.reply).$promise
+							$Comment[upsertOperation](self.reply).$promise
 							.then(function(){
 								$log.info('reply saved');
 								$Boards.get(board.id)

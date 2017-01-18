@@ -14,7 +14,7 @@ exports.listBoardTags = function(id){
 	$log.info('Finding DIS_BOARD_TAG entities related to DIS_BOARD['+id+']');
 
 	if(id === undefined || id === null){
-		throw new Error('Illegal argument for id parameter:' + id);
+		throw new Error('Illegal argument for id parameter:' + id);board
 	}
 
     var connection = datasource.getConnection();
@@ -81,14 +81,14 @@ exports.tag = function(id, tags, createOnDemand){
 	        var statement = connection.prepareStatement(sql);
 	        
 	        var j = 0;
-	        var disbt_id = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
-	        statement.setLong(++j, disbt_id);
+	        var boardTagId = datasource.getSequence('DIS_BOARD_TAG_DISBT_ID').next();
+	        statement.setLong(++j, boardTagId);
 	        statement.setInt(++j, id);        
 	        statement.setLong(++j, tagId);        
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG[' +  disbt_id + '] entity relation for ANN_TAG['+tagId+'] and DIS_BOARD['+id+'] entity inserted');
+	    	$log.info('DIS_BOARD_TAG[' +  boardTagId + '] entity relation for ANN_TAG['+tagId+'] and DIS_BOARD['+id+'] entity inserted');
 		}
 	} catch(e) {
 		e.errContext = sql;
@@ -131,7 +131,7 @@ exports.untag = function(id, tags){
 		    
 		    statement.executeUpdate();
 	    	
-	    	$log.info('DIS_BOARD_TAG[' +  tagEntity.disbt_id+ '] entity relation between DIS_BOARD[' + id + '] entity and ANN_TAG['+tagEntity.id+'] removed');
+	    	$log.info('DIS_BOARD_TAG entity relation between DIS_BOARD[' + id + '] entity and ANN_TAG['+tagEntity.id+'] removed');
 		}
 	} catch(e) {
 		e.errContext = sql;
