@@ -198,6 +198,26 @@ body{
     margin-right:10px
 }
 
+tags-input .tags {
+	box-shadow: none;
+}
+
+tags-input .tags .tag-item {
+	background: #f1f1f1
+}
+
+.tags .tag-item {
+	margin: 2px; 
+	padding: 0 5px; 
+	display: inline-block; 
+	float: left; 
+	height: 26px; 
+	line-height: 25px; 
+	border: 1px solid #acacac; 
+	border-radius: 3px;  
+	background: #f1f1f1
+}
+
 .discussion-header {
 	margin-top: 10px;
 	margin-bottom: -15px;

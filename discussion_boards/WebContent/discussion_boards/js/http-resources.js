@@ -47,7 +47,7 @@
 	  			});
 	}])	
 	.service('BoardComments', ['$resource', '$log', function($resource) {
-	  	return $resource('../../js/discussion_boards/svc/board.js/:boardId/comments/:listMode', {}, 
+	  	return $resource('../../js/discussion_boards/svc/comment.js', {}, 
 	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
 	}])		
 	.service('$Comment', ['$resource', '$log', function($resource, $log) {
@@ -73,6 +73,10 @@
 			    }
 			});
 	}])
+	.service('$Tags', ['$resource', function($resource) {
+	  	return $resource('../../js/annotations/svc/tags.js', {}, 
+	  					{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
+	}])			
 	.service('$LoggedUser', ['$resource', '$log', function($resource) {
 		var UserSvc =  $resource('../../js/usr/svc/user.js/$current', {}, 
 	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});

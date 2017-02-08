@@ -14,7 +14,10 @@ angular.module('$ckeditor', [])
 
 
 angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput'])
-.config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider) {
+.constant('CONFIG', {
+	'LOGIN_URL' : 'login/login.html'
+})
+.config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', 'CONFIG', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider, CONFIG) {
 
 		$urlRouterProvider.otherwise("/");
 		
@@ -29,7 +32,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						})
 						.catch(function(err){
 							$log.error(err);
-							if(err.status && err.status===404)
+							if(err.status && [404, 401, 403].indexOf(err.status)>-1)
 								$log.info('No user to authenticate. Sign in first.');
 							return;
 						});	
@@ -38,7 +41,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  views: {
 		  	"@": {
 		          templateUrl: 'views/master.html',
-		          controller: ['$Boards', '$log', 'FilterList', 'loggedUser', function($Boards, $log, FilterList){
+		          controller: ['$Boards', '$log', 'FilterList', function($Boards, $log, FilterList){
 		          
 		          	this.list = [];
 		          	this.filterList = FilterList;
@@ -47,16 +50,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					$Boards.list()
 					.then(function(data){
 						self.list = data;
-						self.list = self.list.map(function(board){
+/*						self.list = self.list.map(function(board){
 							$Boards.getTags(board)
 							.then(function(tags){
 								board.tags = tags;
 							})
 							.catch(function(err){
-								$log.warn('Could not get board['+board.boardId+'] tags');
+								$log.warn('Could not get board['+board.boardId+'] tags: ' + err.message);
 							});
 							return board;
-						});
+						});*/
 					})
 		          	.catch(function(err){
 		          		$log.error(err);
@@ -76,6 +79,18 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  	}
 		  }
 		})
+		.state('list.login', {
+			url: "login",
+			views: {
+				"@": {
+			    	template: '',
+			        controller: ['$window', function($window){
+			        	$window.location.href = CONFIG.LOGIN_URL;
+					}],
+			        controllerAs: 'loginVm'
+				}
+			}
+		})		
 		.state('list.entity', {
 			url: "{boardId}",
 			params: {
@@ -100,28 +115,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					} else {
 						return;
 					}
-				}],
-				tags: ['$Boards', 'board', '$log', function($Boards, board, $log){
-					if(board){
-						return $Boards.getTags(board)
-							.catch(function(err){
-								$log.warn('Could not get board['+board.boardId+'] tags');
-							});
-					} else {
-						return;
-					}
 				}]
 			},
 			views: {
 				"@": {
 					templateUrl: "views/detail.html",				
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', 'board', 'tags', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, board, tags, loggedUser){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', '$Tags', 'board', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, $Tags, board, loggedUser){
 						this.board = board;
-						this.tags = tags && tags.map(function(tag){
-							return {
-								"text": tag.defaultLabel,
-							};
-						});
 						this.loggedUser = loggedUser;
 						var self = this;
 						
@@ -151,20 +151,13 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							});
 						};
 						
-						this.getVote = function(){
-							$Boards.getVote(self.board)
-							.then(function(vote){
-								self.currentUserVote = vote;
-							});
-						};
-						
 						this.isAuthor = function(){
 							return this.loggedUser!==undefined && this.loggedUser.uname === this.board.user;
 						};
 						
 						this.canPost = function(){
 							return this.loggedUser!==undefined;
-						}
+						};
 						
 						this.openBoardForEdit = function(){
 							self.descriptionEdit = self.board.description;
@@ -200,17 +193,24 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 						
 						this.tagAdded = function($tag){
-							var tags = self.tags.map(function(tag){
-								return tag.text;
+							var tags = self.board.tags.map(function(tag){
+								return tag.defaultLabel;
 							});
 							$Boards.setTags(self.board, tags);
 						};
 						
 						this.tagRemoved = function($tag){
-							var tags = self.tags.map(function(tag){
-								return tag.text;
+							var tags = self.board.tags.map(function(tag){
+								return tag.defaultLabel;
 							});
 							$Boards.setTags(self.board, tags);
+						};
+						
+						this.loadTags = function(query){
+							return $Tags.query({"defaultLabel":query, "$filter":"defaultLabel"}).$promise
+							.then(function(tags){
+								return tags;
+							});
 						};
 
 					}],
@@ -231,7 +231,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion-timeline.html",				
-					controller: ['$state', '$log', '$Boards', '$Comment','$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comment, $UserImg, board, comments, loggedUser){
+					controller: ['$state', '$log', '$Boards', '$Comments', '$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, $UserImg, board, comments, loggedUser){
 						
 						this.comment = {};
 						this.board = board;
@@ -239,6 +239,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.comments = comments;
 						var self = this;
 					  	
+					  	this.isAuthor = function(comment){
+							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
+						};
+						
 					  	this.canPost = function(){
 					  		return self.loggedUser!==undefined && !self.board.locked;
 					  	};
@@ -256,7 +260,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.postComment = function(){
 							self.comment.boardId = this.board.id;
 							var operation = self.comment.id!==undefined?'update':'save';
-							$Comment[operation](self.comment).$promise
+							$Comments[operation](self.comment)
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
 								$log.info('Comment with id['+commentData.id+'] saved');
@@ -299,7 +303,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						}
 						
 						this.remove = function(comment){
-							$Comment['delete']({commentId:comment.id}).$promise
+							$Comments.remove({commentId:comment.id})
 							.then(function(){
 								$Boards.get(board.id)
 								.then(function(board){
@@ -318,15 +322,29 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			}
 		})		
 		.state('list.entity.discussion', {
+			resolve: {
+				comments: ['$Comments', 'board', function($Comments, board){
+					return 	$Comments
+							.list(board.id, 'thread')
+							.then(function(comments){
+								return comments;
+							});
+				}]
+			},		
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.html",				
-					controller: ['$state', '$log', '$Boards', '$Comment', 'board', 'loggedUser', function($state, $log, $Boards, $Comment, board, loggedUser){
+					controller: ['$state', '$log', '$Boards', '$Comments', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, board, comments, loggedUser){
 						
 						this.comment = {};
+						this.comments = comments;
 						this.board = board;
 						this.loggedUser = loggedUser;
 						var self = this;
+					  	
+					  	this.isAuthor = function(comment){
+							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
+						};
 					  	
 					  	this.canPost = function(){
 					  		return self.loggedUser!==undefined && !self.board.locked;
@@ -347,7 +365,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.postComment = function(){
 							self.comment.boardId = this.board.id;
 							var operation = self.comment.id!==undefined?'update':'save';
-							$Comment[operation](self.comment).$promise
+							$Comments[operation](self.comment)
 							.then(function(commentData){
 								//TODO: mixin into the resource the id from Location header upon response
 								$log.info('Comment with id['+commentData.id+'] saved');
@@ -383,7 +401,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 
 						this.replyPost = function(){
 							var upsertOperation = self.reply.id===undefined?'save':'update';
-							$Comment[upsertOperation](self.reply).$promise
+							self.reply.replyToCommentId = self.comment.id;
+							$Comments[upsertOperation](self.reply)
 							.then(function(){
 								$log.info('reply saved');
 								$Boards.get(board.id)
@@ -400,7 +419,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 						
 						this.remove = function(comment){
-							$Comment['delete']({commentId:comment.id}).$promise
+							$Comments.remove({commentId:comment.id})
 							.then(function(){
 								$Boards.get(board.id)
 								.then(function(board){
@@ -417,14 +436,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				}
 			}
 		})		
-		.state('list.new', {    
+		.state('list.new', { 		
 			views: {
 				"@": {
 					templateUrl: "views/board.form.html",
-					controller: ['$state', '$log', 'Board',  function($state, $log, Board){
+					controller: ['$state', '$log', 'SecureBoard', 'loggedUser',  function($state, $log, SecureBoard, loggedUser){
+							if(!loggedUser)
+								$state.go('list.login');
 							this.board = {};
 					  		this.submit = function(){
-					  			Board.save(this.board).$promise
+					  			SecureBoard.save(this.board).$promise
 					  			.then(function(data){
 					  				$log.info('board with id['+data.id+'] saved');
 		              				$state.go('list');
@@ -468,5 +489,20 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  
 		cfpLoadingBarProvider.includeSpinner = false;
 		  
+	}])
+	.run(['$rootScope', '$location', '$LoggedUser', '$log', function ($rootScope, $location, $LoggedUser, $log) {
+	    $rootScope.$on('$routeChangeStart', function (event) {
+			$LoggedUser.get().$promise
+			.then(function(user){
+		        if (!user) {
+		            $log.error('DENY');
+		            event.preventDefault();
+		            $location.path(CONFIG.LOGIN_URL);
+		        } else {
+		            $log.info('ALLOW');
+	//	            $location.path('/home');
+		        }				
+			});
+	    });
 	}]);
 })(angular);

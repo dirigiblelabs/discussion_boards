@@ -4,7 +4,7 @@
     [
       {
         "name":"DISC_ID",
-        "type":"INTEGER",
+        "type":"BIGINT",
         "length":"0",
         "notNull":"true",
         "primaryKey":"true",
@@ -13,7 +13,7 @@
       ,
       {
         "name":"DISC_DISB_ID",
-        "type":"INTEGER",
+        "type":"BIGINT",
         "length":"0",
         "notNull":"true",
         "primaryKey":"false",
@@ -22,7 +22,7 @@
       ,
       {
         "name":"DISC_REPLY_TO_DISC_ID",
-        "type":"INTEGER",
+        "type":"BIGINT",
         "length":"0",
         "notNull":"false",
         "primaryKey":"false",

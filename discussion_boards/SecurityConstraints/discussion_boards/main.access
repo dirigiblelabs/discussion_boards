@@ -1,6 +1,18 @@
 [
   {
-    "location":"/discussion_boards/svc",
+    "location":"/discussion_boards/svc/user",
+    "roles":
+      [
+        {"role":"Everyone"}
+      ]
+  },{
+    "location":"/discussion_boards/login",
+    "roles":
+      [
+        {"role":"Everyone"}
+      ]
+  },{
+    "location":"/discussion_boards/index.html#/login",
     "roles":
       [
         {"role":"Everyone"}

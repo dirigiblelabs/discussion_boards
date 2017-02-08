@@ -7,6 +7,7 @@
 </div>
 
 <div class="pull-right button-group">
-	<button class="btn btn-primary" ui-sref="list.new">New</button>		  
-	<button class="btn btn-primary" ui-sref="list.settings" ng-if="toolbarVm.loggedUser"><i class="fa fa-cog"></i></button>
+	<button class="btn btn-primary" ui-sref="list.new">New</button>
+	<button class="btn btn-primary" ui-sref="list.settings" ng-if="toolbarVm.loggedUser" title="Settings"><i class="fa fa-cog"></i></button>
+	<button class="btn btn-primary" ui-sref="list.login" ng-if="!toolbarVm.loggedUser" title="Sign-in"><i class="glyphicon glyphicon-log-in"></i></button>
 </div>

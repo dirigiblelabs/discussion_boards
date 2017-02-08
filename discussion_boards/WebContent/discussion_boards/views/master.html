@@ -20,20 +20,20 @@
 				<div class="stats">
 					<span>{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 					|
-					<div ng-if="board.comments.length" style="display:inline-block">
-						<span ng-if="board.comments.length">{{board.comments.length}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
+					<div ng-if="board.repliesCount" style="display:inline-block">
+						<span ng-if="board.repliesCount">{{board.repliesCount}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
 							<span ng-if="board.participantsCount>1">people</span>
 							<span ng-if="board.participantsCount===1">person</span>
 						</span>
 					</div>
-					<div ng-if="!board.comments.length" style="display:inline-block">
+					<div ng-if="!board.repliesCount" style="display:inline-block">
 						No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:board.id, board: board})" href>comment</a> !
 					</div>
 				</div>
 									
 				<!--<div class="description" ng-bind-html="board.description"></div>-->
-				<div ng-if="board.tags">
-					<span ng-repeat="tag in board.tags" ng-bind="tag.defaultLabel" style="margin: 2px; padding: 0 5px; display: inline-block; float: left; height: 26px; line-height: 25px; border: 1px solid #acacac; border-radius: 3px;  background: #f1f1f1"><span>
+				<div ng-if="board.tags" class="tags">
+					<span ng-repeat="tag in board.tags" ng-bind="tag.defaultLabel" class="tag-item"><span>
 				</div>
 				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">Last discussion update {{board.timeSinceLatestDiscussionUpdateTime}}</span>
 			</div>

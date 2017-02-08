@@ -5,7 +5,7 @@
 </style>
 
 <div style="margin-top:20px">
-	<span ng-if="vm.loggedUser && vm.board.comments.length===0">Be the first one to comment!</span>
+	<span ng-if="vm.loggedUser && vm.comments.length===0">Be the first one to comment!</span>
 	<span ng-if="!vm.loggedUser">Have something to tell about this? Sign in to comment</span>
 </div>
 <div class="" style="margin-top:20px">
@@ -35,8 +35,8 @@
 		</div>		
         <timeline-footer>
         	<div style="align-self:flex-end" >
-				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.openCommentForEdit(comment)">Edit</a>
-				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.remove(comment)">Delete</a>
+				<a href ng-if="vm.canPost() && vm.isAuthor(comment)" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+				<a href ng-if="vm.canPost() && vm.isAuthor(comment)" ng-click="vm.remove(comment)">Delete</a>
 			</div>
         </timeline-footer>
       </timeline-panel>
