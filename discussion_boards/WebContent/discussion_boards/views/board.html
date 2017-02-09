@@ -1,0 +1,91 @@
+<div class="board-list-item list-group-item">
+
+	<div class="left-compartment">
+		<div class="user-box">
+			<img ng-if="boardVm.board.userDetails.avatar" ng-src="{{boardVm.board.userDetails.avatar}}" class="user-pic"/>
+			<i ng-if="!boardVm.board.userDetails.avatar" class="glyphicon glyphicon-user user-pic"></i>
+			<span ng-bind="boardVm.board.user" class="user-name"></span>
+		</div>
+		<span class="publish-time" title="{{boardVm.board.publishTimeLocal}}" ng-bind="boardVm.board.timeSincePublish"></span>
+	</div>				
+	
+	<div class="main-compartment">
+		
+		<a class="title" ng-bind="boardVm.board.shortText" ui-sref="list.entity({boardId:boardVm.board.id, board: boardVm.board})" ui-sref-opts="{reload: true}"></a>
+
+		<div class="stats">
+			<span>{{boardVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
+			|
+			<div ng-if="boardVm.board.repliesCount">
+				<span ng-if="boardVm.board.repliesCount">{{boardVm.board.repliesCount}} <i class="fa fa-comments-o"></i> by {{boardVm.board.participantsCountShort}}
+					<span ng-if="boardVm.board.participantsCount>1">people</span>
+					<span ng-if="boardVm.board.participantsCount===1">person</span>
+				</span>
+			</div>
+			<div ng-if="!boardVm.board.repliesCount">
+				No one is discussing this yet.
+			</div>
+		</div>
+
+		<div class="description" ng-bind-html="boardVm.board.description" ng-if="!boardVm.descriptionEdit"></div>
+		
+		<tags-input ng-if="boardVm.isAuthor()" ng-model="boardVm.board.tags" 
+												 display-property="defaultLabel",
+												 max-tags="10",
+												 max-length="20",
+												 min-length="1",
+												 on-tag-added="boardVm.tagAdded($tag)" 
+											  	 on-tag-removed="boardVm.tagRemoved($tag)">
+			<auto-complete source="boardVm.loadTags($query)"></auto-complete>
+		</tags-input>
+		<div ng-if="!boardVm.isAuthor()">
+			<span ng-repeat="tag in boardVm.board.tags" ng-bind="tag.defaultLabel" class="tag"><span>
+		</div>									  							   
+		
+		<span ng-if="boardVm.board.timeSinceLastModified" title="{{boardVm.board.lastModifiedTimeLocal}}" class="text-muted">- last edit {{boardVm.board.timeSinceLastModified}}</span>
+		<div ng-if="boardVm.descriptionEdit"> 
+			<textarea class="form-control" ng-model="boardVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
+			<div class="button-group" style="margin: 5px 0;">
+				<button class="btn btn-primary" ng-click="boardVm.postEdit()" ng-disabled="!boardVm.descriptionEdit">Post</button>
+				<button class="btn btn-primary" ng-click="boardVm.cancelEdit()">Cancel</button>
+			</div>
+		</div>		
+
+		<div class="tools" ng-if="boardVm.isAuthor() && !boardVm.descriptionEdit">
+			<a ng-if="boardVm.board.editable" ng-click="boardVm.toggleLock()" href title="{{boardVm.board.locked?'locked':'unlocked'}}"><i ng-if="!boardVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="boardVm.board.locked" class="fa fa-lock"></i></a>
+			<a ng-if="boardVm.board.editable" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil"></i> Edit</a> 
+			<a ng-if="boardVm.board.editable" ng-click="boardVm.remove()" href ><i class="fa fa-trash-o"></i> Delete</a>
+		</div>
+
+	</div>
+
+	<div class="right-compartment">
+			
+		<div class="rating-box">
+			<span class="subtle">rating</span>
+			<span class="rating-number">{{boardVm.board.ratingShort}}</span>
+			<span class="votes-number">{{boardVm.board.totalVotesShort}} Votes</span>
+		</div>
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="boardVm.canVote()">
+			<a ng-click="boardVm.saveVote(1)" href ng-if="boardVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
+			<span ng-if="boardVm.board.currentUserVote===1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
+			<span style="font-size:1.6rem;color:#767676">{{boardVm.board.upvotesShort}}</span>
+		</div>
+		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="boardVm.canVote()">
+			<a ng-click="boardVm.saveVote(-1)" href ng-if="boardVm.board.currentUserVote!==-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
+			<span ng-if="boardVm.board.currentUserVote===-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
+			<span style="font-size:1.6rem;color:#767676">{{boardVm.board.downvotesShort}}</span>									
+		</div>
+		
+	</div>	
+</div>
+
+<div class="discussion-header">
+	<div ng-if="boardVm.board.latestDiscussionUpdateTime" title="{{boardVm.board.latestDiscussionUpdateTimeLocal}}" class="text-muted stats-text">Last discussion update {{boardVm.board.timeSinceLatestDiscussionUpdateTime}}</div>
+	<div class="toolbar">
+		<button class="btn btn-default" ui-sref="list.entity.discussion.thread({board:boardVm.board, timeline:false})"><i class="fa fa-list-ul"></i></button>		
+		<button class="btn btn-default" ui-sref="list.entity.discussion.timeline({board:boardVm.board, timeline:true})"><i class="fa fa-clock-o"></i></button>
+	</div>
+</div>
+
+<div ui-view></div>

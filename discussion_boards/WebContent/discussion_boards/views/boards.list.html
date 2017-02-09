@@ -1,7 +1,7 @@
 <div class="items-list">
-	<div ng-hide="masterVm.list.length" class="nodata-text">Look, it's empty! Be the first to add here!</div>
-	<div class="list-group" ng-if="masterVm.list.length>0">
-	  <div class="list-group-item" ng-repeat="board in masterVm.list|filter:masterVm.filterList.filterText|orderBy:['-rating', '-lastModifiedTime', '-participants']">
+	<div ng-hide="boardsVm.list.length" class="nodata-text">Look, it's empty! Be the first to add here!</div>
+	<div class="list-group" ng-if="boardsVm.list.length>0">
+	  <div class="list-group-item" ng-repeat="board in boardsVm.list|filter:boardsVm.filterList.filterText|orderBy:['-rating', '-lastModifiedTime', '-participants']">
 		<div class="board-list-item">
 			
 			<div class="left-compartment">

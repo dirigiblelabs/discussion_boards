@@ -40,7 +40,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			},			  
 		  views: {
 		  	"@": {
-		          templateUrl: 'views/master.html',
+		          templateUrl: 'views/boards.list.html',
 		          controller: ['$Boards', '$log', 'FilterList', function($Boards, $log, FilterList){
 		          
 		          	this.list = [];
@@ -50,16 +50,6 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					$Boards.list()
 					.then(function(data){
 						self.list = data;
-/*						self.list = self.list.map(function(board){
-							$Boards.getTags(board)
-							.then(function(tags){
-								board.tags = tags;
-							})
-							.catch(function(err){
-								$log.warn('Could not get board['+board.boardId+'] tags: ' + err.message);
-							});
-							return board;
-						});*/
 					})
 		          	.catch(function(err){
 		          		$log.error(err);
@@ -67,7 +57,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		          	});
 
 		          }],
-		          controllerAs: 'masterVm'
+		          controllerAs: 'boardsVm'
 		  	},
 		  	"toolbar@": {
 		          templateUrl: 'views/toolbar.html',
@@ -119,7 +109,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			},
 			views: {
 				"@": {
-					templateUrl: "views/detail.html",				
+					templateUrl: "views/board.html",
 					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', '$Tags', 'board', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, $Tags, board, loggedUser){
 						this.board = board;
 						this.loggedUser = loggedUser;
@@ -134,9 +124,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						} catch(err){$log.error(err);}
 						
 						if($stateParams.timeline){
-							$state.go('list.entity.discussion-timeline', {boardId: self.board.id, board:self.board, timeline:true}); 
+							$state.go('list.entity.discussion.timeline', {boardId: self.board.id, board:self.board, timeline:true}); 
 						} else {
-							$state.go('list.entity.discussion', {boardId: self.board.id, board:self.board, timeline:false});  	
+							$state.go('list.entity.discussion.thread', {boardId: self.board.id, board:self.board, timeline:false});  	
 						}
 						
 						this.canVote = function(){
@@ -214,114 +204,15 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 
 					}],
-					controllerAs: 'detailsVm'				
+					controllerAs: 'boardVm'				
 				}
 			}
 		})
-		.state('list.entity.discussion-timeline', {
-			resolve: {
-				comments: ['$Comments', 'board', function($Comments, board){
-					return 	$Comments
-							.list(board.id, 'timeline')
-							.then(function(comments){
-								return comments;
-							});
-				}]
-			},
-			views: {
-				"@list.entity": {
-					templateUrl: "views/discussion-timeline.html",				
-					controller: ['$state', '$log', '$Boards', '$Comments', '$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, $UserImg, board, comments, loggedUser){
-						
-						this.comment = {};
-						this.board = board;
-						this.loggedUser = loggedUser;
-						this.comments = comments;
-						var self = this;
-					  	
-					  	this.isAuthor = function(comment){
-							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
-						};
-						
-					  	this.canPost = function(){
-					  		return self.loggedUser!==undefined && !self.board.locked;
-					  	};
-					  	
-					  	this.openCommentForEdit = function(comment){
-					  		self.comment = comment;
-					  		self.commentEdit = true;
-					  	};
-					  	
-					  	this.cancelCommentEdit = function(){
-					  		self.comment = {};
-					  		self.commentEdit = false;
-					  	};
-					  	
-						this.postComment = function(){
-							self.comment.boardId = this.board.id;
-							var operation = self.comment.id!==undefined?'update':'save';
-							$Comments[operation](self.comment)
-							.then(function(commentData){
-								//TODO: mixin into the resource the id from Location header upon response
-								$log.info('Comment with id['+commentData.id+'] saved');
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board, timeline: true});
-									//$state.go('list.entity.discussion-timeline', {board: board});
-								});
-							})
-							.catch(function(err){
-								$log.error(err);
-								throw err;
-							})
-							.finally(function(){
-								self.cancelCommentEdit();
-							});
-						};
-						
-						this.pix = {};
-						
-						for(var i=0; i<this.comments.length; i++){
-							if(this.pix[this.comments[i].user] === undefined)
-								this.pix[this.comments[i].user]= '';
-						}
-						
-						for(var user in this.pix){
-							getUserPicture(user)
-							.then(function(pic){
-								if(pic){
-									self.pix[user] = "/services/js/usr/svc/user.js/$pics/"+user;
-								}
-							});
-						}
-						
-						function getUserPicture(username){
-							return $UserImg.get(username)
-							.then(function(data){
-								return data;
-							});
-						}
-						
-						this.remove = function(comment){
-							$Comments.remove({commentId:comment.id})
-							.then(function(){
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board}, {reload:true});
-								});
-							})
-							.catch(function(err){
-								throw err;
-							});
-						};						
-
-
-					}],
-					controllerAs: 'vm'				
-				}
-			}
-		})		
 		.state('list.entity.discussion', {
+			abstract: true
+		})
+		.state('list.entity.discussion.thread', {
+			url: "/thread",
 			resolve: {
 				comments: ['$Comments', 'board', function($Comments, board){
 					return 	$Comments
@@ -333,7 +224,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			},		
 			views: {
 				"@list.entity": {
-					templateUrl: "views/discussion.html",				
+					templateUrl: "views/discussion.thread.html",				
 					controller: ['$state', '$log', '$Boards', '$Comments', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, board, comments, loggedUser){
 						
 						this.comment = {};
@@ -436,6 +327,110 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				}
 			}
 		})		
+		.state('list.entity.discussion.timeline', {
+			url: "/timeline",
+			resolve: {
+				comments: ['$Comments', 'board', function($Comments, board){
+					return 	$Comments
+							.list(board.id, 'timeline')
+							.then(function(comments){
+								return comments;
+							});
+				}]
+			},
+			views: {
+				"@list.entity": {
+					templateUrl: "views/discussion.timeline.html",				
+					controller: ['$state', '$log', '$Boards', '$Comments', '$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, $UserImg, board, comments, loggedUser){
+						
+						this.comment = {};
+						this.board = board;
+						this.loggedUser = loggedUser;
+						this.comments = comments;
+						var self = this;
+					  	
+					  	this.isAuthor = function(comment){
+							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
+						};
+						
+					  	this.canPost = function(){
+					  		return self.loggedUser!==undefined && !self.board.locked;
+					  	};
+					  	
+					  	this.openCommentForEdit = function(comment){
+					  		self.comment = comment;
+					  		self.commentEdit = true;
+					  	};
+					  	
+					  	this.cancelCommentEdit = function(){
+					  		self.comment = {};
+					  		self.commentEdit = false;
+					  	};
+					  	
+						this.postComment = function(){
+							self.comment.boardId = this.board.id;
+							var operation = self.comment.id!==undefined?'update':'save';
+							$Comments[operation](self.comment)
+							.then(function(commentData){
+								//TODO: mixin into the resource the id from Location header upon response
+								$log.info('Comment with id['+commentData.id+'] saved');
+								$Boards.get(board.id)
+								.then(function(board){
+									$state.go('list.entity', {board: board, timeline: true});
+									//$state.go('list.entity.discussion.timeline', {board: board});
+								});
+							})
+							.catch(function(err){
+								$log.error(err);
+								throw err;
+							})
+							.finally(function(){
+								self.cancelCommentEdit();
+							});
+						};
+						
+						this.pix = {};
+						
+						for(var i=0; i<this.comments.length; i++){
+							if(this.pix[this.comments[i].user] === undefined)
+								this.pix[this.comments[i].user]= '';
+						}
+						
+						for(var user in this.pix){
+							getUserPicture(user)
+							.then(function(pic){
+								if(pic){
+									self.pix[user] = "/services/js/usr/svc/user.js/$pics/"+user;
+								}
+							});
+						}
+						
+						function getUserPicture(username){
+							return $UserImg.get(username)
+							.then(function(data){
+								return data;
+							});
+						}
+						
+						this.remove = function(comment){
+							$Comments.remove({commentId:comment.id})
+							.then(function(){
+								$Boards.get(board.id)
+								.then(function(board){
+									$state.go('list.entity', {board: board}, {reload:true});
+								});
+							})
+							.catch(function(err){
+								throw err;
+							});
+						};						
+
+
+					}],
+					controllerAs: 'vm'				
+				}
+			}
+		})		
 		.state('list.new', { 		
 			views: {
 				"@": {
@@ -456,7 +451,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  			});
 					  		};
 						}],
-					controllerAs: 'detailsVm'								
+					controllerAs: 'boardVm'								
 				}
 			}
 		})
