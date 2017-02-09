@@ -1,7 +1,7 @@
 (function(angular){
 "use strict";
 
-//angular'ized extenral dependencies
+//angular'ized external dependencies
 angular.module('$moment', [])
 .factory('$moment', ['$window', function($window) {
   return $window.moment;
@@ -377,7 +377,6 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								$Boards.get(board.id)
 								.then(function(board){
 									$state.go('list.entity', {board: board, timeline: true});
-									//$state.go('list.entity.discussion.timeline', {board: board});
 								});
 							})
 							.catch(function(err){
@@ -461,20 +460,5 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  
 		cfpLoadingBarProvider.includeSpinner = false;
 		  
-	}])
-	.run(['$rootScope', '$location', '$LoggedUser', '$log', function ($rootScope, $location, $LoggedUser, $log) {
-	    $rootScope.$on('$routeChangeStart', function (event) {
-			$LoggedUser.get()
-			.then(function(user){
-		        if (!user) {
-		            $log.error('DENY');
-		            event.preventDefault();
-		            $location.path(CONFIG.LOGIN_URL);
-		        } else {
-		            $log.info('ALLOW');
-	//	            $location.path('/home');
-		        }				
-			});
-	    });
 	}]);
 })(angular);
