@@ -17,8 +17,8 @@
 				</div>
 			</div>
 			<div style="align-self:flex-end" >
-				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.openCommentForEdit(comment)">Edit</a>
-				<a href ng-if="vm.canPost() && !vm.commentEdit" ng-click="vm.remove(comment)"><i class="fa fa-trash-o"></i></a>
+				<a href ng-if="vm.isAuthor(comment) && vm.canPost() && !vm.commentEdit" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+				<a href ng-if="vm.isAuthor(comment) && vm.canPost() && !vm.commentEdit" ng-click="vm.remove(comment)"><i class="fa fa-trash-o"></i></a>
 			</div>
 			<a href ng-click="vm.replyOpen(comment)" style="text-decoration:none; font-weight:bold" ng-hide="!vm.canPost() || vm.replyEdit || vm.commentEdit">Reply</a>
 			<div ng-if="comment.replies.length>0" class="replies">

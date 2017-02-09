@@ -22,13 +22,11 @@ var boardStatsDAOorm = {
 			name: "latestDiscussionUpdateTime",
 			dbName: "LATEST_UPDATE_TIME",
 			type: "Long",
-			dbValue: function(entity){
-				if(entity.latestDiscussionUpdateTime!==null && entity.latestDiscussionUpdateTime>0)
-			    	return new Date(entity.latestDiscussionUpdateTime).toISOString();
-			    return null;
-			},
 			value: function(dbValue){
-				return new Date(dbValue).toISOString();
+				var _value;
+				if(dbValue>0)
+					_value = new Date(dbValue).toISOString();
+				return _value;
 			}
 		},{
 			name: "repliesCount",
