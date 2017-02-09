@@ -76,28 +76,5 @@
 	.service('$Tags', ['$resource', function($resource) {
 	  	return $resource('../../js/annotations/svc/tags.js', {}, 
 	  					{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
-	}])			
-	.service('$LoggedUser', ['$resource', '$log', function($resource) {
-		var UserSvc =  $resource('../../js/usr/svc/user.js/$current', {}, 
-	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
-	  	var get = function(){
-		  	return UserSvc.get().$promise;
-	  	};
-	  	return {
-	  		get: get
-	  	};
-	}])
-	.service('$UserImg', ['$resource', '$log', function($resource) {
-		var UserSvc = $resource('../../js/usr/svc/user.js/$pics/:userName', {}, 
-	  					{get: {method:'GET', params:{}, isArray:false, cache: true, ignoreLoadingBar: true}});
-		var get = function(userName){
-		  	return UserSvc.get({"userName":userName}).$promise
-		  	.then(function(userData){
-		  		return userData;
-		  	});
-	  	};	  					
-	  	return {
-	  		get: get
-	  	};	  					
 	}]);
 })(angular);

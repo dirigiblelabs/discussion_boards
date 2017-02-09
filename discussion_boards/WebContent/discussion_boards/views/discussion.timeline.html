@@ -14,8 +14,7 @@
     <timeline-event ng-repeat="comment in vm.comments" side=""> <!--side="{{side}}"-->
       <!-- uses angular-scroll-animate to give it some pop -->
       <timeline-badge class="default">
-        <i class="glyphicon glyphicon-user" ng-if="vm.pix[comment.user]===''"></i>
-        <div ng-if="vm.pix[comment.user]!==''" style="background-image: url({{vm.pix[comment.user]}});background-repeat: no-repeat; background-size: 100%; background-position: 50%; border-radius: 50%; width: 50px; height: 50px;"></div>
+        <div style="background-image: url(../../js/user/avatar.js/{{comment.user}});background-repeat: no-repeat; background-size: 100%; background-position: 50%; border-radius: 50%; width: 50px; height: 50px;"></div>
       </timeline-badge>
 
       <!-- uses angular-scroll-animate to give it some pop -->

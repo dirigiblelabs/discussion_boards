@@ -142,7 +142,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 						
 						this.isAuthor = function(){
-							return this.loggedUser!==undefined && this.loggedUser.uname === this.board.user;
+							return this.loggedUser!==undefined && this.loggedUser.username === this.board.user;
 						};
 						
 						this.canPost = function(){
@@ -234,7 +234,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						var self = this;
 					  	
 					  	this.isAuthor = function(comment){
-							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
+							return this.loggedUser!==undefined && this.loggedUser.username === comment.user;
 						};
 					  	
 					  	this.canPost = function(){
@@ -341,7 +341,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.timeline.html",				
-					controller: ['$state', '$log', '$Boards', '$Comments', '$UserImg', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, $UserImg, board, comments, loggedUser){
+					controller: ['$state', '$log', '$Boards', '$Comments', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, board, comments, loggedUser){
 						
 						this.comment = {};
 						this.board = board;
@@ -350,7 +350,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						var self = this;
 					  	
 					  	this.isAuthor = function(comment){
-							return this.loggedUser!==undefined && this.loggedUser.uname === comment.user;
+							return this.loggedUser!==undefined && this.loggedUser.username === comment.user;
 						};
 						
 					  	this.canPost = function(){
@@ -388,30 +388,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								self.cancelCommentEdit();
 							});
 						};
-						
-						this.pix = {};
-						
-						for(var i=0; i<this.comments.length; i++){
-							if(this.pix[this.comments[i].user] === undefined)
-								this.pix[this.comments[i].user]= '';
-						}
-						
-						for(var user in this.pix){
-							getUserPicture(user)
-							.then(function(pic){
-								if(pic){
-									self.pix[user] = "/services/js/usr/svc/user.js/$pics/"+user;
-								}
-							});
-						}
-						
-						function getUserPicture(username){
-							return $UserImg.get(username)
-							.then(function(data){
-								return data;
-							});
-						}
-						
+												
 						this.remove = function(comment){
 							$Comments.remove({commentId:comment.id})
 							.then(function(){
@@ -460,12 +437,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				"@": {
 					templateUrl: "views/settings.html",	
 					controller: ['$state', 'FileUploader', 'loggedUser', function($state, FileUploader, loggedUser){
-						
 						this.user = loggedUser;
+						this.rootPath = '../../js-secured/profile/avatar.js';
 						var self  = this;
 						
 						var uploader = this.uploader = new FileUploader({
-							url: this.user && this.user.avatarUrl
+							url: this.user && this.rootPath
 						});
 					    this.uploader.onBeforeUploadItem = function(/*item*/) {
 							//item.url = zipUploadPath + "?path=" + this.folder.path;
@@ -487,7 +464,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 	}])
 	.run(['$rootScope', '$location', '$LoggedUser', '$log', function ($rootScope, $location, $LoggedUser, $log) {
 	    $rootScope.$on('$routeChangeStart', function (event) {
-			$LoggedUser.get().$promise
+			$LoggedUser.get()
 			.then(function(user){
 		        if (!user) {
 		            $log.error('DENY');

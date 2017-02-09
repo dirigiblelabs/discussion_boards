@@ -6,14 +6,9 @@ var boardStatsDAOorm = {
 	dbName: "DIS_BOARD_STATS",
 	properties: [{
 			name: "user",
-			dbName: "USRU_UNAME",
+			dbName: "USER_USERNAME",
 			type: "String",
 			size: 100
-		},{
-			name: "user_pic",
-			dbName: "USRU_PIC",
-			type: "String",
-			size: 5000
 		},{
 			name: "visits",
 			dbName: "DISB_VISITS",

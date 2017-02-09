@@ -2,8 +2,7 @@
 
 	<div class="left-compartment">
 		<div class="user-box">
-			<img ng-if="boardVm.board.userDetails.avatar" ng-src="{{boardVm.board.userDetails.avatar}}" class="user-pic"/>
-			<i ng-if="!boardVm.board.userDetails.avatar" class="glyphicon glyphicon-user user-pic"></i>
+			<img ng-src="../../js/user/avatar.js/{{boardVm.board.user}}" class="user-pic"/>
 			<span ng-bind="boardVm.board.user" class="user-name"></span>
 		</div>
 		<span class="publish-time" title="{{boardVm.board.publishTimeLocal}}" ng-bind="boardVm.board.timeSincePublish"></span>

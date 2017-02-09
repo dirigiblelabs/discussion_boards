@@ -79,7 +79,7 @@
 			remove: remove
 		};
 	}])	
-	.service('$Boards', ['Board', 'SecureBoard', 'BoardVote', 'SecureBoardVote', 'BoardTags', 'SecureBoardTags', '$Comments', '$UserImg', '$moment', function(Board, SecureBoard, BoardVote, SecureBoardVote, BoardTags, SecureBoardTags, $Comments, $UserImg, $moment) {
+	.service('$Boards', ['Board', 'SecureBoard', 'BoardVote', 'SecureBoardVote', 'BoardTags', 'SecureBoardTags', '$Comments', '$moment', function(Board, SecureBoard, BoardVote, SecureBoardVote, BoardTags, SecureBoardTags, $Comments, $moment) {
 		
 		function asElapsedTimeString(time){
 			if(time)
@@ -140,45 +140,14 @@
 			return Board.query({$expand:'votes,tags'}).$promise
           	.then(function(data){
           		return data.map(function(boardData){
-          			var board = formatEntity(boardData);
-          			board.userDetails = {
-						avatar: "/services/js/usr/svc/user.js/$pics/"+board.user 
-					};
-					$UserImg.get(board.user)
-					.then(function(image){
-						if(!image){
-							board.userDetails.avatar = undefined;
-						}
-					})
-					.catch(function(err){
-						if(err.status && err.status>399){
-							board.userDetails.avatar = undefined;
-						}
-						throw err;
-					});
-          			return board;
+          			return formatEntity(boardData);
           		});
           	});          	
 		};
 		var get = function(boardId){
 			return Board.get({"boardId": boardId, "$expand":"votes,tags,comments"}).$promise
 			.then(function(board){
-	      		board = formatEntity(board);
-	      		board.userDetails = {
-					avatar: "/services/js/usr/svc/user.js/$pics/"+board.user 
-				};
-				$UserImg.get(board.user)
-				.then(function(image){
-					if(!image)
-						board.userDetails.avatar= undefined;
-				})
-				.catch(function(err){
-					if(err.status && err.status>399){
-						board.userDetails.avatar = undefined;
-					}
-					throw err;
-				});
-				return board;
+	      		return formatEntity(board);
 			});
 		};
 		var update = function(board){
@@ -241,37 +210,5 @@
 	  	return {
 	  		filterText: _filterText
 	  	};
-	}])
-/*	.factory('AuthResolver', function ($q, $rootScope, $state) {
-	  return {
-	    resolve: function () {
-	      var deferred = $q.defer();
-	      var unwatch = $rootScope.$watch('currentUser', function (currentUser) {
-	        if (angular.isDefined(currentUser)) {
-	          if (currentUser) {
-	            deferred.resolve(currentUser);
-	          } else {
-	            deferred.reject();
-	            $state.go('user-login');
-	          }
-	          unwatch();
-	        }
-	      });
-	      return deferred.promise;
-	    }
-	  };
-	})	
-	.factory('Auth', function(){
-	
-		var user;
-		
-		return {
-		    setUser : function(aUser){
-		        user = aUser;
-		    },
-		    isLoggedIn : function(){
-		        return(user)? user : false;
-		    }
-		};
-	})*/;
+	}]);
 })(angular);	

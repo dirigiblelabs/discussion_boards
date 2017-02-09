@@ -3,14 +3,14 @@
 	<div class="form-group">
 		<label>User name</label>
 		<div class="form-control">
-			<span ng-bind="settingsVm.user.user_username"></span>
+			<span ng-bind="settingsVm.user.username"></span>
 	     </div>
   	</div>	
 	<div class="form-group">
 		<label>Avatar image</label>
 		<div class="form-control" style="height:initial">
 			<input type="file" nv-file-select uploader="settingsVm.uploader" style="display:inline-block"/>
-			<img ng-src="../../js/user/avatar.js/{{settingsVm.user.user_username}}" class="user-pic"/>
+			<img ng-src="../../js/profile/avatar.js" class="user-pic"/>
 	     </div>
   	</div>
 </div>

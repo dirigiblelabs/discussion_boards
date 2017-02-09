@@ -60,5 +60,15 @@
 			        method: 'PUT'
 			    }
 			});
+	}])
+	.service('$LoggedUser', ['$resource', '$log', function($resource) {
+		var UserSvc =  $resource('../../js/profile/user.js', {}, 
+	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+	  	var get = function(){
+		  	return UserSvc.get().$promise;
+	  	};
+	  	return {
+	  		get: get
+	  	};
 	}]);
 })(angular);
