@@ -25,11 +25,15 @@ var boardStatsDAOorm = {
 			}
 		},{
 			name: "repliesCount",
-			dbName: "REPLIES",
+			dbName: "REPLIES_COUNT",
+			type: "Int"
+		},{
+			name: "commentsCount",
+			dbName: "COMMENTS_COUNT",
 			type: "Int"
 		},{
 			name: "participantsCount",
-			dbName: "PARTICIPANTS",
+			dbName: "PARTICIPANTS_COUNT",
 			type: "Int"
 		},{
 			name: "totalVotes",

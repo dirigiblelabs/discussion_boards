@@ -25,7 +25,7 @@ var CommentsORM = {
 				return entity.replyToCommentId !==undefined ? entity.replyToCommentId : null;//TODO: Fixme as soon as all -1 entries are updated to null. Will work with null isntead of -1
 			},
 			value: function(dbValue){
-				return dbValue === null || dbValue<0 ? undefined: dbValue;//TODO: Fixme as soon as all -1 entries are updated to null. Will work with null isntead of -1
+				return dbValue === null || dbValue<1 ? undefined : dbValue;//TODO: Fixme as soon as all -1 entries are updated to null. Will work with null isntead of -1
 			},
 		},{
 			name: "text",

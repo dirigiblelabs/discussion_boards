@@ -20,7 +20,7 @@
 					<span>{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 					|
 					<div ng-if="board.repliesCount" style="display:inline-block">
-						<span ng-if="board.repliesCount">{{board.repliesCount}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
+						<span ng-if="board.repliesCount">{{board.commentsCount}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
 							<span ng-if="board.participantsCount>1">people</span>
 							<span ng-if="board.participantsCount===1">person</span>
 						</span>

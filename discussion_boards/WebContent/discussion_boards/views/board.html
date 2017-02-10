@@ -15,13 +15,13 @@
 		<div class="stats">
 			<span>{{boardVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 			|
-			<div ng-if="boardVm.board.repliesCount">
-				<span ng-if="boardVm.board.repliesCount">{{boardVm.board.repliesCount}} <i class="fa fa-comments-o"></i> by {{boardVm.board.participantsCountShort}}
+			<div ng-if="boardVm.commentsCount">
+				<span ng-if="boardVm.commentsCount">{{boardVm.commentsCount}} <i class="fa fa-comments-o"></i> by {{boardVm.board.participantsCountShort}}
 					<span ng-if="boardVm.board.participantsCount>1">people</span>
 					<span ng-if="boardVm.board.participantsCount===1">person</span>
 				</span>
 			</div>
-			<div ng-if="!boardVm.board.repliesCount">
+			<div ng-if="!boardVm.commentsCount">
 				No one is discussing this yet.
 			</div>
 		</div>

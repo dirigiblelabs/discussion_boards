@@ -1,20 +1,6 @@
 (function(angular){
 "use strict";
 	angular.module('discussion-boards')
-	.service('$DBoardVisits', ['BoardVisits', '$q', function(BoardVisits, $q) {
-		var visited = [];
-		var put = function(boardId){
-			if(visited.indexOf(boardId)<0){
-				visited.push(boardId);
-				return BoardVisits.update({"boardId": boardId}, {}).$promise;
-			} else {
-				return $q.when(false);
-			}
-		};
-	  	return {
-	  		visit: put
-	  	};
-	}])
 	.service('$TimeFormat', ['$moment', function($moment){
 		function asElapsedTimeString(time){
 			if(time)
@@ -28,7 +14,7 @@
 			asFormattedTimeString: asFormattedTimeString
 		};
 	}])
-	.service('$Comments', ['BoardComments', '$SecureComment', '$TimeFormat', '$moment', function(BoardComments, $SecureComment, $TimeFormat, $moment){
+	.service('$Comments', ['BoardComments', '$SecureComment', '$TimeFormat', '$moment', '$rootScope', function(BoardComments, $SecureComment, $TimeFormat, $moment, $rootScope){
 	
 		var formatComment = function(comment){
 			comment.timeSincePublish = $TimeFormat.asElapsedTimeString(comment.publishTime);
@@ -60,6 +46,7 @@
 		};
 		
 		var save = function(comment){
+			$rootScope.$broadcast('dboards.comments.save', comment);
 			return $SecureComment.save(comment).$promise;		
 		};
 		
@@ -67,8 +54,9 @@
 			return $SecureComment.update(comment).$promise;		
 		};
 		
-		var remove = function(commentId){
-			return $SecureComment['delete'](commentId).$promise;		
+		var remove = function(comment){
+			$rootScope.$broadcast('dboards.comments.remove', comment);
+			return $SecureComment['delete']({"commentId": comment.id}).$promise;		
 		};
 	
 		return {
@@ -79,7 +67,7 @@
 			remove: remove
 		};
 	}])	
-	.service('$Boards', ['Board', 'SecureBoard', 'BoardVote', 'SecureBoardVote', 'BoardTags', 'SecureBoardTags', '$Comments', '$moment', function(Board, SecureBoard, BoardVote, SecureBoardVote, BoardTags, SecureBoardTags, $Comments, $moment) {
+	.service('$Boards', ['Board', 'SecureBoard', 'BoardVisits', 'BoardVote', 'SecureBoardVote', 'BoardTags', 'SecureBoardTags', '$Comments', '$moment', '$log', function(Board, SecureBoard, BoardVisits, BoardVote, SecureBoardVote, BoardTags, SecureBoardTags, $Comments, $moment, $log) {
 		
 		function asElapsedTimeString(time){
 			if(time)
@@ -135,7 +123,19 @@
 			board.ratingShort = formatNumberShort(board.rating);
   			return board;
 		}
-		
+
+		var visits = [];
+		var visit = function(board){
+			if(visits.indexOf(board.id)<0){
+				visits.push(board.id);
+				board.visitsShort = formatNumberShort(++board.visits);
+				BoardVisits.update({"boardId": board.id}, {}).$promise
+				.catch(function(err){
+					board.visitsShort = formatNumberShort(--board.visits);
+					$log.error(err.message)
+				});
+			}
+		};
 		var list = function(){
 			return Board.query({$expand:'votes,tags'}).$promise
           	.then(function(data){
@@ -157,8 +157,10 @@
 			});
 		};	
 		var remove = function(board){
+			if(visits.indexOf(board.id)>-1)
+				visits.splice(visits.indexOf(board.id), 1);
 			return SecureBoard.remove({boardId: board.id, cascaded:true}).$promise;
-		};		
+		};
 		var saveVote = function(board, v){
 			return SecureBoardVote.save({"boardId": board.id}, {"vote":v}).$promise
 			.then(function(){
@@ -190,7 +192,8 @@
 		var unlock = function(board){
 			board.locked = false;
 			return SecureBoard.update({"boardId": board.id}, board).$promise;
-		};		
+		};
+
 	 	return {
 	 		list: list,
 	 		get :get,
@@ -202,7 +205,8 @@
 	 		setTags: setTags,
 	 		untag: untag,
 	 		lock: lock,
-	 		unlock:unlock
+	 		unlock:unlock,
+	 		visit: visit
 	 	};
 	}])	
 	.service('FilterList', [function() {

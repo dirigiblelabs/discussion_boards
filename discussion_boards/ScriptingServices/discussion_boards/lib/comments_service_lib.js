@@ -16,8 +16,8 @@ var CommentsDataService = function(){
 		entity.replyToId = entity.replyToCommentId;
 	};
 	this.handlersProvider.postQuery = function(entities, context){
-		var asDiscussionThread = (context.queryParams.thread == 'true') ? true : false;
-		if(asDiscussionThread && context.queryParams.$expand && context.queryParams.$expand.indexOf('replies')>-1){ 
+		var asDiscussionThread = (typeof context.queryParams.thread === 'string' && (context.queryParams.thread === 'true' || context.queryParams.thread.length===0)) ||  ((typeof context.queryParams.thread === 'boolean') ? true : false) ? true : false;
+		if(asDiscussionThread && context.queryParams.$expand && context.queryParams.$expand.indexOf('replies')>-1){
 			entities = entities.filter(function(entity){
 				return entity.replyToCommentId===undefined || entity.replyToCommentId===0;//?
 			});

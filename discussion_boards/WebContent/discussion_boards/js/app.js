@@ -94,9 +94,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						boardId = $stateParams.boardId;
 					}
 					if(boardId){
-						if($stateParams.board)
+						if($stateParams.board){
 							return $stateParams.board;
-						else
+						} else
 							return $Boards.get(boardId)
 							.catch(function(err){
 								$log.error('Could not resolve board entity with id['+$stateParams.boardId+']');
@@ -110,18 +110,25 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/board.html",
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$DBoardVisits', '$Tags', 'board', 'loggedUser', function($state, $stateParams, $log, $Boards, $DBoardVisits, $Tags, board, loggedUser){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope){
 						this.board = board;
+						this.commentsCount = board.commentsCount;
 						this.loggedUser = loggedUser;
 						var self = this;
 						
-						try{
-							$DBoardVisits.visit(this.board.id)
-							.then(function(res){
-								if(res!==false)
-									self.board.visits++;
-							});
-						} catch(err){$log.error(err);}
+						$rootScope.$on('dboards.comments.save', 
+										function(evt){
+											self.commentsCount++;
+											evt.preventDefault();
+										});
+						$rootScope.$on('dboards.comments.remove', 
+										function(evt, comment){
+											self.commentsCount--;
+											if(comment.replies)
+												self.commentsCount = self.commentsCount - comment.replies.length;
+											evt.preventDefault();
+										});						
+						$Boards.visit(this.board);
 						
 						if($stateParams.timeline){
 							$state.go('list.entity.discussion.timeline', {boardId: self.board.id, board:self.board, timeline:true}); 
@@ -225,7 +232,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.thread.html",				
-					controller: ['$state', '$log', '$Boards', '$Comments', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, board, comments, loggedUser){
+					controller: ['$log', '$Comments', 'board', 'comments', 'loggedUser', function($log, $Comments, board, comments, loggedUser){
 						
 						this.comment = {};
 						this.comments = comments;
@@ -254,23 +261,31 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  	};
 					  	
 						this.postComment = function(){
-							self.comment.boardId = this.board.id;
 							var operation = self.comment.id!==undefined?'update':'save';
-							$Comments[operation](self.comment)
+							if(operation==='save'){
+								self.comment.boardId = this.board.id;
+								self.comments.push(self.comment);
+							}
+							var comment = self.comment;
+							self.cancelCommentEdit();self.commentEdit = true;
+							$Comments[operation](comment)
 							.then(function(commentData){
-								//TODO: mixin into the resource the id from Location header upon response
-								$log.info('Comment with id['+commentData.id+'] saved');
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board}, {reload:true});
-								});
+								$log.info('Comment['+commentData.id+'] ' + operation + 'd');
+								$Comments.list(self.board.id, 'thread')
+								.then(function(comments){
+									self.comments = comments;
+								})
+								.finally(function(){
+									self.commentEdit = false;
+								});								
 							})
 							.catch(function(err){
 								$log.error(err);
+								self.comments.filter(function(com){
+									return com.id === comment;
+								});
+								self.commentEdit = false;
 								throw err;
-							})
-							.finally(function(){
-								self.cancelCommentEdit();
 							});
 						};
 						
@@ -291,32 +306,47 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						};
 
 						this.replyPost = function(){
-							var upsertOperation = self.reply.id===undefined?'save':'update';
-							self.reply.replyToCommentId = self.comment.id;
-							$Comments[upsertOperation](self.reply)
-							.then(function(){
-								$log.info('reply saved');
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board}, {reload:true});
+							var operation = self.reply.id===undefined?'save':'update';
+							if(operation === 'save'){
+								self.reply.replyToCommentId = self.comment.id;							
+								self.comment.replies.push(self.reply);
+							}
+							var reply = self.reply;
+							this.replyCancel();self.replyEdit = true;self.commentEdit = true;
+							$Comments[operation](reply)
+							.then(function(replyData){
+								$log.info('Reply['+replyData.id+'] to comment['+self.comment.id+'] ' + operation + 'd');
+								$Comments.list(self.board.id, 'thread')
+								.then(function(comments){
+									self.comments = comments;
+								})
+								.finally(function(){
+									self.replyEdit = false;
+									self.commentEdit = false;
 								});
 							})
 							.catch(function(err){
+								self.replyEdit = false;
+								self.commentEdit = false;
 								throw err;
-							})
-							.finally(function(){
-								self.replyCancel();
 							});
 						};
 						
 						this.remove = function(comment){
-							$Comments.remove({commentId:comment.id})
-							.then(function(){
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board}, {reload:true});
-								});
-							})
+							this.comments = this.comments.filter(function(com, idx){
+								if(com.id === comment.id){
+									return false;
+								} else {
+									self.comments[idx].replies = self.comments[idx].replies.filter(function(_com){
+										if(_com.id === comment.id){
+											return false;
+										}
+										return true;
+									});
+									return true;
+								}
+							});							
+							$Comments.remove(comment)
 							.catch(function(err){
 								throw err;
 							});
@@ -370,15 +400,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.postComment = function(){
 							self.comment.boardId = this.board.id;
 							var operation = self.comment.id!==undefined?'update':'save';
+							if(operation==='save')
+								self.comments.push(self.comment);
 							$Comments[operation](self.comment)
 							.then(function(commentData){
-								//TODO: mixin into the resource the id from Location header upon response
-								$log.info('Comment with id['+commentData.id+'] saved');
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board, timeline: true});
+								$log.info('Comment['+commentData.id+'] ' + operation + 'd');
+								$Comments.list(self.board.id, 'thread')
+								.then(function(comments){
+									self.comments = comments;
 								});
-							})
+							})							
 							.catch(function(err){
 								$log.error(err);
 								throw err;
