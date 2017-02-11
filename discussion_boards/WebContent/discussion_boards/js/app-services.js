@@ -58,13 +58,22 @@
 			$rootScope.$broadcast('dboards.comments.remove', comment);
 			return $SecureComment['delete']({"commentId": comment.id}).$promise;		
 		};
+
+	  	var hasPrivilege = function(username, privilege, comment, board){
+  			if(privilege === 'edit' && comment.user === username)
+  				return true;
+  			if(privilege === 'delete' && [board.user, comment.user].indexOf(username) > -1)
+  				return true;
+	  		return false;
+	  	};
 	
 		return {
 			list: list,
 			formatComment: formatComment,
 			save: save,
 			update: update,
-			remove: remove
+			remove: remove,
+			hasPrivilege: hasPrivilege
 		};
 	}])	
 	.service('$Boards', ['Board', 'SecureBoard', 'BoardVisits', 'BoardVote', 'SecureBoardVote', 'BoardTags', 'SecureBoardTags', '$Comments', '$moment', '$log', function(Board, SecureBoard, BoardVisits, BoardVote, SecureBoardVote, BoardTags, SecureBoardTags, $Comments, $moment, $log) {
@@ -193,6 +202,14 @@
 			board.locked = false;
 			return SecureBoard.update({"boardId": board.id}, board).$promise;
 		};
+		
+	  	var hasPrivilege = function(username, privilege, board){
+			if(['lock', 'tag', 'delete', 'edit'].indexOf(privilege)>-1 && board.user === username)
+  				return true;
+			if(privilege === 'vote' && board.user !== username)
+  				return true;
+	  		return false;
+	  	};		
 
 	 	return {
 	 		list: list,
@@ -206,7 +223,8 @@
 	 		untag: untag,
 	 		lock: lock,
 	 		unlock:unlock,
-	 		visit: visit
+	 		visit: visit,
+	 		hasPrivilege: hasPrivilege
 	 	};
 	}])	
 	.service('FilterList', [function() {

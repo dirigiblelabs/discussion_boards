@@ -19,13 +19,13 @@
 				<div class="stats">
 					<span>{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 					|
-					<div ng-if="board.repliesCount" style="display:inline-block">
-						<span ng-if="board.repliesCount">{{board.commentsCount}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
+					<div ng-if="board.commentsCount" style="display:inline-block">
+						<span>{{board.commentsCount}} <i class="fa fa-comments-o"></i> by {{board.participantsCountShort}}
 							<span ng-if="board.participantsCount>1">people</span>
 							<span ng-if="board.participantsCount===1">person</span>
 						</span>
 					</div>
-					<div ng-if="!board.repliesCount" style="display:inline-block">
+					<div ng-if="!board.commentsCount" style="display:inline-block">
 						No one is discussing this yet. Be the first one to <a ui-sref="list.entity({boardId:board.id, board: board})" href>comment</a> !
 					</div>
 				</div>

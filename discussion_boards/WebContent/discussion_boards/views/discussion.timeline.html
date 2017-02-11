@@ -6,7 +6,7 @@
 
 <div style="margin-top:20px">
 	<span ng-if="vm.loggedUser && vm.comments.length===0">Be the first one to comment!</span>
-	<span ng-if="!vm.loggedUser">Have something to tell about this? Sign in to comment</span>
+	<span ng-if="!vm.loggedUser">Have something to tell about this? <a ui-sref="list.login">Sign in</a> to comment</span>
 </div>
 <div class="" style="margin-top:20px">
   <timeline>
@@ -24,8 +24,8 @@
 		    <span ng-bind="comment.user"></span> said <span title="{{comment.lastModifiedTimeLocal || comment.publishTimeLocal}}" ng-bind="comment.timeSinceLastModified || comment.timeSincePublish"></span>:
 		  </div>
         </timeline-heading>
-		<p ng-if="vm.comment !== comment || vm.replyEdit" ng-bind-html="comment.text" style="font-size: 1.1em"></p>
-		<div ng-if="vm.canPost() && vm.comment === comment && !vm.replyEdit"> 
+		<p ng-if="vm.comment !== comment" ng-bind-html="comment.text" style="font-size: 1.1em"></p>
+		<div ng-if="vm.comment === comment && vm.hasMode('edit')"> 
 			<textarea class="form-control" ng-model="vm.comment.text" style="width:100%; margin-bottom:3px" ck-editor></textarea>
 			<div class="button-group" style="margin: 5px 0;">
 				<button class="btn btn-primary" ng-click="vm.postComment()" ng-disabled="!vm.comment.text">Post</button>
@@ -33,9 +33,9 @@
 			</div>
 		</div>		
         <timeline-footer>
-        	<div style="align-self:flex-end" >
-				<a href ng-if="vm.canPost() && vm.isAuthor(comment)" ng-click="vm.openCommentForEdit(comment)">Edit</a>
-				<a href ng-if="vm.canPost() && vm.isAuthor(comment)" ng-click="vm.remove(comment)">Delete</a>
+        	<div style="align-self:flex-end" ng-if="!vm.hasMode('readonly') && !vm.hasMode('edit')">
+				<a href ng-if="vm.hasPrivilege(comment, 'edit')" ng-click="vm.openCommentForEdit(comment)">Edit</a>
+				<a href ng-if="vm.hasPrivilege(comment, 'delete')" ng-click="vm.remove(comment)">Delete</a>
 			</div>
         </timeline-footer>
       </timeline-panel>
@@ -43,7 +43,7 @@
   </timeline>
 </div>
 
-<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="vm.canPost() && !vm.commentEdit && !vm.replyEdit">
+<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="!vm.hasMode('edit') && !vm.hasMode('readonly')">
 	<span style="font-size: 1em;font-weight:bold; margin-bottom: 5px">Leave a comment</span>
 	<form>
 	  <div class="form-group">

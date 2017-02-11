@@ -12,7 +12,6 @@ angular.module('$ckeditor', [])
   return $window.CKEDITOR;
 }]);
 
-
 angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput'])
 .constant('CONFIG', {
 	'LOGIN_URL' : 'login/login.html'
@@ -135,10 +134,22 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						} else {
 							$state.go('list.entity.discussion.thread', {boardId: self.board.id, board:self.board, timeline:false});  	
 						}
-						
-						this.canVote = function(){
-							return self.loggedUser!==undefined && !self.isAuthor() && !self.board.locked;
-						};
+
+					  	this.hasPrivilege = function(privilege){
+					  		if(this.loggedUser!==undefined){
+					  			return $Boards.hasPrivilege(this.loggedUser.username, privilege, this.board);
+					  		}
+					  		return false;
+					  	};
+					  	
+					  	this.hasMode = function(){
+					  		var args = [].slice.call(arguments);
+					  		if(args.indexOf('readonly') > -1 && self.loggedUser!==undefined && self.board.locked)
+					  			return true;
+					  		if(args.indexOf('edit') > -1 && self.loggedUser!==undefined && !self.board.locked && self.descriptionEdit)
+					  			return true;
+					  		return false;
+					  	};					  	
 						
 						this.saveVote = function(vote){
 							$Boards.saveVote(self.board, vote)
@@ -146,14 +157,6 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								$log.info("voted: " + vote);
 								self.board = data; 
 							});
-						};
-						
-						this.isAuthor = function(){
-							return this.loggedUser!==undefined && this.loggedUser.username === this.board.user;
-						};
-						
-						this.canPost = function(){
-							return this.loggedUser!==undefined;
 						};
 						
 						this.openBoardForEdit = function(){
@@ -240,12 +243,20 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 						this.loggedUser = loggedUser;
 						var self = this;
 					  	
-					  	this.isAuthor = function(comment){
-							return this.loggedUser!==undefined && this.loggedUser.username === comment.user;
-						};
+					  	this.hasPrivilege = function(comment, privilege){
+					  		if(this.loggedUser!==undefined){
+					  			return $Comments.hasPrivilege(this.loggedUser.username, privilege, comment, this.board);
+					  		}
+					  		return false;
+					  	};
 					  	
-					  	this.canPost = function(){
-					  		return self.loggedUser!==undefined && !self.board.locked;
+					  	this.hasMode = function(){
+					  		var args = [].slice.call(arguments);
+					  		if(args.indexOf('readonly') > -1 && self.loggedUser!==undefined && self.board.locked)
+					  			return true;
+					  		if(args.indexOf('edit') > -1 && self.loggedUser!==undefined && !self.board.locked && (self.commentEdit || self.replyEdit))
+					  			return true;
+					  		return false;
 					  	};
 					  	
 					  	this.openCommentForEdit = function(comment){
@@ -261,7 +272,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 					  	};
 					  	
 						this.postComment = function(){
-							var operation = self.comment.id!==undefined?'update':'save';
+							var operation = self.comment.id!==undefined ? 'update' : 'save';
 							if(operation==='save'){
 								self.comment.boardId = this.board.id;
 								self.comments.push(self.comment);
@@ -371,20 +382,28 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.timeline.html",				
-					controller: ['$state', '$log', '$Boards', '$Comments', 'board', 'comments', 'loggedUser', function($state, $log, $Boards, $Comments, board, comments, loggedUser){
+					controller: ['$Comments', '$log', 'board', 'comments', 'loggedUser', function($Comments, $log, board, comments, loggedUser){
 						
 						this.comment = {};
 						this.board = board;
+						this.comments = comments;						
 						this.loggedUser = loggedUser;
-						this.comments = comments;
 						var self = this;
 					  	
-					  	this.isAuthor = function(comment){
-							return this.loggedUser!==undefined && this.loggedUser.username === comment.user;
-						};
-						
-					  	this.canPost = function(){
-					  		return self.loggedUser!==undefined && !self.board.locked;
+					  	this.hasPrivilege = function(comment, privilege){
+					  		if(this.loggedUser!==undefined){
+					  			return $Comments.hasPrivilege(this.loggedUser.username, privilege, comment, this.board);
+					  		}
+					  		return false;
+					  	};
+					  	
+					  	this.hasMode = function(){
+					  		var args = [].slice.call(arguments);
+					  		if(args.indexOf('readonly') > -1 && self.loggedUser!==undefined && self.board.locked)
+					  			return true;
+					  		if(args.indexOf('edit') > -1 && self.loggedUser!==undefined && !self.board.locked && self.commentEdit)
+					  			return true;
+					  		return false;
 					  	};
 					  	
 					  	this.openCommentForEdit = function(comment){
@@ -418,20 +437,18 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								self.cancelCommentEdit();
 							});
 						};
-												
+
 						this.remove = function(comment){
-							$Comments.remove({commentId:comment.id})
-							.then(function(){
-								$Boards.get(board.id)
-								.then(function(board){
-									$state.go('list.entity', {board: board}, {reload:true});
-								});
-							})
+							this.comments = this.comments.filter(function(com){
+								if(com.id === comment.id)
+									return false;
+								return true;
+							});							
+							$Comments.remove(comment)
 							.catch(function(err){
 								throw err;
 							});
-						};						
-
+						};
 
 					}],
 					controllerAs: 'vm'				
