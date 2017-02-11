@@ -53,6 +53,14 @@ BoardVotesDAO.prototype.getVote = function(boardId, user){
 
 //upsert
 BoardVotesDAO.prototype.vote = function(boardId, user, vote){
+	//First check that the user is not the board author: authors are not allowed to vote their own boards.
+	var boardDao = require("discussion_boards/lib/board_dao").get();
+	var board = boardDao.find(boardId, undefined, ['user']);
+	if(!board)
+		throw Error('Illegal argument: no records for boardId['+boardId+']');
+	if(board.user === user)
+		throw Error('Illegal argument: user['+user+'] is nto eligible to vote because is the board author');
+		
 	var previousVote = this.list({
 							boardId: boardId,
 							user: user
