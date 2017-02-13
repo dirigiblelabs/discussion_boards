@@ -31,13 +31,13 @@
 				</div>
 									
 				<!--<div class="description" ng-bind-html="board.description"></div>-->
-				<div ng-if="board.tags" class="tags">
+				<div ng-if="boardsVm.CONFIG.features.tags.enabled && board.tags" class="tags">
 					<span ng-repeat="tag in board.tags" ng-bind="tag.defaultLabel" class="tag-item"><span>
 				</div>
 				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">Last discussion update {{board.timeSinceLatestDiscussionUpdateTime}}</span>
 			</div>
 
-			<div class="right-compartment">
+			<div class="right-compartment" ng-if="boardsVm.CONFIG.features.votes.enabled">
 				<div class="rating-box">
 					<span class="subtle">rating</span>				
 					<span class="rating-number">{{board.ratingShort}}</span>

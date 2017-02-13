@@ -35,13 +35,14 @@
 			</div>
 		</div>		
 		
-		<tags-input ng-if="boardVm.hasPrivilege('tag')" ng-model="boardVm.board.tags" 
-														display-property="defaultLabel",
-														max-tags="5",
-														max-length="20",
-														min-length="1",
-														on-tag-added="boardVm.tagAdded($tag)" 
-													  	on-tag-removed="boardVm.tagRemoved($tag)">
+		<tags-input ng-if="boardsVm.CONFIG.features.tags.enabled && boardVm.hasPrivilege('tag')" 
+					ng-model="boardVm.board.tags" 
+					display-property="defaultLabel",
+					max-tags="5",
+					max-length="20",
+					min-length="1",
+					on-tag-added="boardVm.tagAdded($tag)" 
+				  	on-tag-removed="boardVm.tagRemoved($tag)">
 			<auto-complete source="boardVm.loadTags($query)"></auto-complete>
 		</tags-input>
 		<div ng-if="!boardVm.hasPrivilege('tag')">
@@ -58,7 +59,7 @@
 
 	</div>
 
-	<div class="right-compartment">
+	<div class="right-compartment" ng-if="boardsVm.CONFIG.features.votes.enabled">
 			
 		<div class="rating-box">
 			<span class="subtle">rating</span>

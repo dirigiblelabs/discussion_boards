@@ -14,7 +14,18 @@ angular.module('$ckeditor', [])
 
 angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput'])
 .constant('CONFIG', {
-	'LOGIN_URL' : 'login/login.html'
+	"LOGIN_URL" : "login/login.html",
+	"features" : {
+		"list": {
+			"pageLimit": 25
+		},
+		"votes": {
+			"enabled": true
+		},
+		"tags": {
+			"enabled": false
+		}
+	}
 })
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', 'CONFIG', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider, CONFIG) {
 
@@ -40,11 +51,11 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  views: {
 		  	"@": {
 		          templateUrl: 'views/boards.list.html',
-		          controller: ['$Boards', '$log', 'FilterList', function($Boards, $log, FilterList){
-		          
+		          controller: ['$Boards', '$log', 'FilterList', 'CONFIG', function($Boards, $log, FilterList, CONFIG){
+		          	this.CONFIG = CONFIG;
 		          	this.list = [];
 		          	this.filterList = FilterList;
-		          	this.limit = 5;
+		          	this.limit = CONFIG.features.list.pageLimit;
 		          	this.offset = 0;
 		          	this.hasMore = false;
 		          	var next = this.next = function(_offset, _limit){
@@ -121,7 +132,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/board.html",
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', 'CONFIG', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope, CONFIG){
+						this.CONFIG = CONFIG;
 						this.board = board;
 						this.commentsCount = board.commentsCount;
 						this.loggedUser = loggedUser;
