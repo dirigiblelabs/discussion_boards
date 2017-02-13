@@ -128,6 +128,8 @@ BoardDAO.prototype.visit = function(boardId){
     }
 };
 
+const TAGS_NAMESPACE = "dboard";
+
 BoardDAO.prototype.setTags = function(id, tags, createOnDemand){
 	var tagRefsDAO = this.orm.getAssociation('tagRefs').dao();
 	this.$log.info('Updating ' + tagRefsDAO.orm.dbName +' entity relations to '+this.orm.getPrimaryKey().dbName+'[' +  id + '] entity');
@@ -155,20 +157,22 @@ BoardDAO.prototype.setTags = function(id, tags, createOnDemand){
 	        connection.close();
 	    }
 	}
-	//Now, find the request tag records ans add references from this board to them
+	//Now, find the request tag records and add references from this board to them
 	var tagsDAO = this.orm.getAssociation('tags').daoN();
 	for(var i=0; i < tags.length; i++){
 		if(tags[i]!==null || tags[i]!==undefined){
 			var tagEntity = tagsDAO.list({
-				'defaultLabel': tags[i]
+				'defaultLabel': tags[i],
+				"namespace": TAGS_NAMESPACE
 			})[0];
 			var tagId = tagEntity && tagEntity[tagsDAO.orm.getPrimaryKey().name];
 			if(!tagEntity && createOnDemand){
 				tagId = tagsDAO.insert({
 										"defaultLabel": tags[i],
-										"uri": tags[i]
+										"uri": tags[i],
+										"namespace": TAGS_NAMESPACE
 									});								
-			}		
+			}
 			var entity = {};
 			entity['boardId'] = id;
 			entity['tagId'] = tagId;

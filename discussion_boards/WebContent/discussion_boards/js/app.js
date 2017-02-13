@@ -36,7 +36,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							return;
 						});	
 				}]				
-			},			  
+			},
 		  views: {
 		  	"@": {
 		          templateUrl: 'views/boards.list.html',
@@ -44,17 +44,29 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		          
 		          	this.list = [];
 		          	this.filterList = FilterList;
-		          	var self = this;
+		          	this.limit = 5;
+		          	this.offset = 0;
+		          	this.hasMore = false;
+		          	var next = this.next = function(_offset, _limit){
+						if(_offset!==undefined && _offset===0)
+							this.list = [];
+			          	$Boards.list({
+			          		$limit: _limit || this.limit,
+			          		$offset: _offset || this.offset
+			          	})
+						.then(function(data){
+							this.list = this.list.concat(data.entities);
+							this.hasMore = data.count > this.list.length;
+							this.offset+=this.limit;
+						}.bind(this))
+			          	.catch(function(err){
+			          		$log.error(err);
+			          		throw err;
+			          	});
+		          	}.bind(this);
 		          	
-					$Boards.list()
-					.then(function(data){
-						self.list = data;
-					})
-		          	.catch(function(err){
-		          		$log.error(err);
-		          		throw err;
-		          	});
-
+		          	next();
+		          	
 		          }],
 		          controllerAs: 'boardsVm'
 		  	},

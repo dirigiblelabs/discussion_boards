@@ -20,6 +20,20 @@
 		            }, 
 		            isArray: false
 			    },
+			    query : {
+					method: 'GET',
+			        interceptor: {
+						response: function(res) {
+		                	var _count= res.headers('X-dservice-list-count');
+		                	if(_count!==undefined){
+		                		_count = parseInt(_count, 10);
+		                		res.resource.$count = _count;
+	                		}
+	                        return res.resource;
+		                }
+		            }, 
+		            isArray: true
+			    },
 			    update: {
 			        method: 'PUT'
 			    }

@@ -87,7 +87,8 @@ var BoardsDataService = function(){
 				    	if(tags && !Array.isArray(tags)){
 				    		tags = [tags];
 				    	}
-						self.handlersProvider.dao.setTags(context.pathParams.id, tags, true);
+				    	var createOnDemand = context.queryParams['createOnDemand'] || true;
+						self.handlersProvider.dao.setTags(context.pathParams.id, tags, createOnDemand);
 						io.response.setStatus(io.response.OK);
 					} catch(e) {
 			    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;

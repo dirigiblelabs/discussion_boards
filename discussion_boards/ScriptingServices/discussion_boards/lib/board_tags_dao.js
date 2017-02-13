@@ -45,7 +45,7 @@ var BoardTagDAO  = exports.BoardTagDAO = function(orm, boardDao, tagsDao){
 	this.boardDao = boardDao;
 	this.tagsDao = tagsDao;
 };
-BoardTagDAO.prototype = Object.create( DAO.prototype );
+BoardTagDAO.prototype = Object.create(DAO.prototype);
 
 BoardTagDAO.prototype.listJoins = function(settings, daos){
 	var boardId;

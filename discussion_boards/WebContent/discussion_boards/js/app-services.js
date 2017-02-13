@@ -145,12 +145,22 @@
 				});
 			}
 		};
-		var list = function(){
-			return Board.query({$expand:'votes,tags'}).$promise
+		var list = function(params){
+			params = params || {};
+			params['$expand'] = 'votes,tags';
+			return Board.query(params).$promise
           	.then(function(data){
-          		return data.map(function(boardData){
+          		var _entities = (data.entities || data).map(function(boardData){
           			return formatEntity(boardData);
           		});
+          		var res = _entities;
+          		if(params.$limit!==undefined){
+          			res = {
+	          			entities: _entities,
+	          			count: data.$count
+	          		};
+          		}
+          		return res;
           	});          	
 		};
 		var get = function(boardId){
