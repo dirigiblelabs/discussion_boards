@@ -1,0 +1,40 @@
+{
+    "list": {
+        "empty": "Look, it's empty! Be the first to add here!",
+        "board_stats": {
+            "disc_collabor": "by {0}",
+            "disc_collabor_plural": "people",
+            "disc_collabor_singular": "person",
+            "disc_collabor_none_0": "No one is discussing this yet. Be the first one to",
+            "disc_collabor_none_1": "comment",
+            "disc_collabor_none_3": "!",       
+            "disc_lastupd": "Last discussion update {0}"
+        }        
+    },
+    "board": {
+        "last_edit": "last edit {0}"
+    },
+    "rating": {
+        "title": "rating",
+        "votes_singular": "{0} vote",
+        "votes_plural": "{0} votes"
+    },
+    "discussion":{
+        "notsigned_0": "Have something to say about this?", 
+        "notsigned_1": "Sign in", 
+        "notsigned_2": "to comment",
+        "comment":{
+            "said": "said",
+            "replied": "replied",
+            "new_title": "Leave a comment"
+        }
+    },   
+    "buttons": {
+        "post": "Post",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reply": "Reply",
+        "more": "More..."
+    }
+}

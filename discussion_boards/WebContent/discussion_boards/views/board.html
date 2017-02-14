@@ -16,13 +16,13 @@
 			<span>{{boardVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 			|
 			<div ng-if="boardVm.commentsCount">
-				<span ng-if="boardVm.commentsCount">{{boardVm.commentsCount}} <i class="fa fa-comments-o"></i> by {{boardVm.board.participantsCountShort}}
-					<span ng-if="boardVm.board.participantsCount>1">people</span>
-					<span ng-if="boardVm.board.participantsCount===1">person</span>
+				<span ng-if="boardVm.commentsCount">{{boardVm.commentsCount}} <i class="fa fa-comments-o"></i> {{boardVm.i18n.format('list.board_stats.disc_collabor', boardVm.board.participantsCountShort)}}
+					<span ng-if="boardVm.board.participantsCount!==1" ng-bind="boardVm.i18n.format('list.board_stats.disc_collabor_plural')"></span>
+					<span ng-if="boardVm.board.participantsCount===1" ng-bind="boardVm.i18n.format('list.board_stats.disc_collabor_singular')"></span>
 				</span>
 			</div>
 			<div ng-if="!boardVm.commentsCount">
-				No one is discussing this yet.
+				{{boardVm.i18n.format('list.board_stats.disc_collabor_none_0')}}
 			</div>
 		</div>
 
@@ -30,12 +30,12 @@
 		<div ng-if="boardVm.hasMode('edit')"> 
 			<textarea class="form-control" ng-model="boardVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
 			<div class="button-group" style="margin: 5px 0;">
-				<button class="btn btn-primary" ng-click="boardVm.postEdit()" ng-disabled="!boardVm.descriptionEdit">Post</button>
-				<button class="btn btn-primary" ng-click="boardVm.cancelEdit()">Cancel</button>
+				<button class="btn btn-primary" ng-click="boardVm.postEdit()" ng-disabled="!boardVm.descriptionEdit">{{boardVm.i18n.format('buttons.post')}}</button>
+				<button class="btn btn-primary" ng-click="boardVm.cancelEdit()">{{boardVm.i18n.format('buttons.cancel')}}</button>
 			</div>
 		</div>		
 		
-		<tags-input ng-if="boardsVm.CONFIG.features.tags.enabled && boardVm.hasPrivilege('tag')" 
+		<tags-input ng-if="boardVm.CONFIG.features.tags.enabled && boardVm.hasPrivilege('tag')" 
 					ng-model="boardVm.board.tags" 
 					display-property="defaultLabel",
 					max-tags="5",
@@ -49,22 +49,23 @@
 			<span ng-repeat="tag in boardVm.board.tags" ng-bind="tag.defaultLabel" class="tag"><span>
 		</div>									  							   
 		
-		<span ng-if="boardVm.board.timeSinceLastModified" title="{{boardVm.board.lastModifiedTimeLocal}}" class="text-muted">- last edit {{boardVm.board.timeSinceLastModified}}</span>
+		<span ng-if="boardVm.board.timeSinceLastModified" title="{{boardVm.board.lastModifiedTimeLocal}}" class="text-muted">- {{boardVm.i18n.format('board.last_edit', boardVm.board.timeSinceLastModified)}}</span>
 
 		<div class="tools" ng-if="!boardVm.hasMode('edit')">
 			<a ng-if="boardVm.hasPrivilege('lock')" ng-click="boardVm.toggleLock()" href title="{{boardVm.board.locked?'locked':'unlocked'}}"><i ng-if="!boardVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="boardVm.board.locked" class="fa fa-lock"></i></a>
-			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil"></i> Edit</a> 
-			<a ng-if="boardVm.hasPrivilege('delete')" ng-click="boardVm.remove()" href ><i class="fa fa-trash-o"></i> Delete</a>
+			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil"></i> {{boardVm.i18n.format('buttons.edit')}}</a> 
+			<a ng-if="boardVm.hasPrivilege('delete')" ng-click="boardVm.remove()" href ><i class="fa fa-trash-o"></i> {{boardVm.i18n.format('buttons.delete')}}</a>
 		</div>
 
 	</div>
 
-	<div class="right-compartment" ng-if="boardsVm.CONFIG.features.votes.enabled">
+	<div class="right-compartment" ng-if="boardVm.CONFIG.features.votes.enabled">
 			
 		<div class="rating-box">
-			<span class="subtle">rating</span>
+			<span class="subtle">{{boardVm.i18n.format('rating.title')}}</span>
 			<span class="rating-number">{{boardVm.board.ratingShort}}</span>
-			<span class="votes-number">{{boardVm.board.totalVotesShort}} Votes</span>
+			<span class="votes-number" ng-if="boardVm.board.totalVotes===1">{{boardVm.i18n.format('rating.votes_singular', boardVm.board.totalVotesShort)}}</span>
+			<span class="votes-number" ng-if="boardVm.board.totalVotes!==1">{{boardVm.i18n.format('rating.votes_plural', boardVm.board.totalVotesShort)}}</span>					
 		</div>
 		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="boardVm.hasPrivilege('vote')">
 			<a ng-click="boardVm.saveVote(1)" href ng-if="boardVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
@@ -81,7 +82,7 @@
 </div>
 
 <div class="discussion-header">
-	<div class="text-muted stats-text"><span ng-if="boardVm.board.latestDiscussionUpdateTime" title="{{boardVm.board.latestDiscussionUpdateTimeLocal}}">Last discussion update {{boardVm.board.timeSinceLatestDiscussionUpdateTime}}</span></div>
+	<div class="text-muted stats-text"><span ng-if="boardVm.board.latestDiscussionUpdateTime" title="{{boardVm.board.latestDiscussionUpdateTimeLocal}}">{{boardVm.i18n.format('list.board_stats.disc_lastupd', boardVm.board.timeSinceLatestDiscussionUpdateTime)}}</span></div>
 	<div class="toolbar">
 		<button class="btn btn-default" ui-sref="list.entity.discussion.thread({board:boardVm.board, timeline:false})"><i class="fa fa-list-ul"></i></button>		
 		<button class="btn btn-default" ui-sref="list.entity.discussion.timeline({board:boardVm.board, timeline:true})"><i class="fa fa-clock-o"></i></button>

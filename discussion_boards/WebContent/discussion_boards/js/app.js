@@ -12,7 +12,7 @@ angular.module('$ckeditor', [])
   return $window.CKEDITOR;
 }]);
 
-angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput'])
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput', 'ngI18n'])
 .constant('CONFIG', {
 	"LOGIN_URL" : "login/login.html",
 	"features" : {
@@ -26,6 +26,16 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			"enabled": false
 		}
 	}
+})
+.value('ngI18nConfig', {
+    //defaultLocale should be in lowercase and is required!!
+    defaultLocale:'en',
+    //supportedLocales is required - all locales should be in lowercase!!
+    supportedLocales:['en', 'bg'],
+    //without leading and trailing slashes, default is i18n
+    basePath:'i18n',
+    //default is false
+    cache:true
 })
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', 'CONFIG', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider, CONFIG) {
 
@@ -46,13 +56,38 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 								$log.info('No user to authenticate. Sign in first.');
 							return;
 						});	
-				}]				
+				}],
+				i18n: ['ngI18nResourceBundle', function(ngI18nResourceBundle){
+					return ngI18nResourceBundle.get()
+						   .then(function (resourceBundle) {
+					            return {
+					            	bundle:resourceBundle.data,
+					            	format: function(key){
+					            		var path = key.split('.');
+					            		var msg = this.bundle;
+					            		for(var i=0; i<path.length; i++){
+					            			msg = msg[path[i]];
+					            		}
+					            		var formatArgs = Array.prototype.slice.call(arguments);
+					            		formatArgs.splice(0, 1);
+					            		if(formatArgs.length>0){
+					            			msg = msg.replace(/{\d+}/, function(param){
+					            				var idx = param.substring(1,2);
+						            			return formatArgs[idx];
+						            		});
+					            		}
+					            		return msg;
+					            	}
+				            	};
+					       });
+				}]
 			},
 		  views: {
 		  	"@": {
 		          templateUrl: 'views/boards.list.html',
-		          controller: ['$Boards', '$log', 'FilterList', 'CONFIG', function($Boards, $log, FilterList, CONFIG){
+		          controller: ['$Boards', '$log', 'FilterList', 'i18n', 'CONFIG', function($Boards, $log, FilterList, i18n, CONFIG){
 		          	this.CONFIG = CONFIG;
+		          	this.i18n = i18n;
 		          	this.list = [];
 		          	this.filterList = FilterList;
 		          	this.limit = CONFIG.features.list.pageLimit;
@@ -132,8 +167,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/board.html",
-					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', 'CONFIG', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope, CONFIG){
+					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', 'CONFIG', 'i18n', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope, CONFIG, i18n){
 						this.CONFIG = CONFIG;
+						this.i18n = i18n,
 						this.board = board;
 						this.commentsCount = board.commentsCount;
 						this.loggedUser = loggedUser;
@@ -259,8 +295,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.thread.html",				
-					controller: ['$log', '$Comments', 'board', 'comments', 'loggedUser', function($log, $Comments, board, comments, loggedUser){
-						
+					controller: ['$log', '$Comments', 'board', 'comments', 'loggedUser', 'i18n', function($log, $Comments, board, comments, loggedUser, i18n){
+						this.i18n = i18n,
 						this.comment = {};
 						this.comments = comments;
 						this.board = board;

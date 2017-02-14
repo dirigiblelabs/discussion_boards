@@ -1,0 +1,40 @@
+{
+    "list": {
+        "empty": "Вижте, няма нищо! Бъдете първи и добавете нещо тук!", 
+        "board_stats": {
+            "disc_collabor": "от {0}",
+            "disc_collabor_plural": "хора",
+            "disc_collabor_singular": "човек",
+            "disc_collabor_none_0": "Все още никой не обсъжда това. Бъдете първи",
+            "disc_collabor_none_1": "коментирали го",
+            "disc_collabor_none_3": "!",
+            "disc_lastupd": "Последно обновяване на дискусията {0}"
+        }
+    },
+    "board": {
+        "last_edit": "последна редакция {0}"
+    },
+    "rating": {
+        "title": "рейтинг",
+        "votes_singular": "{0} вот",
+        "votes_plural": "{0} вота"
+    },
+    "discussion":{
+        "notsigned_0": "Имате да кажете нещо по този въпрос?", 
+        "notsigned_1": "Влезте в системата", 
+        "notsigned_2": "за да коментирате",
+        "comment":{
+            "said": "каза",
+            "replied": "отговори",
+            "new_title": "Оставете коментар"
+        }
+    },   
+    "buttons": {
+        "post": "Изпрати",
+        "cancel": "Откажи",
+        "edit": "Редактирай",
+        "delete": "Изтрии",
+        "reply": "Отговори",
+        "more": "Още..."
+    }
+}
