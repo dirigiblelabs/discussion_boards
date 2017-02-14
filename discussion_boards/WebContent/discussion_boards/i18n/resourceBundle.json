@@ -1,18 +1,26 @@
 {
     "list": {
-        "empty": "Look, it's empty! Be the first to add here!",
-        "board_stats": {
-            "disc_collabor": "by {0}",
-            "disc_collabor_plural": "people",
-            "disc_collabor_singular": "person",
-            "disc_collabor_none_0": "No one is discussing this yet. Be the first one to",
-            "disc_collabor_none_1": "comment",
-            "disc_collabor_none_3": "!",       
-            "disc_lastupd": "Last discussion update {0}"
-        }        
+        "empty": "Look, it's empty! Be the first to add here!"
     },
     "board": {
-        "last_edit": "last edit {0}"
+        "last_edit": "last edit {0}",
+        "short_text": "Short Text",
+        "short_text_title": "Short text desribing the essence of the topic",
+        "description": "Description",
+        "description_title": "A detailed description of the topic",
+        "avatar_title": "Avatar for user {0}",
+        "views_title": "{0} users views so far",
+        "comments_stats": {
+            "title_0": "{0} {1} ",
+            "comments_num_1": "comment",
+            "comments_num_many": "comments",
+            "title_1": "from {0} {1}",
+            "collaborators_1": "user",
+            "collaborators_many": "users",
+            "none_0": "No one is discussing this yet. Be the first and ",
+            "none_1": "share a comment",
+            "lastupd": "Last discussion update {0}"
+        }
     },
     "rating": {
         "title": "rating",
@@ -35,6 +43,18 @@
         "edit": "Edit",
         "delete": "Delete",
         "reply": "Reply",
-        "more": "More..."
+        "more": "More...",
+        "new": "New",
+        "home": "Home",
+        "search": "Search",
+        "settings": "Settings",
+        "signin": "Sign in",
+        "view_timeline": "As Timeline",
+        "view_thread": "As Thread"
+    },
+    "settings": {
+        "title": "Settings",
+        "username_label": "User Name",
+        "avatar_label": "Avatar Image"
     }
 }

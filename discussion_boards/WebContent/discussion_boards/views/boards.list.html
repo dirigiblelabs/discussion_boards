@@ -6,7 +6,7 @@
 			
 			<div class="left-compartment">
 				<div class="user-box" style="">
-					<img ng-src="../../js/user/avatar.js/{{board.user}}" class="user-pic"/>
+					<img ng-src="../../js/user/avatar.js/{{board.user}}" class="user-pic" title="{{boardsVm.i18n.format('board.avatar_title', (board.user||''))}}"/>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
 				<span class="publish-time" title="{{board.publishTimeLocal}}" ng-bind="board.timeSincePublish"></span>
@@ -14,26 +14,42 @@
 			
 			<div class="main-compartment">
 				
-				<a class="title" ng-bind="board.shortText" ui-sref="list.entity({boardId:board.id, board: board})"></a>
+				<a class="title" ng-bind="board.shortText" ui-sref="list.entity({boardId:board.id, board: board})" title="{{boardsVm.i18n.format('board.short_text_title')}}"></a>
 
 				<div class="stats">
-					<span>{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
+					<span title="{{boardsVm.i18n.format('board.views_title', (board.visitsShort||0))}}">{{board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 					|
 					<div ng-if="board.commentsCount" style="display:inline-block">
-						<span>{{board.commentsCount}} <i class="fa fa-comments-o"></i> {{boardsVm.i18n.format('list.board_stats.disc_collabor', board.participantsCountShort)}}
-							<span ng-if="board.participantsCount>1" ng-bind="boardsVm.i18n.format('list.board_stats.disc_collabor_plural')"></span>
-							<span ng-if="board.participantsCount===1" ng-bind="boardsVm.i18n.format('list.board_stats.disc_collabor_singular')"></span>
+						<span title="{{
+							(
+								boardsVm.i18n.format('board.comments_stats.title_0', board.commentsCount, 
+									(board.commentsCount===1 ? 
+										boardsVm.i18n.format('board.comments_stats.comments_num_1') : 
+										boardsVm.i18n.format('board.comments_stats.comments_num_many')))  +
+								boardsVm.i18n.format('board.comments_stats.title_1', board.participantsCountShort,
+									(board.participantsCount===1 ? 
+										boardsVm.i18n.format('board.comments_stats.collaborators_1') : 
+										boardsVm.i18n.format('board.comments_stats.collaborators_many'))
+								)
+							)
+							}}">
+							{{board.commentsCount}} <i class="fa fa-comments-o"></i> {{
+									boardsVm.i18n.format('board.comments_stats.title_1', board.participantsCountShort,
+									(board.participantsCount===1 ? 
+										boardsVm.i18n.format('board.comments_stats.collaborators_1') : 
+										boardsVm.i18n.format('board.comments_stats.collaborators_many'))
+								)}}
 						</span>
 					</div>
 					<div ng-if="!board.commentsCount" style="display:inline-block">
-						{{boardsVm.i18n.format('list.board_stats.disc_collabor_none_0')}} <a ui-sref="list.entity({boardId:board.id, board: board})" href>{{boardsVm.i18n.format('list.board_stats.disc_collabor_none_1')}}</a> {{boardsVm.i18n.format('list.board_stats.disc_collabor_none_2')}}
+						{{boardsVm.i18n.format('board.comments_stats.none_0')}} <a ui-sref="list.entity({boardId:board.id, board: board})" href>{{boardsVm.i18n.format('board.comments_stats.none_1')}}</a>
 					</div>
 				</div>
 									
 				<div ng-if="boardsVm.CONFIG.features.tags.enabled && board.tags" class="tags">
 					<span ng-repeat="tag in board.tags" ng-bind="tag.defaultLabel" class="tag-item"><span>
 				</div>
-				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">{{boardsVm.i18n.format('list.board_stats.disc_lastupd', board.timeSinceLatestDiscussionUpdateTime)}}</span>
+				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">{{boardsVm.i18n.format('board.comments_stats.lastupd', board.timeSinceLatestDiscussionUpdateTime)}}</span>
 			</div>
 
 			<div class="right-compartment" ng-if="boardsVm.CONFIG.features.votes.enabled">

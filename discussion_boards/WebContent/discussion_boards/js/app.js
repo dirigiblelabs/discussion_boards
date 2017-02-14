@@ -4,7 +4,9 @@
 //angular'ized external dependencies
 angular.module('$moment', [])
 .factory('$moment', ['$window', function($window) {
-  return $window.moment;
+	var locale = $window.navigator.userLanguage || $window.navigator.language;
+	$window.moment && $window.moment.locale(locale);
+  	return $window.moment;
 }]);
 
 angular.module('$ckeditor', [])
@@ -12,7 +14,7 @@ angular.module('$ckeditor', [])
   return $window.CKEDITOR;
 }]);
 
-angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput', 'ngI18n'])
+angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAnimate', 'ngResource', 'ui.router', 'ui.bootstrap', 'angular-loading-bar', 'angularFileUpload','angular-timeline','angular-scroll-animate', 'ngTagsInput', 'i18n'])
 .constant('CONFIG', {
 	"LOGIN_URL" : "login/login.html",
 	"features" : {
@@ -26,16 +28,6 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			"enabled": false
 		}
 	}
-})
-.value('ngI18nConfig', {
-    //defaultLocale should be in lowercase and is required!!
-    defaultLocale:'en',
-    //supportedLocales is required - all locales should be in lowercase!!
-    supportedLocales:['en', 'bg'],
-    //without leading and trailing slashes, default is i18n
-    basePath:'i18n',
-    //default is false
-    cache:true
 })
 .config(['$stateProvider', '$urlRouterProvider', 'cfpLoadingBarProvider', 'CONFIG', function($stateProvider, $urlRouterProvider, cfpLoadingBarProvider, CONFIG) {
 
@@ -57,29 +49,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							return;
 						});	
 				}],
-				i18n: ['ngI18nResourceBundle', function(ngI18nResourceBundle){
-					return ngI18nResourceBundle.get()
-						   .then(function (resourceBundle) {
-					            return {
-					            	bundle:resourceBundle.data,
-					            	format: function(key){
-					            		var path = key.split('.');
-					            		var msg = this.bundle;
-					            		for(var i=0; i<path.length; i++){
-					            			msg = msg[path[i]];
-					            		}
-					            		var formatArgs = Array.prototype.slice.call(arguments);
-					            		formatArgs.splice(0, 1);
-					            		if(formatArgs.length>0){
-					            			msg = msg.replace(/{\d+}/, function(param){
-					            				var idx = param.substring(1,2);
-						            			return formatArgs[idx];
-						            		});
-					            		}
-					            		return msg;
-					            	}
-				            	};
-					       });
+				i18n: ['i18n', function(i18n){
+					return i18n;
 				}]
 			},
 		  views: {
@@ -118,7 +89,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  	},
 		  	"toolbar@": {
 		          templateUrl: 'views/toolbar.html',
-		          controller: ['FilterList', 'loggedUser', function(FilterList, loggedUser){
+		          controller: ['FilterList', 'loggedUser','i18n', function(FilterList, loggedUser, i18n){
+		          	this.i18n = i18n;
 		          	this.filterList = FilterList;
 		          	this.loggedUser = loggedUser;
 		          }],
@@ -146,6 +118,10 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			},
 			resolve: {
 				board: ['$state', '$stateParams', '$Boards', '$log', function($state, $stateParams, $Boards, $log){
+					//The settings deep link url resolve true from the pattern for dboard detail so we need to explicitly check if it is setting that have been requested or a board details
+					if($stateParams.boardId === 'settings'){
+						return;
+					}
 					var boardId;
 					if($stateParams.boardId !==undefined &&  $stateParams.boardId!==''){
 						boardId = $stateParams.boardId;
@@ -168,6 +144,11 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				"@": {
 					templateUrl: "views/board.html",
 					controller: ['$state', '$stateParams', '$log', '$Boards', '$Tags', 'board', 'loggedUser', '$rootScope', 'CONFIG', 'i18n', function($state, $stateParams, $log, $Boards, $Tags, board, loggedUser, $rootScope, CONFIG, i18n){
+						//The settings deep link url resolve true from the pattern for dboard detail so we need to explicitly check if it is setting that have been requested or a board details
+						if($stateParams.boardId === 'settings'){
+							$state.go('list.settings');
+							return;
+						}
 						this.CONFIG = CONFIG;
 						this.i18n = i18n,
 						this.board = board;
@@ -442,8 +423,9 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@list.entity": {
 					templateUrl: "views/discussion.timeline.html",				
-					controller: ['$Comments', '$log', 'board', 'comments', 'loggedUser', function($Comments, $log, board, comments, loggedUser){
-						
+					controller: ['$Comments', '$log', 'board', 'comments', 'loggedUser', 'CONFIG', 'i18n', function($Comments, $log, board, comments, loggedUser, CONFIG, i18n){
+						this.i18n = i18n;
+						this.CONFIG = CONFIG;
 						this.comment = {};
 						this.board = board;
 						this.comments = comments;						
@@ -519,7 +501,8 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			views: {
 				"@": {
 					templateUrl: "views/board.form.html",
-					controller: ['$state', '$log', 'SecureBoard', 'loggedUser',  function($state, $log, SecureBoard, loggedUser){
+					controller: ['$state', '$log', 'SecureBoard', 'loggedUser', 'i18n',  function($state, $log, SecureBoard, loggedUser, i18n){
+							this.i18n = i18n;
 							if(!loggedUser)
 								$state.go('list.login');
 							this.board = {};
@@ -540,10 +523,12 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			}
 		})
 		.state('list.settings', {  
+			url: '/settings',
 			views: {
 				"@": {
 					templateUrl: "views/settings.html",	
-					controller: ['$state', 'FileUploader', 'loggedUser', function($state, FileUploader, loggedUser){
+					controller: ['$state', 'FileUploader', 'loggedUser', 'i18n', function($state, FileUploader, loggedUser, i18n){
+						this.i18n = i18n;
 						this.user = loggedUser;
 						this.rootPath = '../../js-secured/profile/avatar.js';
 						var self  = this;
@@ -552,7 +537,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 							url: this.user && this.rootPath
 						});
 					    this.uploader.onBeforeUploadItem = function(/*item*/) {
-							//item.url = zipUploadPath + "?path=" + this.folder.path;
+							
 					    };
 					    this.uploader.onCompleteItem = function(/*fileItem, response, status, headers*/) {
 							$state.reload();

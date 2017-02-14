@@ -2,7 +2,7 @@
 
 	<div class="left-compartment">
 		<div class="user-box">
-			<img ng-src="../../js/user/avatar.js/{{boardVm.board.user}}" class="user-pic"/>
+			<img ng-src="../../js/user/avatar.js/{{boardVm.board.user}}" class="user-pic" title="{{boardVm.i18n.format('board.avatar_title', (boardVm.board.user||''))}}"/>
 			<span ng-bind="boardVm.board.user" class="user-name"></span>
 		</div>
 		<span class="publish-time" title="{{boardVm.board.publishTimeLocal}}" ng-bind="boardVm.board.timeSincePublish"></span>
@@ -10,28 +10,44 @@
 	
 	<div class="main-compartment">
 		
-		<a class="title" ng-bind="boardVm.board.shortText" ui-sref="list.entity({boardId:boardVm.board.id, board: boardVm.board})" ui-sref-opts="{reload: true}"></a>
+		<a class="title" ng-bind="boardVm.board.shortText" ui-sref="list.entity({boardId:boardVm.board.id, board: boardVm.board})" ui-sref-opts="{reload: true}" title="{{boardVm.i18n.format('board.short_text_title')}}"></a>
 
-		<div class="stats">
-			<span>{{boardVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
+		<div class="stats" title="{{boardVm.i18n.format('board.views_title', (boardVm.board.visitsShort||0))}}">
+			<span title="{{boardVm.i18n.format('board.views_title', (boardVm.board.visitsShort||0))}}">{{boardVm.board.visitsShort||0}} <i class="fa fa-eye"></i></span>
 			|
-			<div ng-if="boardVm.commentsCount">
-				<span ng-if="boardVm.commentsCount">{{boardVm.commentsCount}} <i class="fa fa-comments-o"></i> {{boardVm.i18n.format('list.board_stats.disc_collabor', boardVm.board.participantsCountShort)}}
-					<span ng-if="boardVm.board.participantsCount!==1" ng-bind="boardVm.i18n.format('list.board_stats.disc_collabor_plural')"></span>
-					<span ng-if="boardVm.board.participantsCount===1" ng-bind="boardVm.i18n.format('list.board_stats.disc_collabor_singular')"></span>
+			<div ng-if="boardVm.commentsCount" style="display:inline-block">
+				<span title="{{
+					(
+						boardVm.i18n.format('board.comments_stats.title_0', boardVm.commentsCount, 
+							(boardVm.board.commentsCount===1 ? 
+								boardVm.i18n.format('board.comments_stats.comments_num_1') : 
+								boardVm.i18n.format('board.comments_stats.comments_num_many')))  +
+						boardVm.i18n.format('board.comments_stats.title_1', boardVm.board.participantsCountShort,
+							(boardVm.board.participantsCount===1 ? 
+								boardVm.i18n.format('board.comments_stats.collaborators_1') : 
+								boardVm.i18n.format('board.comments_stats.collaborators_many'))
+						)
+					)
+					}}">
+					{{boardVm.commentsCount}} <i class="fa fa-comments-o"></i> {{
+							boardVm.i18n.format('board.comments_stats.title_1', boardVm.board.participantsCountShort,
+							(boardVm.board.participantsCount===1 ? 
+								boardVm.i18n.format('board.comments_stats.collaborators_1') : 
+								boardVm.i18n.format('board.comments_stats.collaborators_many'))
+						)}}
 				</span>
 			</div>
 			<div ng-if="!boardVm.commentsCount">
-				{{boardVm.i18n.format('list.board_stats.disc_collabor_none_0')}}
+				{{boardVm.i18n.format('board.comments_stats.none_0')}} <a ui-sref="list.entity({boardId:board.id, board: board})" href>{{boardVm.i18n.format('board.comments_stats.none_1')}}</a>
 			</div>
 		</div>
 
-		<div class="description" ng-bind-html="boardVm.board.description" ng-if="!boardVm.hasMode('edit')"></div>
+		<div class="description" ng-bind-html="boardVm.board.description" ng-if="!boardVm.hasMode('edit')" title="{{boardVm.i18n.format('board.description_title')}}"></div>
 		<div ng-if="boardVm.hasMode('edit')"> 
 			<textarea class="form-control" ng-model="boardVm.descriptionEdit" style="width:100%; margin-bottom:3px" ck-editor></textarea>
 			<div class="button-group" style="margin: 5px 0;">
-				<button class="btn btn-primary" ng-click="boardVm.postEdit()" ng-disabled="!boardVm.descriptionEdit">{{boardVm.i18n.format('buttons.post')}}</button>
-				<button class="btn btn-primary" ng-click="boardVm.cancelEdit()">{{boardVm.i18n.format('buttons.cancel')}}</button>
+				<button class="btn btn-primary" ng-click="boardVm.postEdit()" ng-disabled="!boardVm.descriptionEdit" ng-bind="boardVm.i18n.format('buttons.post')" title="{{boardVm.i18n.format('buttons.post')}}"></button>
+				<button class="btn btn-primary" ng-click="boardVm.cancelEdit()" ng-bind="boardVm.i18n.format('buttons.cancel')" title="{{boardVm.i18n.format('buttons.cancel')}}"></button>
 			</div>
 		</div>		
 		
@@ -47,14 +63,14 @@
 		</tags-input>
 		<div ng-if="!boardVm.hasPrivilege('tag')">
 			<span ng-repeat="tag in boardVm.board.tags" ng-bind="tag.defaultLabel" class="tag"><span>
-		</div>									  							   
+		</div>
 		
 		<span ng-if="boardVm.board.timeSinceLastModified" title="{{boardVm.board.lastModifiedTimeLocal}}" class="text-muted">- {{boardVm.i18n.format('board.last_edit', boardVm.board.timeSinceLastModified)}}</span>
 
 		<div class="tools" ng-if="!boardVm.hasMode('edit')">
 			<a ng-if="boardVm.hasPrivilege('lock')" ng-click="boardVm.toggleLock()" href title="{{boardVm.board.locked?'locked':'unlocked'}}"><i ng-if="!boardVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="boardVm.board.locked" class="fa fa-lock"></i></a>
-			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil"></i> {{boardVm.i18n.format('buttons.edit')}}</a> 
-			<a ng-if="boardVm.hasPrivilege('delete')" ng-click="boardVm.remove()" href ><i class="fa fa-trash-o"></i> {{boardVm.i18n.format('buttons.delete')}}</a>
+			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil" title="{{boardVm.i18n.format('buttons.edit')}}"></i> {{boardVm.i18n.format('buttons.edit')}}</a> 
+			<a ng-if="boardVm.hasPrivilege('delete')" ng-click="boardVm.remove()" href title="{{boardVm.i18n.format('buttons.delete')}}"><i class="fa fa-trash-o"></i> {{boardVm.i18n.format('buttons.delete')}}</a>
 		</div>
 
 	</div>
@@ -82,10 +98,10 @@
 </div>
 
 <div class="discussion-header">
-	<div class="text-muted stats-text"><span ng-if="boardVm.board.latestDiscussionUpdateTime" title="{{boardVm.board.latestDiscussionUpdateTimeLocal}}">{{boardVm.i18n.format('list.board_stats.disc_lastupd', boardVm.board.timeSinceLatestDiscussionUpdateTime)}}</span></div>
+	<div class="text-muted stats-text"><span ng-if="boardVm.board.latestDiscussionUpdateTime" title="{{boardVm.board.latestDiscussionUpdateTimeLocal}}">{{boardVm.i18n.format('board.comments_stats.lastupd', boardVm.board.timeSinceLatestDiscussionUpdateTime)}}</span></div>
 	<div class="toolbar">
-		<button class="btn btn-default" ui-sref="list.entity.discussion.thread({board:boardVm.board, timeline:false})"><i class="fa fa-list-ul"></i></button>		
-		<button class="btn btn-default" ui-sref="list.entity.discussion.timeline({board:boardVm.board, timeline:true})"><i class="fa fa-clock-o"></i></button>
+		<button class="btn btn-default" ui-sref="list.entity.discussion.thread({board:boardVm.board, timeline:false})" title="{{boardVm.i18n.format('buttons.view_thread')}}"><i class="fa fa-list-ul"></i></button>		
+		<button class="btn btn-default" ui-sref="list.entity.discussion.timeline({board:boardVm.board, timeline:true})" title="{{boardVm.i18n.format('buttons.view_timeline')}}"><i class="fa fa-clock-o"></i></button>
 	</div>
 </div>
 

@@ -1,5 +1,5 @@
-<a style="font-weight:700; text-decoration:none; font-size: 2.4em; line-height: 1em; top:-4px; position:relative;" ui-sref="list"><i class="fa fa-home"></i></a>
-<div style="display:inline-block; margin-left:15px; width: 200px; border-radius:10px">
+<a style="font-weight:700; text-decoration:none; font-size: 2.4em; line-height: 1em; top:-4px; position:relative;" ui-sref="list" title="{{toolbarVm.i18n.format('buttons.home')}}"><i class="fa fa-home"></i></a>
+<div style="display:inline-block; margin-left:15px; width: 200px; border-radius:10px" title="{{toolbarVm.i18n.format('buttons.search')}}">
 	<div class="input-group input-group">
 	  <span class="input-group-addon" id="quick-filter" style="border-top-left-radius:10em; border-bottom-left-radius:10em;"><i class="glyphicon glyphicon-search"></i></span>
 	  <input type="text" class="form-control" placeholder="" aria-describedby="quick-filter" style="border-top-right-radius:10em; border-bottom-right-radius:10em;" ng-model="toolbarVm.filterList.filterText">
@@ -7,7 +7,7 @@
 </div>
 
 <div class="pull-right button-group">
-	<button class="btn btn-primary" ui-sref="list.new">New</button>
-	<button class="btn btn-primary" ui-sref="list.settings" ng-if="toolbarVm.loggedUser" title="Settings"><i class="fa fa-cog"></i></button>
-	<button class="btn btn-primary" ui-sref="list.login" ng-if="!toolbarVm.loggedUser" title="Sign-in"><i class="glyphicon glyphicon-log-in"></i></button>
+	<button class="btn btn-primary" ui-sref="list.new" title="{{toolbarVm.i18n.format('buttons.new')}}" ng-bind="toolbarVm.i18n.format('buttons.new')"></button>
+	<button class="btn btn-primary" ui-sref="list.settings" ng-if="toolbarVm.loggedUser" title="{{toolbarVm.i18n.format('buttons.settings')}}"><i class="fa fa-cog"></i></button>
+	<button class="btn btn-primary" ui-sref="list.login" ng-if="!toolbarVm.loggedUser" title="{{toolbarVm.i18n.format('buttons.signin')}}"><i class="glyphicon glyphicon-log-in"></i></button>
 </div>
