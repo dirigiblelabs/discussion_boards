@@ -5,7 +5,7 @@
 		<div class="board-list-item">
 			
 			<div class="left-compartment">
-				<div class="user-box" style="">
+				<div class="user-box">
 					<img ng-src="../../js/user/avatar.js/{{board.user}}" class="user-pic" title="{{boardsVm.i18n.format('board.avatar_title', (board.user||''))}}"/>
 					<span ng-bind="board.user" class="user-name"></span>
 				</div>
@@ -49,7 +49,7 @@
 				<div ng-if="boardsVm.CONFIG.features.tags.enabled && board.tags" class="tags">
 					<span ng-repeat="tag in board.tags" ng-bind="tag.defaultLabel" class="tag-item"><span>
 				</div>
-				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" style="font-size: 0.875em;color: #767676;">{{boardsVm.i18n.format('board.comments_stats.lastupd', board.timeSinceLatestDiscussionUpdateTime)}}</span>
+				<span ng-if="board.latestDiscussionUpdateTime" title="{{board.latestDiscussionUpdateTimeLocal}}" class="text-muted">{{boardsVm.i18n.format('board.comments_stats.lastupd', board.timeSinceLatestDiscussionUpdateTime)}}</span>
 			</div>
 
 			<div class="right-compartment" ng-if="boardsVm.CONFIG.features.votes.enabled">

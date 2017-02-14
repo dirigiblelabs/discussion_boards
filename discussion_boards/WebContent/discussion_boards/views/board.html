@@ -68,8 +68,8 @@
 		<span ng-if="boardVm.board.timeSinceLastModified" title="{{boardVm.board.lastModifiedTimeLocal}}" class="text-muted">- {{boardVm.i18n.format('board.last_edit', boardVm.board.timeSinceLastModified)}}</span>
 
 		<div class="tools" ng-if="!boardVm.hasMode('edit')">
-			<a ng-if="boardVm.hasPrivilege('lock')" ng-click="boardVm.toggleLock()" href title="{{boardVm.board.locked?'locked':'unlocked'}}"><i ng-if="!boardVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="boardVm.board.locked" class="fa fa-lock"></i></a>
-			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href ><i class="fa fa-pencil" title="{{boardVm.i18n.format('buttons.edit')}}"></i> {{boardVm.i18n.format('buttons.edit')}}</a> 
+			<a ng-if="boardVm.hasPrivilege('lock')" ng-click="boardVm.toggleLock()" href title="{{boardVm.board.locked?boardVm.i18n.format('buttons.unlock'):boardVm.i18n.format('buttons.lock')}}"><i ng-if="!boardVm.board.locked" class="fa fa-unlock-alt"></i><i ng-if="boardVm.board.locked" class="fa fa-lock"></i></a>
+			<a ng-if="boardVm.hasPrivilege('edit')" ng-click="boardVm.openBoardForEdit()" href title="{{boardVm.i18n.format('buttons.edit')}}"><i class="fa fa-pencil"></i> {{boardVm.i18n.format('buttons.edit')}}</a> 
 			<a ng-if="boardVm.hasPrivilege('delete')" ng-click="boardVm.remove()" href title="{{boardVm.i18n.format('buttons.delete')}}"><i class="fa fa-trash-o"></i> {{boardVm.i18n.format('buttons.delete')}}</a>
 		</div>
 
@@ -83,15 +83,15 @@
 			<span class="votes-number" ng-if="boardVm.board.totalVotes===1">{{boardVm.i18n.format('rating.votes_singular', boardVm.board.totalVotesShort)}}</span>
 			<span class="votes-number" ng-if="boardVm.board.totalVotes!==1">{{boardVm.i18n.format('rating.votes_plural', boardVm.board.totalVotesShort)}}</span>					
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="boardVm.hasPrivilege('vote')">
-			<a ng-click="boardVm.saveVote(1)" href ng-if="boardVm.board.currentUserVote!==1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
-			<span ng-if="boardVm.board.currentUserVote===1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
-			<span style="font-size:1.6rem;color:#767676">{{boardVm.board.upvotesShort}}</span>
+		<div class="vote-tool" ng-if="boardVm.hasPrivilege('vote')">
+			<a ng-click="boardVm.saveVote(1)" href ng-if="boardVm.board.currentUserVote!==1" class="ctrl"><i class="fa fa-thumbs-up default" aria-hidden="true"></i></a>
+			<span ng-if="boardVm.board.currentUserVote===1" class="ctrl"><i class="fa fa-thumbs-up active" aria-hidden="true"></i></span>
+			<span class="num">{{boardVm.board.upvotesShort}}</span>
 		</div>
-		<div class="vote-tool" style="display: flex;align-items: center;width: 100%;" ng-if="boardVm.hasPrivilege('vote')">
-			<a ng-click="boardVm.saveVote(-1)" href ng-if="boardVm.board.currentUserVote!==-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
-			<span ng-if="boardVm.board.currentUserVote===-1" style="flex: 1 0 auto;"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
-			<span style="font-size:1.6rem;color:#767676">{{boardVm.board.downvotesShort}}</span>									
+		<div class="vote-tool" ng-if="boardVm.hasPrivilege('vote')">
+			<a ng-click="boardVm.saveVote(-1)" href ng-if="boardVm.board.currentUserVote!==-1"  class="ctrl"><i class="fa fa-thumbs-up fa-rotate-180 default" aria-hidden="true"></i></a>
+			<span ng-if="boardVm.board.currentUserVote===-1" class="ctrl"><i class="fa fa-thumbs-up fa-rotate-180 active" aria-hidden="true"></i></span>			
+			<span class="num">{{boardVm.board.downvotesShort}}</span>									
 		</div>
 		
 	</div>	

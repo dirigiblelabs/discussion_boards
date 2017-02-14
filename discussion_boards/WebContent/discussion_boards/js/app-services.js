@@ -64,6 +64,10 @@
   				return true;
   			if(privilege === 'delete' && [board.user, comment.user].indexOf(username) > -1)
   				return true;
+			if(privilege === 'comment' && username!==undefined)
+  				return true;
+			if(privilege === 'reply' && username!==undefined)
+  				return true;
 	  		return false;
 	  	};
 	

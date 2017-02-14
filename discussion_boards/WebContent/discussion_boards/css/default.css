@@ -179,6 +179,17 @@ body{
 
 .vote-tool{
 	font-size: 1.6em;
+	display: flex;
+	align-items: center;
+	width: 100%;	
+}
+
+.vote-tool .ctrl{
+	flex: 1 0 auto;
+}
+.vote-tool .num{
+	font-size:1.6rem;
+	color:#767676
 }
 
 .vote-tool .active { 

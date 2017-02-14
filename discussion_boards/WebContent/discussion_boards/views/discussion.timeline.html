@@ -43,7 +43,7 @@
   </timeline>
 </div>
 
-<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="!vm.hasMode('edit') && !vm.hasMode('readonly')">
+<div style="display:flex; flex-direction:column; margin: 10px 0" ng-if="vm.hasPrivilege(undefined, 'comment') && !vm.hasMode('edit') && !vm.hasMode('readonly')">
 	<span style="font-size: 1em;font-weight:bold; margin-bottom: 5px">Leave a comment</span>
 	<form>
 	  <div class="form-group">
