@@ -33,7 +33,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 
 		$urlRouterProvider.otherwise("/");
 		
-		$stateProvider	
+		$stateProvider		
 		.state('list', {
 			url: "/",
 			resolve: {
@@ -98,6 +98,19 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 		  	}
 		  }
 		})
+		.state('logout', {
+			views: {
+				"@": {
+			    	template: '',
+			        controller: ['$state', '$LoggedUserProfile', function($state, $LoggedUserProfile){
+			        	$LoggedUserProfile.logout()
+			        	.finally(function(){
+			        		$state.go('list');
+			        	});
+					}]
+				}
+			}
+		})			
 		.state('list.login', {
 			url: "login",
 			views: {
@@ -109,7 +122,7 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 			        controllerAs: 'loginVm'
 				}
 			}
-		})		
+		})
 		.state('list.entity', {
 			url: "{boardId}",
 			params: {
@@ -502,9 +515,11 @@ angular.module('discussion-boards', ['$moment', '$ckeditor', 'ngSanitize', 'ngAn
 				"@": {
 					templateUrl: "views/board.form.html",
 					controller: ['$state', '$log', 'SecureBoard', 'loggedUser', 'i18n',  function($state, $log, SecureBoard, loggedUser, i18n){
-							this.i18n = i18n;
-							if(!loggedUser)
+							if(!loggedUser){
 								$state.go('list.login');
+								return;
+							}
+							this.i18n = i18n;
 							this.board = {};
 					  		this.submit = function(){
 					  			SecureBoard.save(this.board).$promise

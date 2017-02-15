@@ -49,6 +49,7 @@
         "search": "Search",
         "settings": "Settings",
         "signin": "Sign in",
+        "signout": "Sign out",
         "lock": "Lock",
         "unlock": "Unlock",
         "view_timeline": "As Timeline",

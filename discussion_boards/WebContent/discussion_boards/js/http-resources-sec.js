@@ -70,5 +70,15 @@
 	  	return {
 	  		get: get
 	  	};
+	}])
+	.service('$LoggedUserProfile', ['$resource', function($resource) {
+		var UserSvc =  $resource('../../js-secured/discussion_boards/svc/user/profile.js/logout', {}, 
+	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
+	  	var logout = function(){
+		  	return UserSvc.get().$promise;
+	  	};
+	  	return {
+	  		logout: logout
+	  	};
 	}]);
 })(angular);

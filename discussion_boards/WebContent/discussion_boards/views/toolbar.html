@@ -12,11 +12,11 @@
 	<button class="btn btn-primary" ui-sref="list.login" ng-if="!toolbarVm.loggedUser" title="{{toolbarVm.i18n.format('buttons.signin')}}"><i class="glyphicon glyphicon-log-in"></i></button>
 	<div class="btn-group" ng-if="toolbarVm.loggedUser" >
 		<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{toolbarVm.i18n.format('buttons.settings')}}">
-			<!--<i class="fa fa-cog"></i>--> <img ng-src="../../js/profile/avatar.js" title="{{settingsVm.i18n.format('settings.avatar_label')}}" style="width:20px;height:20px"/> <span class="caret"></span>
+			<img ng-src="../../js/profile/avatar.js" title="{{settingsVm.i18n.format('settings.avatar_label')}}" style="width:20px;height:20px"/> <span class="caret"></span>
 		</button>
 		<ul class="dropdown-menu">
 			<li><a ui-sref="list.settings" title="{{toolbarVm.i18n.format('buttons.settings')}}"><i class="fa fa-cog"></i> Settings</button></li>
-			<li><a ui-sref="list.logout" title="{{toolbarVm.i18n.format('buttons.signin')}}"><i class="glyphicon glyphicon-log-out"></i> Sign-out</a></li>
+			<li><a href ui-sref="logout" title="{{toolbarVm.i18n.format('buttons.signout')}}"><i class="glyphicon glyphicon-log-out"></i> Sign-out</a></li>
 		</ul>
 	</div>
 	
