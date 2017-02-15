@@ -67,7 +67,7 @@ BoardVotesDAO.prototype.vote = function(boardId, user, vote){
 						})[0];
 	if(previousVote === undefined || previousVote === null || previousVote === 0){
 		//Operations is INSERT
-		this.$log.info("Inserting DIS_BOARD_VOTE relation between DIS_BOARD["+boardId+"] and USR_USER["+user+"]");
+		this.$log.info("Inserting "+this.orm.dbName+" relation between DIS_BOARD["+boardId+"] and IAM_USER["+user+"]");
 		this.insert({
 			vote: vote,
 			boardId: boardId,

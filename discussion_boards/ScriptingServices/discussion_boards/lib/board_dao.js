@@ -143,14 +143,14 @@ BoardDAO.prototype.setTags = function(id, tags, createOnDemand){
 			for(var i=0; i < boardTags.length; i++){
 				this.$log.info('Removing '+tagRefsDAO.orm.dbName+' entity relation between '+this.orm.getPrimaryKey().dbName+'['+id+'] entity and ANN_TAG['+boardTags[i].id+']');
 				var qb = this.ormstatements.builder().remove().from(tagRefsDAO.orm.dbName)
-						.where('DISBT_DISB_ID=?', [tagRefsDAO.orm.getProperty('boardId')])
-						.where('DISBT_ANN_ID=?', [tagRefsDAO.orm.getProperty('tagId')]);
+						.where(tagRefsDAO.orm.getProperty('boardId').dbName + '=?', [tagRefsDAO.orm.getProperty('boardId')])
+						.where(tagRefsDAO.orm.getProperty('tagId').dbName + '=?', [tagRefsDAO.orm.getProperty('tagId')]);
 				var params={};
 				params[tagRefsDAO.orm.getProperty('boardId').name] = boardTags[i][tagRefsDAO.orm.getProperty('boardId').name];
 				params[tagRefsDAO.orm.getProperty('tagId').name] = boardTags[i][tagRefsDAO.orm.getProperty('tagId').name];
 				var updatedRecordsCount = this.ormstatements.execute(qb, connection, params);
 				//tagRefsDAO.remove(boardTags[i][tagRefsDAO.orm.getPrimaryKey().name]);
-			    this.$log.info('DIS_BOARD_TAG entity relation between DIS_BOARD['+id+'] entity and ANN_TAG['+boardTags[i].id+'] removed');
+			    this.$log.info(tagRefsDAO.orm.dbName + ' entity relation between '+this.orm.getPrimaryKey().dbName+'['+id+'] entity and ANN_TAG['+boardTags[i].id+'] removed');
 			}
 			this.$log.info(boardTags.length + ' '+tagRefsDAO.orm.dbName+' entity relations to '+this.orm.getPrimaryKey().dbName+'[' +  id+ '] entity removed');
 		} finally {

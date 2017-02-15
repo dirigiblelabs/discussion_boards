@@ -1,5 +1,5 @@
 <div style="margin-top:20px">
-	<span ng-if="vm.loggedUser && vm.comments.length===0">{{vm.i18n.format('list.board_stats.disc_collabor_none_0')}}</span>
+	<span ng-if="vm.loggedUser && vm.comments.length===0">{{vm.i18n.format('board.comments_stats.none_0') + vm.i18n.format('board.comments_stats.none_1')}}</span>
 	<span ng-if="!vm.loggedUser">{{vm.i18n.format('discussion.notsigned_0')}} <a ui-sref="list.login">{{vm.i18n.format('discussion.notsigned_1')}}</a> {{vm.i18n.format('discussion.notsigned_2')}}</span>
 </div>
 <div class="list-group" ng-if="vm.comments.length>0" style="margin-top:20px">

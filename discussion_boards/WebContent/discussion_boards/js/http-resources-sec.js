@@ -61,7 +61,7 @@
 			    }
 			});
 	}])
-	.service('$LoggedUser', ['$resource', '$log', function($resource) {
+	.service('$LoggedUser', ['$resource', function($resource) {
 		var UserSvc =  $resource('../../js/profile/user.js', {}, 
 	  					{get: {method:'GET', params:{}, isArray:false, ignoreLoadingBar: true}});
 	  	var get = function(){

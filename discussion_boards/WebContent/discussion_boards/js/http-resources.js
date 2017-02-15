@@ -60,7 +60,7 @@
 	  				remove: {method:'DELETE', params:{}, isArray:true, ignoreLoadingBar: true}
 	  			});
 	}])	
-	.service('BoardComments', ['$resource', '$log', function($resource) {
+	.service('BoardComments', ['$resource', function($resource) {
 	  	return $resource('../../js/discussion_boards/svc/comment.js', {}, 
 	  			{get: {method:'GET', params:{}, isArray:true, ignoreLoadingBar: true}});
 	}])		
