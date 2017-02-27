@@ -27,8 +27,8 @@ var BoardsORM = {
 			dbName: "DISB_PUBLISH_TIME",
 			required: true,
 			type: "Long",
-			dbValue: function(entity){
-				return entity.publishTime !== undefined ? new Date(entity.publishTime).getTime() : null;
+			dbValue: function(publishTime){
+				return publishTime !== undefined ? new Date(publishTime).getTime() : null;
 			},
 			value: function(dbValue){
 				return dbValue !== null ? new Date(dbValue).toISOString() : undefined;
@@ -38,8 +38,8 @@ var BoardsORM = {
 			name: "lastModifiedTime",
 			dbName: "DISB_LASTMODIFIED_TIME",
 			type: "Long",
-			dbValue: function(entity){
-				return entity.lastModifiedTime !== undefined ? new Date(entity.lastModifiedTime).getTime() : null;
+			dbValue: function(lastModifiedTime){
+				return lastModifiedTime !== undefined ? new Date(lastModifiedTime).getTime() : null;
 			},
 			value: function(dbValue){
 				return dbValue !== null ? new Date(dbValue).toISOString() : undefined;
@@ -57,8 +57,8 @@ var BoardsORM = {
 			name: "locked",
 			dbName: "DISB_LOCKED",
 			type: "Short",
-			dbValue: function(entity){
-				return entity.locked ? 1 : 0;
+			dbValue: function(locked){
+				return locked ? 1 : 0;
 			},
 			value: function(dbValue){
 				return dbValue>0 ? true : false;
@@ -70,32 +70,31 @@ var BoardsORM = {
 			size: 255
 		}	
 	],
-	associationSets: {
-		comments: {
-			dao: require("discussion_boards/lib/comment_dao").get,
+	associations: [{
+			name: 'comments',
+			targetDao: require("discussion_boards/lib/comment_dao").get,
 			joinKey: "boardId",
-			associationType: "one-to-many",
+			type: "one-to-many",
 			defaults: {
 				flat:false
 			}
-		},
-		tagRefs: {
-			dao: require("discussion_boards/lib/board_tags_dao").get,
+		}, {
+			name: 'tagRefs',
+			targetDao: require("discussion_boards/lib/board_tags_dao").get,
 			joinKey: "boardId",
-			associationType: "one-to-many"
-		},
-		tags: {
-			daoJoin: require("discussion_boards/lib/board_tags_dao").get,
-			daoN: require("annotations/lib/tags_dao").get,
+			type: "one-to-many"
+		}, {
+			name: 'tags',
+			joinDao: require("discussion_boards/lib/board_tags_dao").get,
+			targetDao: require("annotations/lib/tags_dao").get,
 			joinKey: "boardId",
-			associationType: "many-to-many"
-		},
-		votes: {
-			dao: require("discussion_boards/lib/board_votes_dao").get,
+			type: "many-to-many"
+		}, {
+		    name: 'votes',
+			targetDao: require("discussion_boards/lib/board_votes_dao").get,
 			joinKey: "boardId",
-			associationType: "one-to-many"
-		}
-	}
+			type: "one-to-many"
+		}]
 };
 
 var DAO = require('daoism/dao').DAO;
@@ -131,7 +130,7 @@ BoardDAO.prototype.visit = function(boardId){
 const TAGS_NAMESPACE = "dboard";
 
 BoardDAO.prototype.setTags = function(id, tags, createOnDemand){
-	var tagRefsDAO = this.orm.getAssociation('tagRefs').dao();
+	var tagRefsDAO = this.orm.getAssociation('tagRefs').targetDao();
 	this.$log.info('Updating ' + tagRefsDAO.orm.dbName +' entity relations to '+this.orm.getPrimaryKey().dbName+'[' +  id + '] entity');
 	//First, clear all existing tag references for this board
 	var listSettings = {};
@@ -158,7 +157,7 @@ BoardDAO.prototype.setTags = function(id, tags, createOnDemand){
 	    }
 	}
 	//Now, find the request tag records and add references from this board to them
-	var tagsDAO = this.orm.getAssociation('tags').daoN();
+	var tagsDAO = this.orm.getAssociation('tags').targetDao();
 	for(var i=0; i < tags.length; i++){
 		if(tags[i]!==null || tags[i]!==undefined){
 			var tagEntity = tagsDAO.list({

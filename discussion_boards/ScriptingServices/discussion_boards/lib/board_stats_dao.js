@@ -53,32 +53,31 @@ var boardStatsDAOorm = {
 			type: "Int"
 		}	
 	],
-	associationSets: {
-		comments: {
-			dao: require("discussion_boards/lib/comment_dao").get,
-			associationType: "one-to-many",
+	associations: [{
+			name: 'comments',
+			targetDao: require("discussion_boards/lib/comment_dao").get,
+			type: "one-to-many",
 			joinKey: "boardId",
 			defaults: {
 				flat: false
 			}
-		},
-		tagRefs: {
-			dao: require("discussion_boards/lib/board_tags_dao").get,
+		}, {
+			name: 'tagRefs',
+			targetDao: require("discussion_boards/lib/board_tags_dao").get,
 			joinKey: "boardId",
-			associationType: "one-to-many"
-		},
-		tags: {
-			daoJoin: require("discussion_boards/lib/board_tags_dao").get,
-			daoN: require("annotations/lib/tags_dao").get,
+			type: "one-to-many"
+		},{
+			name: 'tags',
+			joinDao: require("discussion_boards/lib/board_tags_dao").get,
+			targetDao: require("annotations/lib/tags_dao").get,
 			joinKey: "boardId",
-			associationType: "many-to-many"
-		},
-		votes: {
-			dao: require("discussion_boards/lib/board_votes_dao").get,
+			type: "many-to-many"
+		},{
+		    name: 'votes',
+			targetDao: require("discussion_boards/lib/board_votes_dao").get,
 			joinKey: "boardId",
-			associationType: "one-to-many"
-		}
-	}
+			type: "one-to-many"
+		}]
 };
 
 var mashupORM = function(){
@@ -88,7 +87,7 @@ var mashupORM = function(){
 	});
 	
 	boardStatsDAOorm.properties = baseOrm.properties.concat(boardStatsDAOorm.properties);
-	boardStatsDAOorm.associationSets = baseOrm.associationSets;
+	boardStatsDAOorm.associations = baseOrm.associations;
 	
 	return boardStatsDAOorm;
 };

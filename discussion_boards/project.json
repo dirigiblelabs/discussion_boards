@@ -11,12 +11,12 @@
             "guid":"arestme",
             "type": "git",
             "url": "https://github.com/dirigiblelabs/arestme.git",
-            "branch":"master"
+            "branch":"1.0"
     	},{
             "guid":"daoism",
             "type":"git",
             "url":"https://github.com/dirigiblelabs/daoism.git",
-            "branch":"master"
+            "branch":"1.0"
     	},{
     	    "guid":"iam",
 	        "type":"git",
