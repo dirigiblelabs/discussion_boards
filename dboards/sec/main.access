@@ -1,0 +1,24 @@
+{  
+   "constraints":[ 
+   	  {  
+         "uri":"/dboards/svc/user",
+         "method":"*",
+         "roles":[  
+            "Everyone"
+         ]
+      },{  
+         "uri":"/dboards/login",
+         "method":"GET",
+         "roles":[  
+            "Everyone"
+         ]
+      },{  
+         "uri":"/dboards/index.html#/login",
+         "method":"GET",
+         "roles":[  
+            "Everyone"
+         ]
+      }
+   ]
+}
+

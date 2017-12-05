@@ -1,0 +1,22 @@
+{
+    "guid":"discussion_boards",
+    "repository":{
+        "type":"git",
+        "branch":"master",
+        "url":"https://github.com/dirigiblelabs/discussion_boards.git"
+        
+    },
+    "dependencies": [
+        {
+    	    "guid":"iam",
+	        "type":"git",
+	        "url":"https://github.com/dirigiblelabs/core_iam.git",
+	        "branch":"master"
+    	}, {
+    	    "guid":"tags",
+	        "type":"git",
+	        "url":"https://github.com/dirigiblelabs/tags.git",
+	        "branch":"master"
+    	}
+	]
+}
