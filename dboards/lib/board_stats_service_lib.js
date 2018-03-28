@@ -96,8 +96,7 @@ exports.getDao = function(commentsDao, tagsDao){
 	commentsDao = commentsDao || require('dboards/lib/comment_dao').create();
 	tagsDao = tagsDao || require('dboards/lib/board_tags_dao').create();
 	
-	var orm = mashupORM();	
-	
+	var orm = mashupORM();
 	
 	var boardsDAO = require('dboards/lib/board_dao').create(orm, 'dboards.dao.BoardStatsDAO');
 	
@@ -118,8 +117,9 @@ exports.getDao = function(commentsDao, tagsDao){
  * Factory function for Board Stats data service instances.
  */
 exports.create = function(commentsDao, tagsDao){
-	var rsdata = require('http/v3/rs-data'); 	
-	var svc = rsdata.service().dao(this.getDao(commentsDao, tagsDao).orm, 'dboards.svc.BoardStatsService');
+	var rsdata = require('http/v3/rs-data');
+	var boardStatsDao = this.getDao(commentsDao, tagsDao);
+	var svc = rsdata.service().dao(boardStatsDao, 'dboards.svc.BoardStatsService');
 	svc.dao().afterFound = function(entity){
 			var userLib = require("security/v3/user");
 			var boardVotesDAO = require("dboards/lib/board_votes_dao").create();

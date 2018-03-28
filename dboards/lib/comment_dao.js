@@ -20,7 +20,7 @@ var CommentsORM = exports.CommentsORM = {
 			name: "replyToCommentId",
 			column: "DISC_REPLY_TO_DISC_ID",
 			type: "BIGINT",
-			dbValue: function(replyToCommentId){
+			dbValue: function(replyToCommentId){ 
 				return replyToCommentId !==undefined ? replyToCommentId : null;
 			},
 			value: function(dbValue){

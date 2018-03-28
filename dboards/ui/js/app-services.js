@@ -38,7 +38,10 @@
 			return BoardComments
 					.query(params).$promise.
 					then(function(commentsData){
-						var comments = commentsData.map(function(comment){
+						var comments = commentsData.filter(function(comment){
+							return comment.replyToCommentId===undefined;
+						})
+						.map(function(comment){
 							return formatComment(comment);
 						});
 						return comments;
