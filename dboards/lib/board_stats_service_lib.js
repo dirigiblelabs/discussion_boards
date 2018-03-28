@@ -119,7 +119,7 @@ exports.getDao = function(commentsDao, tagsDao){
  */
 exports.create = function(commentsDao, tagsDao){
 	var rsdata = require('http/v3/rs-data'); 	
-	var svc = rsdata.service().dao(this.getDao(commentsDao, tagsDao), 'dboards.svc.BoardStatsService');
+	var svc = rsdata.service().dao(this.getDao(commentsDao, tagsDao).orm, 'dboards.svc.BoardStatsService');
 	svc.dao().afterFound = function(entity){
 			var userLib = require("security/v3/user");
 			var boardVotesDAO = require("dboards/lib/board_votes_dao").create();

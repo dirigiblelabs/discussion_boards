@@ -12,7 +12,7 @@ var rsdata = require('http/v3/rs-data');
 exports.create = function(){
 
 	var boardSvc = rsdata.service(undefined, undefined, undefined, 'dboards.svc.BoardsService')
-					.dao(require("dboards/lib/board_dao").create());
+					.dao(require("dboards/lib/board_dao").create().orm);
 	
 	boardSvc.mappings().create().onEntityInsert(function(entity){
 	    entity.user = require("security/v3/user").getName();

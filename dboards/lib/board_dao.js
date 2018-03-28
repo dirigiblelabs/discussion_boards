@@ -101,7 +101,6 @@ var visit = function(boardId){
 	var qb;
     try {
     	var visitsField = this.orm.getProperty('visits');    	
-    	
     	qb = require('db/v3/sql').getDialect()
     		.update()
     		.table(this.orm.table)
