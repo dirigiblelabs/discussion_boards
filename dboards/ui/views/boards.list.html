@@ -6,8 +6,9 @@
 			
 			<div class="left-compartment">
 				<div class="user-box">
-					<img ng-src="../../../web/dboards/svc/user/dboards-icon.png" class="user-pic" title="{{boardsVm.i18n.format('board.avatar_title', (board.user||''))}}"/>
-					<span ng-bind="board.user" class="user-name"></span>
+					<!-- img ng-src="../../../web/dboards/svc/user/dboards-icon.png" class="user-pic" title="{{boardsVm.i18n.format('board.avatar_title', (board.user||''))}}"/ -->
+					<span class="fa fa-user fa-4x text-primary" title="{{boardsVm.i18n.format('board.avatar_title', (board.user||''))}}"></span>
+					<span ng-bind="board.user" class="user-name text-primary"></span>
 				</div>
 				<span class="publish-time" title="{{board.publishTimeLocal}}" ng-bind="board.timeSincePublish"></span>
 			</div>				

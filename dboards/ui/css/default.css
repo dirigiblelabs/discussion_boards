@@ -6,7 +6,7 @@ html, body {
 }
 	
 body{
-	background-color: #f9f9f9;
+	/*background-color: #f9f9f9;*/
 }
 
 /* Fixes bootstrap dropdown when it's on the right -side page border */
@@ -103,7 +103,7 @@ body{
 	margin-bottom: 3px;
 	font-size: 1.6em;
 	line-height: 1em;
-	color: #337ab7;
+	/*color: #337ab7;*/
 	text-decoration: none;
 }
 

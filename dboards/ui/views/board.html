@@ -2,8 +2,9 @@
 
 	<div class="left-compartment">
 		<div class="user-box">
-			<img ng-src="../../../web/dboards/svc/user/dboards-icon.png" class="user-pic" title="{{boardVm.i18n.format('board.avatar_title', (boardVm.board.user||''))}}"/>
-			<span ng-bind="boardVm.board.user" class="user-name"></span>
+			<!--  mg ng-src="../../../web/dboards/svc/user/dboards-icon.png" class="user-pic" title="{{boardVm.i18n.format('board.avatar_title', (boardVm.board.user||''))}}"/ -->
+			<span class="fa fa-user fa-4x text-primary" title="{{boardVm.i18n.format('board.avatar_title', (boardVm.board.user||''))}}"></span>
+			<span ng-bind="boardVm.board.user" class="user-name text-primary"></span>
 		</div>
 		<span class="publish-time" title="{{boardVm.board.publishTimeLocal}}" ng-bind="boardVm.board.timeSincePublish"></span>
 	</div>				
