@@ -1,19 +1,19 @@
 {  
    "constraints":[ 
    	  {  
-         "uri":"/dboards/svc/user",
+         "path":"/dboards/svc/user",
          "method":"*",
          "roles":[  
             "Everyone"
          ]
       },{  
-         "uri":"/dboards/login",
+         "path":"/dboards/login",
          "method":"GET",
          "roles":[  
             "Everyone"
          ]
       },{  
-         "uri":"/dboards/index.html#/login",
+         "path":"/dboards/index.html#/login",
          "method":"GET",
          "roles":[  
             "Everyone"
